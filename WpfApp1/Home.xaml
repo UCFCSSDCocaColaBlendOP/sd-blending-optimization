@@ -1,0 +1,82 @@
+﻿<mah:MetroWindow x:Class="WpfApp1.MainWindow"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"         
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        Title="Blending Optimization System - Home" Height="586.4" Width="1008.2" WindowState="Maximized">
+    <Grid Background="#FF1F1E1E" Margin="0,0,-6.4,-6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="16*"/>
+            <RowDefinition Height="58*"/>
+            <RowDefinition Height="57*"/>
+            <RowDefinition Height="77*"/>
+            <RowDefinition Height="342*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="17*"/>
+            <ColumnDefinition Width="233*"/>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="429*"/>
+            <ColumnDefinition Width="39*"/>
+            <ColumnDefinition Width="115*"/>
+            <ColumnDefinition Width="10*"/>
+        </Grid.ColumnDefinitions>
+        <TabControl x:Name="tc_Home" Margin="5,0.4,4.8,0.2" BorderThickness="1,1,1,1" FontFamily="Segoe UI Semibold" FontSize="20" Background="#FF132226" Foreground="White" BorderBrush="White" Grid.Row="5" Grid.ColumnSpan="5" Grid.Column="1">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border Name="Border" BorderThickness="1,1,1,0" BorderBrush="Gainsboro" CornerRadius="4,4,0,0" Margin="0,0,2,0">
+                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="10,2"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#FFDD4A4A"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter TargetName="Border" Property="Background" Value="#FF132226"/>
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsSelected" Value="False"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="Border" Property="Background" Value="#FFD76868"/>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="SO-1" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_SO1" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="SO-2" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_SO2" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Shared" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Shared" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button x:Name="btn_Generate" Content="Generate Schedule" Height="40" Margin="5,8,0,0" FontFamily="Segoe UI Semibold" FontSize="18" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="2"/>
+        <Button x:Name="btn_Export" Content="Export Schedule" Height="40" Margin="5,8,0,0" FontFamily="Segoe UI Semibold" FontSize="18" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="3"/>
+        <Button x:Name="btn_Settings" Grid.Column="5" Height="75" Margin="0,0.6,4.8,0" Grid.Row="1" Grid.RowSpan="3" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="90">
+            <iconPacks:PackIconEntypo x:Name="settingsIcon" Kind="Cog" Margin="0" Foreground="White" Height="Auto" Width="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></iconPacks:PackIconEntypo>
+        </Button>
+        <Image x:Name="logo" OpacityMask="White" Height="107" Margin="14.8,15.6,0,0" Grid.Row="1" Grid.RowSpan="3" VerticalAlignment="Top" Source="logo.png" Grid.Column="3" Stretch="Fill" HorizontalAlignment="Left" Width="468"/>
+
+    </Grid>
+</mah:MetroWindow>
