@@ -25,5 +25,20 @@ namespace WpfApp1
         {
             InitializeComponent();
         }
+
+        private void btn_Generate_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btn_Export_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btn_Settings_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
