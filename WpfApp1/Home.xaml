@@ -8,12 +8,11 @@
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
         Title="Blending Optimization System - Home" Height="586.4" Width="1008.2" WindowState="Maximized">
-    <Grid Background="#FF1F1E1E" Margin="0,0,-6.4,-6">
+    <Grid Background="#FF1F1E1E" Margin="-4,0,-2.4,-6.2">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
-            <RowDefinition Height="115*"/>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="434*"/>
+            <RowDefinition Height="120*"/>
+            <RowDefinition Height="438*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="17*"/>
@@ -24,7 +23,7 @@
             <ColumnDefinition Width="115*"/>
             <ColumnDefinition Width="10*"/>
         </Grid.ColumnDefinitions>
-        <TabControl x:Name="tc_Home" Margin="5,4.4,4.8,10.2" BorderThickness="1,1,1,1" FontFamily="Segoe UI Semibold" FontSize="20" Background="#FF132226" Foreground="White" BorderBrush="White" Grid.Row="3" Grid.ColumnSpan="5" Grid.Column="1">
+        <TabControl x:Name="tc_Home" Margin="5,4.2,4.8,10.2" BorderThickness="1,1,1,1" FontFamily="Segoe UI Semibold" FontSize="20" Background="#FF132226" Foreground="White" BorderBrush="White" Grid.Row="2" Grid.ColumnSpan="5" Grid.Column="1">
             <TabControl.Resources>
                 <Style TargetType="TabItem">
                     <Setter Property="Template">
@@ -72,9 +71,10 @@
         <Button x:Name="btn_Generate" Content="Generate Schedule" Margin="5,6.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Height="40" VerticalAlignment="Top" Click="btn_Generate_Click"/>
         <Button x:Name="btn_Export" Content="Export Schedule" Height="40" Margin="5,64.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Click="btn_Export_Click"/>
         <Image x:Name="logo" OpacityMask="White" Height="107" Margin="14.8,6.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="3" Stretch="Fill" HorizontalAlignment="Left" Width="468"/>
-        <Button x:Name="btn_Settings" Grid.Column="5" Height="75" Margin="0,0.2,4.8,0" Grid.Row="1" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="90" Click="btn_Settings_Click">
+        <Button x:Name="btn_Settings" Grid.Column="5" Height="90" Margin="0,0.2,4.8,0" Grid.Row="1" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="90" Click="btn_Settings_Click">
             <iconPacks:PackIconEntypo x:Name="settingsIcon" Kind="Cog" Margin="0" Foreground="White" Height="Auto" Width="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         </Button>
+        <Button x:Name="btn_Refresh" Content="Refresh" Height="31" Margin="0,2.2,6.8,0" FontFamily="Segoe UI Semibold" FontSize="14" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" Grid.Column="5" Grid.Row="2" Click="btn_Export_Click" HorizontalAlignment="Right" Width="117"/>
 
     </Grid>
 </mah:MetroWindow>

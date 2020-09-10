@@ -7,8 +7,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="Blending Optimization System - Settings" Height="586.4" Width="838.2">
-    <Grid Background="#FF1F1E1E" Margin="0,0,-6.4,-6">
+        Title="Blending Optimization System - Settings" Height="586.4" Width="838.2" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Background="#FF1F1E1E" Margin="-4,0,-2,-6.2">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
             <RowDefinition Height="85*"/>
@@ -51,21 +51,41 @@
             </TabControl.Resources>
             <TabItem Header="Function" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
-                    <DataGrid x:Name="dg_SO1" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="26*"/>
+                        <RowDefinition Height="181*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="482*"/>
+                        <ColumnDefinition Width="79*"/>
+                        <ColumnDefinition Width="159*"/>
+                        <ColumnDefinition Width="78*"/>
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="dg_Function" BorderBrush="White" BorderThickness="0,0,2,0" Background="#FF132226" Margin="0,0,0.6,0.6" Grid.RowSpan="2"/>
+                    <Button x:Name="btn_Edit_Function" Content="Edit Function" Margin="0.2,10,0,5" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="159" Click="btn_Export_Click" Grid.Column="2"/>
+                    <TextBox x:Name="tb_Name_Function" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="0.2,29,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="159"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Equipment" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
-                    <DataGrid x:Name="dg_SO2" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="480*"/>
+                        <ColumnDefinition Width="317*"/>
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="dg_Equip" BorderBrush="White" BorderThickness="0,0,2,0" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Recipe" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
-                    <DataGrid x:Name="dg_Shared" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="480*"/>
+                        <ColumnDefinition Width="317*"/>
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="dg_Recipe" BorderBrush="White" BorderThickness="0,0,2,0" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
                 </Grid>
             </TabItem>
         </TabControl>
-        <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10,0.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
+        <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
 
     </Grid>
 </mah:MetroWindow>
