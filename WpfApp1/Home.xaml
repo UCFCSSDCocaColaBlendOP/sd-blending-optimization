@@ -62,9 +62,19 @@
                     <DataGrid x:Name="dg_SO2" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Shared" BorderBrush="White" Foreground="White">
+            <TabItem Header="SO-2 Chopper" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
-                    <DataGrid x:Name="dg_Shared" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                    <DataGrid x:Name="dg_SO2_Chop" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="SO-3" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_SO3" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Tote Unloading" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Tote" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
                 </Grid>
             </TabItem>
         </TabControl>

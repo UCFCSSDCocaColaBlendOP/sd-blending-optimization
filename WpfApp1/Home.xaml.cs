@@ -56,8 +56,10 @@ namespace WpfApp1
 
         private void btn_Settings_Click(object sender, RoutedEventArgs e)
         {
+            Mouse.OverrideCursor = Cursors.Wait;
             Settings form = new Settings();
             form.Show();
+            Mouse.OverrideCursor = null;
         }
 
         private void fill_SO1()
