@@ -14,10 +14,17 @@ namespace WpfApp1
         List<bool> SOs = new List<bool>(); // ordered list, with a boolean value for each SO
         List<List<ScheduleEntry>> schedule = new List<List<ScheduleEntry>>(); // this is a list of schedules, there should be one for each functionality
 
+        
         public Equipment()
         {
             foreach (bool x in functionalities)
                 schedule.Add(new List<ScheduleEntry>());
+        }
+
+        public Equipment(String name, int type)
+        {
+            this.name = name;
+            this.type = type;
         }
     }
 }
