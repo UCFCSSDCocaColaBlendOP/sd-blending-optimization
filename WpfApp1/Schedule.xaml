@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="Blending Optimization System - Schedule" Height="586.4" Width="838.2" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Blending Optimization System - Schedule" Height="586.4" Width="838.2" WindowStartupLocation="CenterScreen" ShowMinButton="True" ResizeMode="NoResize">
     <Grid Background="#FF1F1E1E" Margin="-4,0,-2,-6.2">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
