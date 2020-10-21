@@ -22,5 +22,16 @@ namespace WpfApp1.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=73.245.86.159;Initial Catalog=blendingsd2;User ID=blending1;Password=" +
+            "senior2020")]
+        public string Setting {
+            get {
+                return ((string)(this["Setting"]));
+            }
+        }
     }
 }

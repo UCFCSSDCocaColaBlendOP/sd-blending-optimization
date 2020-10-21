@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Caching;
+using System.Windows;
 using Microsoft.VisualBasic.FileIO;
 
 namespace WpfApp1.Classes
@@ -111,6 +114,9 @@ namespace WpfApp1.Classes
                     
 
                     string name = lines[i][3];
+
+                    int type = name.Contains("CIP") ? -1: getJuiceType(name);
+                    Console.WriteLine(name + " " + type);
 
                     string date = lines[i][0];
                     string seconds = lines[i][1];
@@ -411,6 +417,35 @@ namespace WpfApp1.Classes
             Console.WriteLine("\n " + count_f_line_materials[7]);
         }
         */
+
+        private int getJuiceType(String material_name)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_JuiceId]";
+                cmd.Parameters.Add("mat_name", SqlDbType.VarChar).Value = material_name;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                return Convert.ToInt32(dt.Rows[0]["juice_id"]);
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return -1;
+        }
 
         private void PrintAllJuices()
         {
