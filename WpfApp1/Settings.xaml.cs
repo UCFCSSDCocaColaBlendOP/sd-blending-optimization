@@ -24,6 +24,8 @@ namespace WpfApp1
     /// </summary>
     public partial class Settings : MetroWindow
     {
+        bool func_list = true;
+
         public Settings()
         {
             InitializeComponent();
@@ -88,14 +90,36 @@ namespace WpfApp1
 
         private string get_Equipment(DataGrid dg)
         {
-            DataRowView row = (dg.SelectedItems.Count == 0 ? null : (DataRowView)dg.SelectedItems[0]);
-            return row["Equipment"].ToString();
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Equipment"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
         }
 
         private string get_Function(DataGrid dg)
         {
-            DataRowView row = (dg.SelectedItems.Count == 0 ? null : (DataRowView)dg.SelectedItems[0]);
-            return row["Function"].ToString();
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Function"].ToString();
+            }
+
+            catch (Exception ex)
+            { return null; }
         }
 
         private void fill_Recipes()
@@ -116,32 +140,6 @@ namespace WpfApp1
                 da.Fill(dt);
 
                 dg_Recipe.ItemsSource = dt.DefaultView;
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        private void fill_Juices()
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_Juice_List]";
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                dg_Juice.ItemsSource = dt.DefaultView;
             }
 
             catch (Exception ex)
@@ -180,6 +178,7 @@ namespace WpfApp1
         {
             string selected_Equip = get_Equipment(dg_Equip);
             tb_Name_Equipment.Text = selected_Equip;
+            tb_Name_Function.Text = "";
             
             fill_Functions(selected_Equip);
             fill_AppliedFunctions(selected_Equip);
@@ -196,6 +195,8 @@ namespace WpfApp1
             tb_Name_Equipment.IsEnabled = true;
             btn_Equip_AddTo.IsEnabled = true;
             btn_Equip_RemoveFrom.IsEnabled = true;
+            btn_Edit_Function.IsEnabled = true;
+            btn_Add_Function.IsEnabled = true;
 
             btn_Edit_Equipment.Visibility = Visibility.Hidden;
             btn_Add_Equipment.Visibility = Visibility.Hidden;
@@ -211,10 +212,13 @@ namespace WpfApp1
             tb_Name_Equipment.IsEnabled = false;
             btn_Equip_AddTo.IsEnabled = false;
             btn_Equip_RemoveFrom.IsEnabled = false;
+            btn_Edit_Function.IsEnabled = false;
+            btn_Add_Function.IsEnabled = false;
 
             btn_Edit_Equipment.Visibility = Visibility.Visible;
             btn_Add_Equipment.Visibility = Visibility.Visible;
             btn_Save_Equipment.Visibility = Visibility.Hidden;
+            btn_Submit_Equipment.Visibility = Visibility.Hidden;
             btn_Cancel_Equipment.Visibility = Visibility.Hidden;
         }
 
@@ -288,7 +292,274 @@ namespace WpfApp1
 
         private void btn_Save_Equipment_Click(object sender, RoutedEventArgs e)
         {
+            if (String.IsNullOrEmpty(tb_Name_Equipment.Text))
+            {
+                return;
+            }
 
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_Equipment]";
+                cmd.Parameters.Add("oldEquip", SqlDbType.VarChar).Value = get_Equipment(dg_Equip);
+                cmd.Parameters.Add("newEquip", SqlDbType.VarChar).Value = tb_Name_Equipment.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Equipment();
+            dg_Equip.IsEnabled = true;
+            tb_Name_Equipment.IsEnabled = false;
+            btn_Equip_AddTo.IsEnabled = false;
+            btn_Equip_RemoveFrom.IsEnabled = false;
+            btn_Edit_Function.IsEnabled = false;
+            btn_Add_Function.IsEnabled = false;
+
+            btn_Edit_Equipment.Visibility = Visibility.Visible;
+            btn_Add_Equipment.Visibility = Visibility.Visible;
+            btn_Save_Equipment.Visibility = Visibility.Hidden;
+            btn_Submit_Equipment.Visibility = Visibility.Hidden;
+            btn_Cancel_Equipment.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Add_Equipment_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Equip.IsEnabled = false;
+            dg_Equip.UnselectAll();
+            dg_Function_List.ItemsSource = null;
+            dg_Applied_Functions.ItemsSource = null;
+
+            tb_Name_Equipment.IsEnabled = true;
+            btn_Equip_AddTo.IsEnabled = false;
+            btn_Equip_RemoveFrom.IsEnabled = false;
+
+            btn_Edit_Equipment.Visibility = Visibility.Hidden;
+            btn_Add_Equipment.Visibility = Visibility.Hidden;
+            btn_Submit_Equipment.Visibility = Visibility.Visible;
+            btn_Cancel_Equipment.Visibility = Visibility.Visible;
+        }
+
+        private void dg_Function_List_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            tb_Name_Function.Text = get_Function(dg_Function_List);
+            func_list = true;
+        }
+
+        private void dg_Applied_Functions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            tb_Name_Function.Text = get_Function(dg_Applied_Functions);
+            func_list = false;
+        }
+
+        private void btn_Submit_Equipment_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Equipment.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_Equipment]";
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = tb_Name_Equipment.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Equipment();
+            dg_Equip.IsEnabled = true;
+            tb_Name_Equipment.IsEnabled = false;
+            tb_Name_Equipment.Text = "";
+            btn_Equip_AddTo.IsEnabled = false;
+            btn_Equip_RemoveFrom.IsEnabled = false;
+            btn_Edit_Function.IsEnabled = false;
+            btn_Add_Function.IsEnabled = false;
+
+            btn_Edit_Equipment.Visibility = Visibility.Visible;
+            btn_Add_Equipment.Visibility = Visibility.Visible;
+            btn_Save_Equipment.Visibility = Visibility.Hidden;
+            btn_Submit_Equipment.Visibility = Visibility.Hidden;
+            btn_Cancel_Equipment.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Edit_Function_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Function_List.SelectedItems.Count == 0 && dg_Applied_Functions.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Equip.IsEnabled = false;
+            dg_Function_List.IsEnabled = false;
+            dg_Applied_Functions.IsEnabled = false;
+
+            //tb_Name_Equipment.IsEnabled = false;
+            tb_Name_Function.IsEnabled = true;
+            btn_Equip_AddTo.IsEnabled = false;
+            btn_Equip_RemoveFrom.IsEnabled = false;
+
+            btn_Edit_Function.Visibility = Visibility.Hidden;
+            btn_Add_Function.Visibility = Visibility.Hidden;
+            btn_Save_Function.Visibility = Visibility.Visible;
+            btn_Cancel_Function.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_Function_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Equip.IsEnabled = false;
+            dg_Function_List.UnselectAll();
+            dg_Applied_Functions.UnselectAll();
+            dg_Function_List.IsEnabled = false;
+            dg_Applied_Functions.IsEnabled = false;
+
+            //tb_Name_Equipment.IsEnabled = true;
+            tb_Name_Function.IsEnabled = true;
+            btn_Equip_AddTo.IsEnabled = false;
+            btn_Equip_RemoveFrom.IsEnabled = false;
+
+            btn_Edit_Equipment.Visibility = Visibility.Hidden;
+            btn_Add_Equipment.Visibility = Visibility.Hidden;
+            btn_Submit_Function.Visibility = Visibility.Visible;
+            btn_Cancel_Function.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_Function_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_Function.Text = get_Function(dg_Function_List);
+
+            dg_Equip.IsEnabled = true;
+            dg_Function_List.IsEnabled = true;
+            dg_Applied_Functions.IsEnabled = true;
+
+            tb_Name_Function.IsEnabled = false;
+            btn_Equip_AddTo.IsEnabled = true;
+            btn_Equip_RemoveFrom.IsEnabled = true;
+
+            btn_Edit_Function.Visibility = Visibility.Visible;
+            btn_Add_Function.Visibility = Visibility.Visible;
+            btn_Save_Function.Visibility = Visibility.Hidden;
+            btn_Submit_Function.Visibility = Visibility.Hidden;
+            btn_Cancel_Function.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_Function_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Function.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_Function]";
+                cmd.Parameters.Add("oldFunc", SqlDbType.VarChar).Value = (func_list == true) ? get_Function(dg_Function_List) : get_Function(dg_Applied_Functions);
+                cmd.Parameters.Add("newFunc", SqlDbType.VarChar).Value = tb_Name_Function.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Functions(get_Equipment(dg_Equip));
+            fill_AppliedFunctions(get_Equipment(dg_Equip));
+
+            dg_Equip.IsEnabled = true;
+            dg_Function_List.IsEnabled = true;
+            dg_Applied_Functions.IsEnabled = true;
+
+            tb_Name_Function.IsEnabled = false;
+            tb_Name_Function.Text = "";
+            btn_Equip_AddTo.IsEnabled = true;
+            btn_Equip_RemoveFrom.IsEnabled = true;
+
+            btn_Edit_Function.Visibility = Visibility.Visible;
+            btn_Add_Function.Visibility = Visibility.Visible;
+            btn_Save_Function.Visibility = Visibility.Hidden;
+            btn_Submit_Function.Visibility = Visibility.Hidden;
+            btn_Cancel_Function.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Submit_Function_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Function.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_Function]";
+                cmd.Parameters.Add("func", SqlDbType.VarChar).Value = tb_Name_Function.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Functions(get_Equipment(dg_Equip));
+            fill_AppliedFunctions(get_Equipment(dg_Equip));
+
+            dg_Equip.IsEnabled = true;
+            dg_Function_List.IsEnabled = true;
+            dg_Applied_Functions.IsEnabled = true;
+
+            tb_Name_Function.IsEnabled = false;
+            tb_Name_Function.Text = "";
+            btn_Equip_AddTo.IsEnabled = true;
+            btn_Equip_RemoveFrom.IsEnabled = true;
+
+            btn_Edit_Function.Visibility = Visibility.Visible;
+            btn_Add_Function.Visibility = Visibility.Visible;
+            btn_Save_Function.Visibility = Visibility.Hidden;
+            btn_Submit_Function.Visibility = Visibility.Hidden;
+            btn_Cancel_Function.Visibility = Visibility.Hidden;
         }
     }
 }
