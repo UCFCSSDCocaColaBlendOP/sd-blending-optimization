@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\WpfApp1"
+    "\\WpfApp1",
+    "\\WpfApp1\\Classes",
+    "\\WpfApp1\\Properties"
   ],
   "SelectedNode": "\\BlendingOptimization.sln",
   "PreviewInSolutionExplorer": false

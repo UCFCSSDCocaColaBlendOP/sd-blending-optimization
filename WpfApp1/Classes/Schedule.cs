@@ -26,7 +26,7 @@ namespace WpfApp1.Classes
         public int numFunctions; // TODO: need to fill this in as soon as possible to use it in the rest of the code (1)
         public int numSOs;
         public bool[] uniqueTools; // a function is true if only one machine supports that functionality, false otherwise
-
+        
         public List<Juice> finished;
         public List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
         public List<Juice> juices_line8;
@@ -188,6 +188,212 @@ namespace WpfApp1.Classes
 
 
         // TODO - add pull equipment function
+        void PullEquipment()
+        {
+            // access the database
+            // initialize SOcount and functionCount
+            //methods used to get the maximum sos and functionalities
+
+            numSOs = getNumSOs();
+            numFunctions = getNumFunctions();
+
+            // find the equipment list in the database
+            // iterate through each piece of equipment
+
+            try
+            {
+                int equip_type;
+                String equip_name;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Equip_id]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    equip_type = Convert.ToInt32(dr["id"]);
+                    equip_name = dr.Field<String>("Equipment");
+                    Equipment temp = new Equipment(equip_name, equip_type);
+
+                    //set all the number of functions in the list
+                    //set all to false
+                    //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
+                    for (int i = 0; i < numFunctions + 1; i++)
+                    {
+                        temp.functionalities.Add(false);
+                    }
+
+                    for (int j = 0; j < numSOs + 1; j++)
+                    {
+                        temp.SOs.Add(false);
+                    }
+                    machines.Add(temp);
+                }
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            // sees what functionality and sos each equipment has
+            // sets the index the correlates to the functionality and so id true if 
+            // equipment has that functionality and so
+            getEquipFuncSos();
+        }
+
+        //gets the maximum number of functions
+        private int getNumFunctions()
+        {
+            int numofFunctions = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_FuncMaxId]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+            return numofFunctions;
+        }
+
+        // get maximum number of sos
+        private int getNumSOs()
+        {
+            int s = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_SOsMaxId]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                s = Convert.ToInt32(dt.Rows[0]["id"]);
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+            return s;
+        }
+
+        private void getEquipFuncSos()
+        {
+            try
+            {
+                int id_equip;
+                int id_func;
+                int id_so;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_FuncSO]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    id_equip = Convert.ToInt32(dr["id_Equip"]);
+                    id_func = Convert.ToInt32(dr["id_Func"]);
+                    id_so = Convert.ToInt32(dr["id_SO"]);
+                    for (int i = 0; i < machines.Count; i++)
+                    {
+                        if (machines[i].type == id_equip)
+                        {
+                            machines[i].functionalities[id_func] = true;
+                            machines[i].SOs[id_so] = true;
+                        }
+                    }
+                }
+                /*
+                for (int i = 0; i < machines.Count; i++)
+                {
+                    Console.WriteLine(machines[i].type);
+                    for (int j = 0; j < machines[i].functionalities.Count; j++)
+                    {
+                        Console.WriteLine(j);
+                        Console.WriteLine(machines[i].functionalities[j]);
+                    }
+                    Console.WriteLine();
+                }
+                for (int i = 0; i < machines.Count; i++)
+                {
+                    Console.WriteLine(machines[i].type);
+                    for (int j = 0; j < machines[i].SOs.Count; j++)
+                    {
+                        Console.WriteLine(j);
+                        Console.WriteLine(machines[i].SOs[j]);
+                    }
+
+                    Console.WriteLine();
+                }
+                */
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
 
         public CompareRecipe[] prepRecipes(Juice x)
         {
