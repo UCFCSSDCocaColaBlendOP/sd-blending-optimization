@@ -11,6 +11,7 @@ namespace WpfApp1
         public bool parsing;
         public bool starter; // check for whereami, askForBatches, no_batches, currentBatch
         public bool mixing;
+        public DateTime readytotrans; // set when mixing == true, this is the time the transferline should be acquired by
         // i got rid of the no_batches flag since we're asking about batches regardless
 
         public int totalBatches; // used to be quantity
@@ -33,11 +34,14 @@ namespace WpfApp1
         public List<ScheduleEntry> schedule = new List<ScheduleEntry>();
 
         public List<List<int>> recipes = new List<List<int>>(); // for each recipe there's a list, each list a list of times each functionality is needed for, -1 if not needed
+        public List<int> recipePreTimes = new List<int>();
+        public List<int> recipePostTimes = new List<int>();
         public List<bool> inlineflags = new List<bool>(); // marks whether or not each recipe is inline
 
         public List<DateTime> idealTime = new List<DateTime>();
         public int numUniqueToolsNeeded; // the number of tools which only one machine supports that all the recipes need
 
+        public Equipment BlendTank;
 
         // TODO - decide on cosntructor with Noelle (1)
         // case when juice type can be parsed from the SAP schedule??? Not sure anymore
@@ -90,6 +94,7 @@ namespace WpfApp1
         public void RecalculateFillTime()
         {
             // find the fill time for the next batch
+            // also find the ideal times for each recipe
         }
 
         // TODO - fill in function

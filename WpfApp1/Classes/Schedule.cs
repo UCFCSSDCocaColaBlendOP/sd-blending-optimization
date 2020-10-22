@@ -418,7 +418,7 @@ namespace WpfApp1.Classes
                     int func = (recipecopy[j][0]).type * -1;
 
                     // case that the recipe doesn't need that function
-                    if (recipecopy[j].Count == 1 && x.recipes[func][0] < 0) // TODO - need to fix that 0 in [0] because idk (1)
+                    if (recipecopy[j].Count == 1 && x.recipes[i][func] < 0) 
                     {
                         checkoffFunc[func] = true;
                         cntFunc++;
@@ -428,7 +428,7 @@ namespace WpfApp1.Classes
                     // case that the recipe needs the function and it isn't available
                     if (recipecopy[j].Count == 1)
                     {
-                        //options[i].possible = false; // TODO : this doesn't exist (1)
+                        options[i].conceivable = false;
                         break;
                     }
 
@@ -437,17 +437,25 @@ namespace WpfApp1.Classes
                     DateTime currentStart = new DateTime(0,0,0);
                     int otherfuncs = 0;
                     int sos = 0;
-                    bool otherUnique = false; // TODO : what do you want to initialize it to? (1) and all the variabels before it
+                    bool otherUnique = false; 
 
                     for (int k = 1; k < recipecopy[j].Count; k++)
                     {
                         // check that equipment can connect
+                        bool flag = false;
+                        for (int l = 0; l < numSOs; l++)
+                            if (options[i].sos[l] && recipecopy[j][k].SOs[l])
+                                flag = true;
+                        // this means that the piece of equipment can't connect to any of the SOs the recipe can connect to
+                        if (!flag)
+                            continue;
 
                         DateTime tempstart = GetStart(recipecopy[j][k], x.recipes[i]);
                         int tempfuncs = GetFuncs(recipecopy[j][k], x.recipes[i], checkoffFunc);
                         int tempsos = GetSOs(recipecopy[j][k], checkoffsos);
                         bool containsUnneededUnique = GetOtherUnique();
 
+                        // there is no current
                         if (choice == -1)
                         {
                             choice = k;
@@ -456,18 +464,7 @@ namespace WpfApp1.Classes
                             sos = tempsos;
                             otherUnique = containsUnneededUnique;
                         }
-                        else if (DateTime.Compare(tempstart, x.idealTime[i]) > 0 && DateTime.Compare(tempstart, currentStart) < 0)
-                        {
-                            choice = k;
-                            currentStart = tempstart;
-                            otherfuncs = tempfuncs;
-                            sos = tempsos;
-                            otherUnique = containsUnneededUnique;
-                        }
-                        else if (DateTime.Compare(tempstart, x.idealTime[i]) > 0)
-                        {
-                            continue;
-                        }
+                        // temp and current are the same time
                         else if (DateTime.Compare(tempstart, currentStart) == 0)
                         {
                             if (otherUnique && !containsUnneededUnique)
@@ -499,39 +496,21 @@ namespace WpfApp1.Classes
                                 otherUnique = containsUnneededUnique;
                             }
                         }
-                        else if (DateTime.Compare(tempstart, currentStart) < 0)
+                        // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
+                        else if (DateTime.Compare(tempstart, x.idealTime[i]) == 0)
                         {
-                            if (TimeSpan.Compare(currentStart.Subtract(x.idealTime[i]), new TimeSpan(1, 0, 0)) <= 0)
-                            {
-                                if (otherUnique && !containsUnneededUnique)
-                                {
-                                    choice = k;
-                                    currentStart = tempstart;
-                                    otherfuncs = tempfuncs;
-                                    sos = tempsos;
-                                    otherUnique = containsUnneededUnique;
-                                }
-                                else if ((containsUnneededUnique && !otherUnique) || otherfuncs > tempfuncs)
-                                {
-                                    continue;
-                                }
-                                else if (tempfuncs > otherfuncs)
-                                {
-                                    choice = k;
-                                    currentStart = tempstart;
-                                    otherfuncs = tempfuncs;
-                                    sos = tempsos;
-                                    otherUnique = containsUnneededUnique;
-                                }
-                                else if (tempsos > sos)
-                                {
-                                    choice = k;
-                                    currentStart = tempstart;
-                                    otherfuncs = tempfuncs;
-                                    sos = tempsos;
-                                    otherUnique = containsUnneededUnique;
-                                }
-                            }
+                            choice = k;
+                            currentStart = tempstart;
+                            otherfuncs = tempfuncs;
+                            sos = tempsos;
+                            otherUnique = containsUnneededUnique;
+                        }
+                        // current is later than ideal
+                        else if (DateTime.Compare(x.idealTime[i], currentStart) < 0)
+                        {
+                            // temp is later than current
+                            if (DateTime.Compare(tempstart, currentStart) > 0)
+                                continue;
                             else
                             {
                                 choice = k;
@@ -540,41 +519,89 @@ namespace WpfApp1.Classes
                                 sos = tempsos;
                                 otherUnique = containsUnneededUnique;
                             }
-                        }
-                        else if (TimeSpan.Compare(tempstart.Subtract(x.idealTime[i]), new TimeSpan(1, 0, 0)) <= 0)
+                        }    
+                        // current is earlier than ideal
+                        else
                         {
-                            if (otherUnique && !containsUnneededUnique)
-                            {
-                                choice = k;
-                                currentStart = tempstart;
-                                otherfuncs = tempfuncs;
-                                sos = tempsos;
-                                otherUnique = containsUnneededUnique;
-                            }
-                            else if ((containsUnneededUnique && !otherUnique) || otherfuncs > tempfuncs)
-                            {
+                            // temp is later than ideal
+                            if (DateTime.Compare(tempstart, x.idealTime[i]) > 0)
                                 continue;
-                            }
-                            else if (tempfuncs > otherfuncs)
+                            // current is within an hour of ideal
+                            else if (TimeSpan.Compare(currentStart.Subtract(x.idealTime[i]), new TimeSpan(1, 0, 0)) <= 0)
                             {
-                                choice = k;
-                                currentStart = tempstart;
-                                otherfuncs = tempfuncs;
-                                sos = tempsos;
-                                otherUnique = containsUnneededUnique;
+                                // temp is also within an hour of ideal
+                                if (TimeSpan.Compare(tempstart.Subtract(x.idealTime[i]), new TimeSpan(1, 0, 0)) <= 0)
+                                {
+                                    if (otherUnique && !containsUnneededUnique)
+                                    {
+                                        choice = k;
+                                        currentStart = tempstart;
+                                        otherfuncs = tempfuncs;
+                                        sos = tempsos;
+                                        otherUnique = containsUnneededUnique;
+                                    }
+                                    else if ((containsUnneededUnique && !otherUnique) || otherfuncs > tempfuncs)
+                                    {
+                                        continue;
+                                    }
+                                    else if (tempfuncs > otherfuncs)
+                                    {
+                                        choice = k;
+                                        currentStart = tempstart;
+                                        otherfuncs = tempfuncs;
+                                        sos = tempsos;
+                                        otherUnique = containsUnneededUnique;
+                                    }
+                                    else if (tempsos > sos)
+                                    {
+                                        choice = k;
+                                        currentStart = tempstart;
+                                        otherfuncs = tempfuncs;
+                                        sos = tempsos;
+                                        otherUnique = containsUnneededUnique;
+                                    }
+                                }
+                                // temp is more than an hour earlier than ideal
+                                else
+                                {
+                                    continue;
+                                }
                             }
-                            else if (tempsos > sos)
+                            // current is more than an hour earlier than ideal
+                            else
                             {
-                                choice = k;
-                                currentStart = tempstart;
-                                otherfuncs = tempfuncs;
-                                sos = tempsos;
-                                otherUnique = containsUnneededUnique;
+                                // temp is later than current but earlier than ideal
+                                if (DateTime.Compare(tempstart, currentStart) > 0)
+                                {
+                                    choice = k;
+                                    currentStart = tempstart;
+                                    otherfuncs = tempfuncs;
+                                    sos = tempsos;
+                                    otherUnique = containsUnneededUnique;
+                                }
+                                // temp is earlier than current
+                                else
+                                {
+                                    continue;
+                                }
                             }
                         }
-
+                       
                     }
 
+                    // it couldn't find a valid piece of equipment for this functionality
+                    if (choice == -1)
+                    {
+                        options[i].conceivable = false;
+                        break;
+                    }
+
+                    // add the chosen tool to the equipment list
+                    options[i].tools.Add(recipecopy[j][choice]);
+                    if (DateTime.Compare(currentStart, options[i].start) < 0)
+                        options[i].start;
+
+                    // update the remaining fields: start length and onTime and sos
 
                     // mark off the rest of the functionalities that piece supports
 
@@ -594,6 +621,7 @@ namespace WpfApp1.Classes
                 if (inprogress[0].mixing)
                 {
                     // you only have to acquire a transfer line
+                    AcquireTransferLine(inprogress[0], inprogress[0].readytotrans);
 
                     // update the batch counts
                     inprogress[0].neededBatches--;
@@ -617,6 +645,8 @@ namespace WpfApp1.Classes
                     if (inprogress[0].inline)
                     {
                         // you only need to acquire a transfer line
+                        DateTime temp; // this is the fillTime - however long it will take to transfer
+                        AcquireTransferLine(inprogress[0], temp);
 
                         // update the batch counts
                         inprogress[0].neededBatches--;
@@ -663,6 +693,16 @@ namespace WpfApp1.Classes
                     }
                 }
             }
+        }
+
+        public void AcquireTransferLine(Juice x, DateTime y)
+        {
+            // go through list of transfer lines and pick the one that's best for x at time y
+            // then assign the juice to it
+            // also mark the blend tank to say when the juice will be done
+            //      except when inline is true and there is more than 1 batch left
+
+            // we need to know how long a juice will have a transfer line for
         }
 
         // TODO - fill in function

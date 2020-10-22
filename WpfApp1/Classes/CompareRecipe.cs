@@ -14,6 +14,6 @@ namespace WpfApp1.Classes
         public List<Equipment> tools = new List<Equipment>();
         public bool conceivable;
         public bool onTime;
-        public List<int> sos = new List<int>();
+        public List<bool> sos = new List<bool>();
     }
 }
