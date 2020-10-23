@@ -597,9 +597,14 @@ namespace WpfApp1.Classes
                     }
 
                     // add the chosen tool to the equipment list
-                    options[i].tools.Add(recipecopy[j][choice]);
+                    options[i].tools.Add(recipecopy[j][choice]); 
                     if (DateTime.Compare(currentStart, options[i].start) < 0)
+                    {
+                        /*
                         options[i].start;
+                        */
+                    }
+                       
 
                     // update the remaining fields: start length and onTime and sos
 
@@ -645,8 +650,11 @@ namespace WpfApp1.Classes
                     if (inprogress[0].inline)
                     {
                         // you only need to acquire a transfer line
+
+                        /*
                         DateTime temp; // this is the fillTime - however long it will take to transfer
                         AcquireTransferLine(inprogress[0], temp);
+                        */
 
                         // update the batch counts
                         inprogress[0].neededBatches--;
@@ -710,6 +718,26 @@ namespace WpfApp1.Classes
         {
             // sorts inprogress by current filltime
             // use insertion sort because most calls will be on an already sorted list
+            if (inprogress.Count > 1)
+            {
+                Juice tempjuice;
+                for (int i = 1; i < inprogress.Count; i++)
+                {
+                    for (int j = i; j > 0; j--)
+                    {
+                        if (inprogress[j - 1].OGFillTime > inprogress[j].OGFillTime)
+                        {
+                            tempjuice = inprogress[j];
+                            inprogress[j] = inprogress[j - 1];
+                            inprogress[j - 1] = tempjuice;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         public List<List<Equipment>> SortByOptions(List<int> x)
