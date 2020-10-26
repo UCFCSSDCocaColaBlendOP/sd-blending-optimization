@@ -32,6 +32,8 @@ namespace WpfApp1
 
             fill_Recipes();
             fill_Equipment();
+            fill_Juice_Dropdown(cb_Juice_Recipe);
+            fill_Function_Dropdown(cb_Function_Recipe);
         }
 
         private void fill_Functions(string equip)
@@ -88,6 +90,62 @@ namespace WpfApp1
             }
         }
 
+        private void fill_Juice_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Juice_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Juice";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Function_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Function_List_All]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Functionality";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private string get_Equipment(DataGrid dg)
         {
             try
@@ -116,6 +174,40 @@ namespace WpfApp1
 
                 DataRowView row = (DataRowView)dg.SelectedItems[0];
                 return row["Function"].ToString();
+            }
+
+            catch (Exception ex)
+            { return null; }
+        }
+
+        private string get_Recipe(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Recipe"].ToString();
+            }
+
+            catch (Exception ex)
+            { return null; }
+        }
+
+        private string get_Time(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Time"].ToString();
             }
 
             catch (Exception ex)
@@ -560,6 +652,143 @@ namespace WpfApp1
             btn_Save_Function.Visibility = Visibility.Hidden;
             btn_Submit_Function.Visibility = Visibility.Hidden;
             btn_Cancel_Function.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Edit_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Recipe.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Recipe.IsEnabled = false;
+            tb_Name_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.IsEnabled = true;
+            chck_Inline.IsEnabled = true;
+            cb_Function_Recipe.IsEnabled = true;
+            tb_Time_Recipe.IsEnabled = true;
+            btn_Set_Time.IsEnabled = true;
+
+            btn_Edit_Recipe.Visibility = Visibility.Hidden;
+            btn_Add_Recipe.Visibility = Visibility.Hidden;
+            btn_Save_Recipe.Visibility = Visibility.Visible;
+            btn_Cancel_Recipe.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Recipe.IsEnabled = false;
+            dg_Recipe.UnselectAll();
+            dg_Function_Times.ItemsSource = null;
+            tb_Name_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.IsEnabled = true;
+            chck_Inline.IsEnabled = true;
+
+            btn_Edit_Recipe.Visibility = Visibility.Hidden;
+            btn_Add_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Visible;
+            btn_Cancel_Recipe.Visibility = Visibility.Visible;
+        }
+
+        private void dg_Recipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selected_Recipe = get_Recipe(dg_Recipe);
+            tb_Name_Recipe.Text = selected_Recipe;
+
+            fill_RecipeInfo(selected_Recipe);
+            fill_FunctionTimes(selected_Recipe);
+        }
+
+        private void fill_RecipeInfo(string recipe)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Recipe]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = recipe;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Juice_Recipe.SelectedValue = Convert.ToInt32(dt.Rows[0]["Juice"]);
+                chck_Inline.IsChecked = Convert.ToBoolean(dt.Rows[0]["Inline"]);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_FunctionTimes(string recipe)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_FunctionTimes]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = recipe;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Function_Times.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void btn_Cancel_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_Recipe.Text = get_Recipe(dg_Recipe);
+
+            dg_Recipe.IsEnabled = true;
+            dg_Function_Times.IsEnabled = true;
+
+            tb_Name_Recipe.IsEnabled = false;
+            cb_Juice_Recipe.IsEnabled = false;
+            chck_Inline.IsEnabled = false;
+            cb_Function_Recipe.IsEnabled = false;
+            tb_Time_Recipe.IsEnabled = false;
+            btn_Set_Time.IsEnabled = false;
+
+            btn_Edit_Recipe.Visibility = Visibility.Visible;
+            btn_Add_Recipe.Visibility = Visibility.Visible;
+            btn_Save_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Hidden;
+            btn_Cancel_Recipe.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btn_Submit_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void dg_Function_Times_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            cb_Function_Recipe.Text = get_Function(dg_Function_Times);
+            tb_Time_Recipe.Text = get_Time(dg_Function_Times);
         }
     }
 }
