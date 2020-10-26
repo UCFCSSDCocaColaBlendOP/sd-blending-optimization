@@ -395,18 +395,17 @@ namespace WpfApp1.Classes
             }
         }
 
-        public CompareRecipe[] prepRecipes(Juice x)
+        public CompareRecipe[] PrepRecipes(Juice x)
         {
             CompareRecipe[] options = new CompareRecipe[x.recipes.Count];
 
-            // make equipment choices for each recipe
+            // for each recipe fill in start, tools, sos, and conceivable
             for (int i = 0; i < x.recipes.Count; i++)
             {
+                options[i] = new CompareRecipe();
                 List<List<Equipment>> recipecopy = SortByOptions(x.recipes[i]);
                 bool[] checkoffFunc = new bool[numFunctions];
                 int cntFunc = 0;
-                bool[] checkoffsos = new bool[numSOs];
-                int cntSOs = numSOs;
 
                 for (int j = 0; j < numFunctions; j++)
                 {
@@ -452,7 +451,7 @@ namespace WpfApp1.Classes
 
                         DateTime tempstart = GetStart(recipecopy[j][k], x.recipes[i]);
                         int tempfuncs = GetFuncs(recipecopy[j][k], x.recipes[i], checkoffFunc);
-                        int tempsos = GetSOs(recipecopy[j][k], checkoffsos);
+                        int tempsos = GetSOs(recipecopy[j][k], options[i].sos);
                         bool containsUnneededUnique = GetOtherUnique();
 
                         // there is no current
@@ -596,22 +595,32 @@ namespace WpfApp1.Classes
                         break;
                     }
 
-                    // add the chosen tool to the equipment list
-                    options[i].tools.Add(recipecopy[j][choice]); 
-                    if (DateTime.Compare(currentStart, options[i].start) < 0)
-                    {
-                        /*
-                        options[i].start;
-                        */
-                    }
-                       
-
-                    // update the remaining fields: start length and onTime and sos
+                    // add the chosen tool to the equipment list, add the new start time, and update SO connections
+                    options[i].tools.Add(recipecopy[j][choice]);
+                    options[i].start.Add(currentStart);
+                    for (int k = 0; k < numSOs; k++)
+                        options[i].sos[k] = options[i].sos[k] && recipecopy[j][choice].SOs[k];
 
                     // mark off the rest of the functionalities that piece supports
-
+                    for (int k = 0; k < numFunctions; k++)
+                    {
+                        if (recipecopy[j][choice].functionalities[k] && !checkoffFunc[k])
+                        {
+                            checkoffFunc[k] = true;
+                            cntFunc++;
+                        }
+                    }
 
                 }
+
+            }
+
+            // for each recipe fill in onTime and length and startBlending
+            for (int i = 0; i < x.recipes.Count; i++)
+            {
+                options[i].SortStartAndTools();
+
+                // onTime is whether startBlending + length + postblend + transferTime is before fill time
             }
 
             return options;
@@ -798,7 +807,7 @@ namespace WpfApp1.Classes
         }
 
         // TODO - fill in function
-        public int GetSOs(Equipment tool, bool[] sosclaimed)
+        public int GetSOs(Equipment tool, List<bool> sosavail)
         {
             return 0;
         }
