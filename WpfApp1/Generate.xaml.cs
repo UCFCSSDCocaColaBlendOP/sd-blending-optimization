@@ -39,12 +39,54 @@ namespace WpfApp1
 
         private void btn_Next_Click(object sender, RoutedEventArgs e)
         {
-            tc_Home.SelectedIndex = 1;
+
         }
 
         private void btn_Back_Click(object sender, RoutedEventArgs e)
         {
+            
+        }
+
+        private void btn_NextToThaw_Click(object sender, RoutedEventArgs e)
+        {
+            tc_Home.SelectedIndex = 1;
+        }
+
+        private void btn_BackToThaw_Click(object sender, RoutedEventArgs e)
+        {
+            tc_Home.SelectedIndex = 1;
+        }
+
+        private void btn_NextToEquip_Click(object sender, RoutedEventArgs e)
+        {
+            tc_Home.SelectedIndex = 2;
+        }
+
+        private void btn_BackToJuice_Click(object sender, RoutedEventArgs e)
+        {
             tc_Home.SelectedIndex = 0;
+        }
+
+        private void cb_State_Copy_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void chck_Enable_Click(object sender, RoutedEventArgs e)
+        {
+            if (chck_Enable.IsChecked == true)
+            {
+                tb_Thaw_Start.IsEnabled = true;
+                tb_Thaw_Stop.IsEnabled = true;
+                cb_Thaw_Juice.IsEnabled = true;
+            }
+
+            else
+            {
+                tb_Thaw_Start.IsEnabled = false;
+                tb_Thaw_Stop.IsEnabled = false;
+                cb_Thaw_Juice.IsEnabled = false;
+            }
         }
     }
 }

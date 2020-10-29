@@ -33,7 +33,9 @@ namespace WpfApp1
             fill_Recipes();
             fill_Equipment();
             fill_Juice_Dropdown(cb_Juice_Recipe);
+            fill_Juice_Dropdown(cb_Juice1);
             fill_Function_Dropdown(cb_Function_Recipe);
+            fill_Cleaning_Dropdown(cb_Cleaning_Process);
         }
 
         private void fill_Functions(string equip)
@@ -118,6 +120,34 @@ namespace WpfApp1
             }
         }
 
+        private void fill_Cleaning_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Cleaning_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "process";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private void fill_Function_Dropdown(ComboBox cb)
         {
             try
@@ -177,7 +207,7 @@ namespace WpfApp1
             }
 
             catch (Exception ex)
-            { return null; }
+            { return ""; }
         }
 
         private string get_Recipe(DataGrid dg)
@@ -194,7 +224,7 @@ namespace WpfApp1
             }
 
             catch (Exception ex)
-            { return null; }
+            { return ""; }
         }
 
         private string get_Time(DataGrid dg)
@@ -682,7 +712,9 @@ namespace WpfApp1
             dg_Function_Times.ItemsSource = null;
             tb_Name_Recipe.IsEnabled = true;
             cb_Juice_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.SelectedIndex = -1;
             chck_Inline.IsEnabled = true;
+            chck_Inline.IsChecked = false;
 
             btn_Edit_Recipe.Visibility = Visibility.Hidden;
             btn_Add_Recipe.Visibility = Visibility.Hidden;
@@ -694,6 +726,11 @@ namespace WpfApp1
         {
             string selected_Recipe = get_Recipe(dg_Recipe);
             tb_Name_Recipe.Text = selected_Recipe;
+
+            if (String.IsNullOrEmpty(selected_Recipe))
+            {
+                return;
+            }
 
             fill_RecipeInfo(selected_Recipe);
             fill_FunctionTimes(selected_Recipe);
@@ -789,6 +826,115 @@ namespace WpfApp1
         {
             cb_Function_Recipe.Text = get_Function(dg_Function_Times);
             tb_Time_Recipe.Text = get_Time(dg_Function_Times);
+        }
+
+        private void cb_Function_Recipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void btn_Set_Time_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Time_Recipe.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_FunctionTime]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = get_Recipe(dg_Recipe);
+                cmd.Parameters.Add("juice", SqlDbType.BigInt).Value = cb_Juice_Recipe.SelectedValue;
+                cmd.Parameters.Add("func", SqlDbType.VarChar).Value = cb_Function_Recipe.Text;
+                cmd.Parameters.Add("time", SqlDbType.BigInt).Value = Convert.ToInt32(tb_Time_Recipe.Text);
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_FunctionTimes(get_Recipe(dg_Recipe));
+        }
+
+        private void cb_Juice1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            cb_Juice2.SelectedIndex = -1;
+            cb_Cleaning_Process.SelectedIndex = -1;
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_CIP_Juices]";
+                cmd.Parameters.Add("juice1", SqlDbType.BigInt).Value = cb_Juice1.SelectedValue;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Juice2.ItemsSource = dt.DefaultView;
+                cb_Juice2.DisplayMemberPath = "Juice";
+                cb_Juice2.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void cb_Juice2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cb_Juice2.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_CIP_Process]";
+                cmd.Parameters.Add("juice1", SqlDbType.BigInt).Value = cb_Juice1.SelectedValue;
+                cmd.Parameters.Add("juice2", SqlDbType.BigInt).Value = cb_Juice2.SelectedValue;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Cleaning_Process.SelectedValue = Convert.ToInt32(dt.Rows[0]["process_id"]);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void btn_Save_CIP_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

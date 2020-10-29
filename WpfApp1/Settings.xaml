@@ -123,12 +123,25 @@
                     <Label x:Name="label_Function_Times" Content="Function Times" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="1" HorizontalAlignment="Left" Margin="9.8,9.6,0,0" VerticalAlignment="Top" Height="30" Width="240" Grid.Row="3" Grid.ColumnSpan="2"/>
                     <TextBox x:Name="tb_Time_Recipe" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="4" HorizontalAlignment="Left" Height="26" Margin="54.977,48.4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="4"/>
                     <Label x:Name="label_Time_Recipe" Content="Time:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="3" HorizontalAlignment="Left" Margin="0,45.4,0,0" VerticalAlignment="Top" Height="30" Width="75" Grid.ColumnSpan="2" Grid.Row="4"/>
-                    <Button x:Name="btn_Set_Time" Content="Set Time" IsEnabled="False" Margin="0,13.4,0,0.2" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="144" Grid.Column="3" Click="btn_Add_Recipe_Click" Grid.ColumnSpan="2" Grid.Row="5"/>
+                    <Button x:Name="btn_Set_Time" Content="Set Time" IsEnabled="False" Margin="0,13.4,0,0.2" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="144" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="5" Click="btn_Set_Time_Click"/>
                     <Label x:Name="label_Function_Recipe" Content="Function:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="3" HorizontalAlignment="Left" Margin="0,0.4,0,0" VerticalAlignment="Top" Height="30" Width="75" Grid.ColumnSpan="2" Grid.Row="4"/>
-                    <ComboBox x:Name="cb_Function_Recipe" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="54.977,4.4,0,0" VerticalAlignment="Top" Width="187" Grid.ColumnSpan="2" Grid.Column="4" Height="26" Grid.Row="4"/>
+                    <ComboBox x:Name="cb_Function_Recipe" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="54.977,4.4,0,0" VerticalAlignment="Top" Width="187" Grid.ColumnSpan="2" Grid.Column="4" Height="26" Grid.Row="4" SelectionChanged="cb_Function_Recipe_SelectionChanged"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="CIP" BorderBrush="White" Foreground="White"/>
+            <TabItem Header="CIP" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="227*"/>
+                        <RowDefinition Height="186*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="434*"/>
+                        <ColumnDefinition Width="363*"/>
+                    </Grid.ColumnDefinitions>                    <Label x:Name="label_CIP_Juice1" Content="Juice 1:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="24,23,0,0" VerticalAlignment="Top" Height="30" Width="138"/>                    <Label x:Name="label_CIP_Juice2" Content="Juice 2:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="24,72,0,0" VerticalAlignment="Top" Height="30" Width="138"/>                    <Label x:Name="label_CIP_Cleaning_Process" Content="Cleaning Process:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="24,122,0,0" VerticalAlignment="Top" Height="30" Width="138"/>                    <ComboBox x:Name="cb_Juice1" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="180,23,0,0" VerticalAlignment="Top" Width="244" Height="28" SelectionChanged="cb_Juice1_SelectionChanged"/>
+                    <ComboBox x:Name="cb_Juice2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="180,72,0,0" VerticalAlignment="Top" Width="244" Height="28" SelectionChanged="cb_Juice2_SelectionChanged"/>                    <ComboBox x:Name="cb_Cleaning_Process" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="180,124,0,0" VerticalAlignment="Top" Width="244" Height="28"/>                    <Button x:Name="btn_Save_CIP" Content="Save Changes" Margin="24,177,0,10.2" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="155" Click="btn_Save_CIP_Click"/>
+
+                </Grid>
+            </TabItem>
             <TabItem Header="Users" BorderBrush="White" Foreground="White"/>
         </TabControl>
         <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
