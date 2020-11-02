@@ -193,9 +193,33 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="Users" BorderBrush="White" Foreground="White"/>
+            <TabItem Header="Users" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="19*"/>
+                        <RowDefinition Height="119*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="235*"/>
+                        <ColumnDefinition Width="281*"/>
+                        <ColumnDefinition Width="30*"/>
+                        <ColumnDefinition Width="125*"/>
+                        <ColumnDefinition Width="127*"/>
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="dg_Users" BorderBrush="White" BorderThickness="0,0,2,0" Background="#FF132226" FontSize="12" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,0,13.2,0.6" Grid.RowSpan="2"/>
+                    <TextBox x:Name="tb_Name_User" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="1" HorizontalAlignment="Left" Height="26" Margin="84.8,14,0,0" VerticalAlignment="Top" Width="186"/>
+                    <Label x:Name="label_Name_User" Content="Name:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="1" HorizontalAlignment="Left" Margin="9.8,10,0,0" VerticalAlignment="Top" Height="30" Width="75"/>
+                    <Button x:Name="btn_Edit_User" Content="Configure" Margin="3.4,11,0,8.8" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="115" Grid.Column="3"/>
+                    <Button x:Name="btn_Add_User" Content="Add New" Margin="4.6,11,0,8.8" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="115" Grid.Column="4"/>
+                    <Button x:Name="btn_Save_User" Content="Save" Visibility="Hidden" Margin="4.4,12,0,9.8" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="114" Grid.Column="3"/>
+                    <Button x:Name="btn_Cancel_User" Content="Cancel" Visibility="Hidden" Margin="4.6,11,0,8.8" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="115" Grid.Column="4"/>
+                    <Button x:Name="btn_Submit_User" Content="Submit" Visibility="Hidden" Margin="4.4,11,0,9.8" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="114" Grid.Column="3"/>
+
+                </Grid>
+            </TabItem>
         </TabControl>
         <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
+        <Button x:Name="btn_Refresh" Content="Refresh" Height="31" Margin="0,0,4.6,0" FontFamily="Segoe UI Semibold" FontSize="14" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Right" Width="117" Click="btn_Refresh_Click"/>
 
     </Grid>
 </mah:MetroWindow>

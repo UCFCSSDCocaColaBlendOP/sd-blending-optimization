@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -1104,6 +1105,11 @@ namespace WpfApp1
 
         private void cb_Juice2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            get_Clean_Process();
+        }
+
+        private void get_Clean_Process()
+        {
             if (cb_Juice2.SelectedIndex == -1)
             {
                 return;
@@ -1133,6 +1139,35 @@ namespace WpfApp1
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+
+        private void btn_Edit_CIP_Click(object sender, RoutedEventArgs e)
+        {
+            if (cb_Juice1.SelectedIndex == -1 || cb_Juice2.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            cb_Juice1.IsEnabled = false;
+            cb_Juice2.IsEnabled = false;
+            cb_Cleaning_Process.IsEnabled = true;
+
+            btn_Edit_CIP.Visibility = Visibility.Hidden;
+            btn_Save_CIP.Visibility = Visibility.Visible;
+            btn_Cancel_CIP.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_CIP_Click(object sender, RoutedEventArgs e)
+        {
+            get_Clean_Process();
+
+            cb_Juice1.IsEnabled = true;
+            cb_Juice2.IsEnabled = true;
+            cb_Cleaning_Process.IsEnabled = false;
+
+            btn_Edit_CIP.Visibility = Visibility.Visible;
+            btn_Save_CIP.Visibility = Visibility.Hidden;
+            btn_Cancel_CIP.Visibility = Visibility.Hidden;
         }
 
         private void btn_Save_CIP_Click(object sender, RoutedEventArgs e)
@@ -1235,26 +1270,9 @@ namespace WpfApp1
             btn_Cancel_Juice.Visibility = Visibility.Hidden;
         }
 
-        private void btn_Edit_CIP_Click(object sender, RoutedEventArgs e)
+        private void btn_Refresh_Click(object sender, RoutedEventArgs e)
         {
-            cb_Juice1.IsEnabled = false;
-            cb_Juice2.IsEnabled = false;
-            cb_Cleaning_Process.IsEnabled = true;
 
-            btn_Edit_CIP.Visibility = Visibility.Hidden;
-            btn_Save_CIP.Visibility = Visibility.Visible;
-            btn_Cancel_CIP.Visibility = Visibility.Visible;
-        }
-
-        private void btn_Cancel_CIP_Click(object sender, RoutedEventArgs e)
-        {
-            cb_Juice1.IsEnabled = true;
-            cb_Juice2.IsEnabled = true;
-            cb_Cleaning_Process.IsEnabled = false;
-
-            btn_Edit_CIP.Visibility = Visibility.Visible;
-            btn_Save_CIP.Visibility = Visibility.Hidden;
-            btn_Cancel_CIP.Visibility = Visibility.Hidden;
         }
     }
 }
