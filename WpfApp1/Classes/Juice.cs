@@ -37,8 +37,13 @@ namespace WpfApp1
         public List<int> recipePreTimes = new List<int>();
         public List<int> recipePostTimes = new List<int>();
         public List<bool> inlineflags = new List<bool>(); // marks whether or not each recipe is inline
+        public bool inlineposs; // or of inlineflags
+        public int transferTime;
 
         public List<DateTime> idealTime = new List<DateTime>();
+            /* ideal start time = fill time - (the time it takes to transfer from blend to aseptic + 
+								                postblend time +
+								                the sum of all the blend equipment times in the recipe) */
         public int numUniqueToolsNeeded; // the number of tools which only one machine supports that all the recipes need
 
         public Equipment BlendTank;

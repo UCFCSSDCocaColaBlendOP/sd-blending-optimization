@@ -12,7 +12,6 @@ namespace WpfApp1
     {
         public DateTime start;
         public DateTime end;
-        public TimeSpan totalTime;
         public int state;
         // for equipment, state =
         //                      0 - clean, waiting
@@ -29,34 +28,22 @@ namespace WpfApp1
         Juice juice;
         string cleaning;
 
-        // for juice recipe
-        int equipmentFunctionality;
-
         // for juice schedule
         Equipment tool;
-        int recipeStage; // 0 for pre recipe, -1 for post recipe
 
         public ScheduleEntry(DateTime start, DateTime end, Juice juice)
         {
             this.start = start;
             this.end = end;
-            this.totalTime = this.end.Subtract(this.start);
 
             this.state = 2;
             this.juice = juice;
-        }
-
-        public ScheduleEntry(TimeSpan length, int function)
-        {
-            this.totalTime = length;
-            this.equipmentFunctionality = function;
         }
 
         public ScheduleEntry(DateTime start, DateTime end, string cleaning)
         {
             this.start = start;
             this.end = end;
-            this.totalTime = this.end.Subtract(this.start);
 
             this.state = 1;
             this.cleaning = cleaning;
@@ -66,8 +53,6 @@ namespace WpfApp1
         {
             this.start = start;
             this.end = end;
-            this.totalTime = this.end.Subtract(this.start);
-
             // come back
         }
     }
