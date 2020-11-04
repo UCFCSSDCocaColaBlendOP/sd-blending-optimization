@@ -19,11 +19,11 @@ namespace WpfApp1.Classes
 {
     class Schedule
     {
-        public List<Equipment> extras;
-        public List<Equipment> blendSystems;
+        public List<Equipment> extras= new List<Equipment>();
+        public List<Equipment> blendSystems= new List<Equipment>();
         public Equipment thawRoom;
-        public List<Equipment> blendtanks;
-        public List<Equipment> transferLines;
+        public List<Equipment> blendtanks= new List<Equipment>();
+        public List<Equipment> transferLines = new List<Equipment>();
 
         // TODO - make sure all global variables are intialized when they have to be.. make it's supposed to be in a function and not the constructor
         // TODO - (time permitting) make variables that are needed private
@@ -202,6 +202,64 @@ namespace WpfApp1.Classes
             numSOs = getNumSOs();
             numFunctions = getNumFunctions();
 
+            // transfer lines and the sos
+            getTransferLines();
+
+            // blendtanks and their type is their sos
+            getBlendTanks();
+
+            // find the equipment list in the database
+            // iterate through each piece of equipment
+            try
+            {
+                int equip_type;
+                String equip_name;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Equip_id]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    equip_type = Convert.ToInt32(dr["id"]);
+                    equip_name = dr.Field<String>("Equipment");
+                    Equipment temp = new Equipment(equip_name, equip_type);
+
+                    //set all the number of functions in the list
+                    //set all to false
+                    //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
+                    for (int i = 0; i < numFunctions + 1; i++)
+                    {
+                        temp.functionalities.Add(false);
+                    }
+
+                    for (int j = 0; j < numSOs + 1; j++)
+                    {
+                        temp.SOs.Add(false);
+                    }
+                    blendSystems.Add(temp);
+                }
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            getBlendSystem_FuncSos();
+            getExtras();
+
             // find the equipment list in the database
             // iterate through each piece of equipment
 
@@ -325,11 +383,270 @@ namespace WpfApp1.Classes
             {
                 MessageBox.Show(ex.Message);
             }
-
-
             return s;
         }
+        public void getTransferLines()
+        {
+            int id_tl;
+            String name_tl;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
 
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_TransferLines]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    id_tl = Convert.ToInt32(dr["id"]);
+                    name_tl = dr.Field<String>("Transfer Lines"); ;
+                    Equipment temp = new Equipment(name_tl, id_tl);
+                    for (int i = 0; i < numSOs + 1; i++)
+                    {
+                        temp.SOs.Add(false);
+                    }
+                    transferLines.Add(temp);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            getTransferSOs();
+        }
+        public void getTransferSOs()
+        {
+            try
+            {
+                int id_tl;
+                int id_so;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_TL_SO]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    id_tl = Convert.ToInt32(dr["id_TL"]);
+                    id_so = Convert.ToInt32(dr["id_SO"]);
+                    for (int i = 0; i < transferLines.Count; i++)
+                    {
+                        if (transferLines[i].type == id_tl)
+                        {
+                            transferLines[i].SOs[id_so] = true;
+                            break;
+                        }
+                    }
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        public void getBlendTanks()
+        {
+            int id_so;
+            String name_mt;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_MixTanks]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    id_so = Convert.ToInt32(dr["id_SO"]);
+                    name_mt = dr.Field<String>("Mix Tank"); ;
+                    Equipment temp = new Equipment(name_mt, id_so);
+
+                    blendtanks.Add(temp);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        private void getBlendSystem_FuncSos()
+        {
+            try
+            {
+                int flag = 0;
+                int id_equip;
+                int id_func;
+                int id_so;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_FuncSO]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    id_equip = Convert.ToInt32(dr["id_Equip"]);
+                    id_func = Convert.ToInt32(dr["id_Func"]);
+                    id_so = Convert.ToInt32(dr["id_SO"]);
+                    for (int i = 0; i < blendSystems.Count; i++)
+                    {
+                        if (blendSystems[i].type == id_equip)
+                        {
+                            blendSystems[i].functionalities[id_func] = true;
+                            blendSystems[i].SOs[id_so] = true;
+                        }
+                    }
+                }
+                Equipment blendmachine;
+                for (int i = 0; i < blendSystems.Count; i++)
+                {
+                    flag = 0;
+                    int x = 0;
+                    String name_func = "";
+                    for (int j = 0; j < blendSystems[i].functionalities.Count; j++)
+                    {
+                        if (blendSystems[i].functionalities[j] == true)
+                        {
+                            flag++;
+                            x = j;
+                            name_func = blendSystems[i].name;
+                        }
+                        if (flag == 2)
+                        {
+                            break;
+                        }
+                    }
+                    if (flag == 1)
+                    {
+                        Equipment temp = new Equipment(name_func, x);
+                        temp.SOs = blendSystems[i].SOs;
+                        extras.Add(temp);
+                        blendmachine = blendSystems[i];
+                        blendSystems.Remove(blendmachine);
+                    }
+
+                }
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+        public void getExtras()
+        {
+            try
+            {
+                int count = 1;
+                int id_func;
+                String name_func; 
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_FuncEquip]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                int sum = numSOs;
+
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (dr["id_Equip"] == DBNull.Value)
+                    {
+                        if (dr.Field<String>("Functionality") != "Thaw Room")
+                        {
+                            name_func = dr.Field<String>("Functionality");
+                            id_func = Convert.ToInt32(dr["id"]);
+                            sum = numSOs;
+                            while (numSOs + 1 != count)
+                            {
+                                Equipment e = new Equipment(name_func,id_func);
+                                for (int y = 0; y < sum + 1; y++)
+                                {
+                                    if (count == y)
+                                    {
+                                        e.SOs.Add(true);
+                                    }
+                                    else
+                                    {
+                                        e.SOs.Add(false);
+                                    }
+                                }
+                                extras.Add(e);
+                                count++;
+                            }
+                            count = 1;
+                        }
+                    }
+                }
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         private void getEquipFuncSos()
         {
             try
@@ -956,6 +1273,24 @@ namespace WpfApp1.Classes
             }
 
             // sort options by the length of the lists
+            List<Equipment> temp;
+            for (int i = 1; i < options.Count; i++)
+            {
+                for (int j = i; j > 0; j--)
+                {
+
+                    if (options[j - 1].Count > options[j].Count)
+                    {
+                        temp = options[j - 1];
+                        options[j - 1] = options[j];
+                        options[j] = temp;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
 
             return options;
         }
