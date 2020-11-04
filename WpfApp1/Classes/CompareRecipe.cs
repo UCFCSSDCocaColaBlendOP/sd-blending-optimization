@@ -9,22 +9,34 @@ namespace WpfApp1.Classes
     class CompareRecipe
     {
         // TODO - fix the initialization... I don't THINK this is the right way to initialize it and might run into problems with it
-        public List<DateTime> start;
         public DateTime startBlending;
-        public TimeSpan length;
-        public List<Equipment> tools;
         public bool conceivable;
         public bool onTime;
-        public List<bool> sos;
+
+        public bool thawRoom;
+        public bool makeANewThawEntry;
+        public DateTime thawTime;
+
+        public List<Equipment> neededExtras;
+        public List<DateTime> extraTimes;
+
+        public Equipment blendSystem;
+        public DateTime blendTime;
+        public TimeSpan blendLength;
+
+        public Equipment mixTank;
+        public DateTime mixTime;
+        public TimeSpan mixLength;
+
+        public Equipment transferLine;
+        public DateTime transferTime;
+        public TimeSpan transferLength;
 
 
         public CompareRecipe()
         {
-            start = new List<DateTime>();
-            tools = new List<Equipment>();
             conceivable = true;
             onTime = true;
-            sos = new List<bool>();
         }
 
         public void SortStartAndTools()
