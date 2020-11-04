@@ -259,6 +259,7 @@ namespace WpfApp1.Classes
 
             getBlendSystem_FuncSos();
             getExtras();
+            getExtraSorted(); 
 
             // find the equipment list in the database
             // iterate through each piece of equipment
@@ -645,6 +646,27 @@ namespace WpfApp1.Classes
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+        private void getExtraSorted()
+        {
+            Equipment temp;
+            for (int i = 1; i < extras.Count; i++)
+            {
+                for (int j = i; j > 0; j--)
+                {
+
+                    if (extras[j - 1].type > extras[j].type)
+                    {
+                        temp = extras[j - 1];
+                        extras[j - 1] = extras[j];
+                        extras[j] = temp;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
         }
         private void getEquipFuncSos()
