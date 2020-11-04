@@ -34,7 +34,7 @@ namespace WpfApp1.Classes
         public DateTime scheduleID;
 
 
-        public Schedule()
+        public Schedule(string filename)
         {
             this.scheduleID = DateTime.Now;
 
@@ -46,6 +46,8 @@ namespace WpfApp1.Classes
             this.finished = new List<Juice>();
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
+
+            ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
         }
 
@@ -138,6 +140,7 @@ namespace WpfApp1.Classes
                 }
             }
 
+            PullEquipment();
             PrintAllJuices();
         }
 
@@ -186,9 +189,7 @@ namespace WpfApp1.Classes
 
         }
 
-
-        // TODO - add pull equipment function
-        void PullEquipment()
+        private void PullEquipment()
         {
             // access the database
             // initialize SOcount and functionCount
