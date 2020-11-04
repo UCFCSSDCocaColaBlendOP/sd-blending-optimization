@@ -31,14 +31,14 @@ namespace WpfApp1.Classes
         public List<Equipment> machines;
         public int numFunctions; // TODO: need to fill this in as soon as possible to use it in the rest of the code (1)
         public int numSOs;
-        
+
         public List<Juice> finished;
         public List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
         public List<Juice> juices_line8;
         public DateTime scheduleID;
 
 
-        public Schedule()
+        public Schedule(string filename)
         {
             this.scheduleID = DateTime.Now;
 
@@ -49,6 +49,8 @@ namespace WpfApp1.Classes
             this.finished = new List<Juice>();
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
+
+            ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
         }
 
@@ -60,12 +62,12 @@ namespace WpfApp1.Classes
             bool row_starter = false;
             int counter = 0;
 
-            if(!fileName.Contains("csv"))
+            if (!fileName.Contains("csv"))
             {
                 throw new SystemException("The selected file is not a csv.");
             }
 
-            using(TextFieldParser parser = new TextFieldParser(fileName))
+            using (TextFieldParser parser = new TextFieldParser(fileName))
             {
                 parser.TrimWhiteSpace = true;
                 parser.Delimiters = new string[] { "," };
@@ -73,12 +75,12 @@ namespace WpfApp1.Classes
                 while (!parser.EndOfData)
                 {
                     string[] line = parser.ReadFields();
-                    if(line[8].Contains("F_LINE") && !row_starter) 
-                    { 
+                    if (line[8].Contains("F_LINE") && !row_starter)
+                    {
                         row_start = counter;
                         row_starter = true;
                     }
-                    if(line[0] == "") {break;}
+                    if (line[0] == "") { break; }
                     lines.Add(line);
                     counter++;
                 }
@@ -114,11 +116,11 @@ namespace WpfApp1.Classes
                     int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
                     int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
                     bool no_batches = quantity_juice <= quantity_juice_2;
-                    
+
 
                     string name = lines[i][3];
 
-                    int type = name.Contains("CIP") ? -1: getJuiceType(name);
+                    int type = name.Contains("CIP") ? -1 : getJuiceType(name);
                     Console.WriteLine(name + " " + type);
 
                     string date = lines[i][0];
@@ -128,19 +130,21 @@ namespace WpfApp1.Classes
 
                     bool starterFlag = quantity_juice_2 != 0;
 
-                    Juice new_juice = new Juice(0, line, material, name, fillTime,  starterFlag, no_batches);
+                    Juice new_juice = new Juice(0, line, material, name, fillTime, starterFlag, no_batches);
 
-                    if(line == 8)
+                    if (line == 8)
                     {
                         juices_line8.Add(new_juice);
-                    } else
+                    }
+                    else
                     {
                         inprogress.Add(new_juice);
                     }
-                    
+
                 }
             }
 
+            PullEquipment();
             PrintAllJuices();
         }
 
@@ -176,7 +180,7 @@ namespace WpfApp1.Classes
         private void PrintAllJuices()
         {
             Console.WriteLine("Juices in lne 1,2,3,7:");
-            for(int i=0; i<inprogress.Count; i++)
+            for (int i = 0; i < inprogress.Count; i++)
             {
                 Console.WriteLine("Name: " + inprogress[i].name);
             }
@@ -189,11 +193,10 @@ namespace WpfApp1.Classes
 
         }
 
-
         // TODO - add pull equipment function
         // extras are pieces of equipment with a single functionality, their type is their functionality
         // blendtanks are blendtanks their type is their SO
-        void PullEquipment()
+        private void PullEquipment()
         {
             // access the database
             // initialize SOcount and functionCount
@@ -764,8 +767,8 @@ namespace WpfApp1.Classes
             // if the thaw room is needed
             if (x.recipes[y][0] > 0)
             {
-                
-                
+
+
                 //              option.makeANewThawEntry = true;
                 // set option.thawTime
                 // if there isn't availablity in the thawroom set conceivable to false and return
@@ -802,7 +805,7 @@ namespace WpfApp1.Classes
                     needBlendSys = true;
 
             if (needBlendSys)
-            { 
+            {
                 int choice = -1;
                 DateTime currentStart = new DateTime(0, 0, 0);
                 int sos = 0;
@@ -821,7 +824,7 @@ namespace WpfApp1.Classes
 
                     // then check if it has the functionalities the recipe needs
                     for (int k = 1; k < numFunctions; k++)
-                        if (!checkoffFunc[k] && x.recipes[i][k] > 0 && !blendSystems[j].functionalities[k])
+                        if (!checkoffFunc[k] && x.recipes[j][k] > 0 && !blendSystems[j].functionalities[k])
                             continue;
 
                     TimeSpan templength = new TimeSpan(0, 0, 0);
@@ -992,7 +995,7 @@ namespace WpfApp1.Classes
 
             return option;
         }
-        
+
         public CompareRecipe PrepRecipe(Juice x, int y, int slurrySize)
         {
             return new CompareRecipe();
@@ -1031,7 +1034,7 @@ namespace WpfApp1.Classes
                     if (inprogress[0].inline)
                     {
                         // you only need to acquire a transfer line
-                        AcquireTransferLine(inprogress[0], inprogress[0].currentFillTime.Subtract(new TimeSpan(0,inprogress[0].transferTime,0)), inprogress[0].BlendTank);
+                        AcquireTransferLine(inprogress[0], inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)), inprogress[0].BlendTank);
 
                         // update the batch counts
                         inprogress[0].neededBatches--;
@@ -1051,7 +1054,7 @@ namespace WpfApp1.Classes
                             if (inprogress[0].slurryBatches == 0)
                             {
                                 inprogress[0].inline = false;
-                                
+
                                 // mark the mix tank ended
                                 ReleaseMixTank(inprogress[0].BlendTank, inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)));
                             }
@@ -1066,7 +1069,7 @@ namespace WpfApp1.Classes
                         if (inprogress[0].neededBatches != 1 && inprogress[0].inlineposs)
                         {
                             // decide if you can do inline: can you finish the slurry for 2,3,4,or5 batches before the fill time?
-                            
+
                             CompareRecipe pick = null;
                             int pickIdx = -1;
                             int size = -1;
@@ -1328,7 +1331,7 @@ namespace WpfApp1.Classes
             DateTime start = new DateTime();
             return start;
         }
-        
+
         public int GetSOs(Equipment tool, bool[] sosavail)
         {
             int cnt = 0;
@@ -1340,10 +1343,41 @@ namespace WpfApp1.Classes
             return cnt;
         }
 
-        public void EnterScheduleLine(Equipment x, DateTime y, Juice z, int batch, TimeSpan q)
+        // Enter a line in the schedule of a given equipment
+        private void EnterScheduleLine(Equipment x, DateTime startTime, Juice j, int batch, TimeSpan timeSpan)
         {
-            // mark x's schedule at time y for Juice z, batch for time span q
-            // make sure to also apply the appropriate cleaning in between
+            List<ScheduleEntry> schedule = x.schedule;
+            if(schedule.Count == 0)
+            {
+                schedule.Add(new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+            } else
+            {
+                int index_insert = 0;
+                for(int i=0; i<schedule.Count; i++)
+                {
+                    if(schedule[i].start > startTime)
+                    {
+                        index_insert = i;
+                        break;
+                    }
+                }
+
+                //Deal with cleaning
+                if(x.name.Equals("Thaw Room")) //TODO! Is that the name given exactly?
+                {
+                    schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                } else
+                {
+                    //TODO: find cleaning string
+                    //string cleaning = 
+
+                    //how long the cleaning will take
+                    //TimeSpan q = 
+
+                    //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                    //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                }
+            }
         }
 
         public void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)
