@@ -135,6 +135,8 @@
                     <Label x:Name="label_Thaw_Juice" Content="Juice" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="14.2,144.6,0,0" VerticalAlignment="Top" Height="30" Width="109" Grid.Row="2" Grid.Column="1"/>
                     <CheckBox x:Name="chck_Enable" IsEnabled="True" Content="" Background="#FF132226" HorizontalAlignment="Left" Margin="134.2,13.6,0,0" Grid.Row="2" VerticalAlignment="Top" Height="26" Width="165" Grid.Column="1" Click="chck_Enable_Click"/>
                     <Label x:Name="label_Thaw_Enable" Content="Enable" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="14.2,9.6,0,0" VerticalAlignment="Top" Height="30" Width="109" Grid.Row="2" Grid.Column="1"/>
+                    <Button x:Name="btn_AddToThaw" IsEnabled="False" Content="Add" Margin="14.2,199.6,0,164.2" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="131" Grid.Row="2" Grid.Column="1" Click="btn_AddToThaw_Click"/>
+                    <Button x:Name="btn_RemoveFromThaw" IsEnabled="False" Content="Remove" Margin="168.2,199.6,0,164.2" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="131" Grid.Row="2" Grid.Column="1" Click="btn_RemoveFromThaw_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Equipment" BorderBrush="White" Foreground="White" Visibility="Visible" Margin="0.2,-50,0.4,34.6">

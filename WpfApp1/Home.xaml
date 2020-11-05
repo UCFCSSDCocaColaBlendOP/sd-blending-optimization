@@ -68,6 +68,8 @@
                     <DataGrid x:Name="dg_Shared" Background="#FF132226" Margin="0,0,-0.4,0.4"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Transfer_Line" Background="#FF132226" Margin="0,0,-0.4,0.4"/>                </Grid>            </TabItem>            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Aseptic" Background="#FF132226" Margin="0,0,-0.4,0.4"/>                </Grid>            </TabItem>
+
         </TabControl>
         <Button x:Name="btn_Generate" Content="Generate Schedule" Margin="5,6.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Height="40" VerticalAlignment="Top" Click="btn_Generate_Click"/>
         <Button x:Name="btn_View" Content="View Schedules" Height="40" Margin="5,64.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Click="btn_Export_Click"/>
