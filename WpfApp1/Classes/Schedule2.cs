@@ -52,7 +52,7 @@ namespace WpfApp1.Classes
 
            
             //ExampleOfSchedule();
-            ExampleOfSchedule2(); 
+            //ExampleOfSchedule2(); 
 
             //ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();

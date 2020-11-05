@@ -23,8 +23,13 @@
         </Grid.ColumnDefinitions>
         <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
         <DataGrid x:Name="dg_Schedules" BorderBrush="White" BorderThickness="1,1,1,1" Background="#FF132226" Margin="1.2,25,18,10.2" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4"/>
-        <DatePicker x:Name="date_From" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="10.4,10.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165"/>
-        <ComboBox x:Name="cb_Type" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="10.4,58.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165"/>
+        <ComboBox x:Name="cb_Type" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.4,57.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165">
+            <ComboBoxItem Content="By Juice"/>
+            <ComboBoxItem Content="By Equipment"/>
+        </ComboBox>
+        <ComboBox x:Name="cb_SchID" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.4,10.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165"/>
+        <Label x:Name="label_SchID" Content="Schedule ID:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="2" HorizontalAlignment="Left" Margin="25.4,8.2,0,0" VerticalAlignment="Top" Height="30" Width="120" Grid.Row="1"/>
+        <Label x:Name="label_Type" Content="View Type:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="2" HorizontalAlignment="Left" Margin="25.4,55.2,0,0" VerticalAlignment="Top" Height="30" Width="120" Grid.Row="1"/>
 
     </Grid>
 </mah:MetroWindow>
