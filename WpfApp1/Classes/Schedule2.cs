@@ -1397,6 +1397,7 @@ namespace WpfApp1.Classes
 
         private void ExampleOfSchedule()
         {
+            
             int i = 1;
             List<Equipment> equips = new List<Equipment>();
 
@@ -1438,27 +1439,6 @@ namespace WpfApp1.Classes
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
             equips.Add(sucrose_so1);
-
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_ProdSchedule]";
-
-                cmd.Connection = conn;
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
 
             //go through each equipment
 
@@ -1613,6 +1593,7 @@ namespace WpfApp1.Classes
             aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
             equips.Add(aseptic_7);
 
+
         }
         public void insertingEquipSchedule(int entryid, String equipname, DateTime start, DateTime end, String juice)
         {
@@ -1642,6 +1623,40 @@ namespace WpfApp1.Classes
                 MessageBox.Show(ex.ToString());
             }
         }
+        /*
+        public String checkProductionSchedule(String equipname, DateTime start, DateTime end)
+        {
+           
+            String name = "0";
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[check_ProdSch]";
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value =equipname;
+                cmd.Parameters.Add("start", SqlDbType.VarChar).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.VarChar).Value = end;
+                //cmd.Parameters.Add("entryid", SqlDbType.VarChar).Value = entry;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                
+                name = Convert.ToInt32(dt.Rows[0]["juice_id"]);
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+            return name; 
+        }
+        */
 
         private void ExampleOfSchedule2()
         {
