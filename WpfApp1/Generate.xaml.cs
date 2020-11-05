@@ -79,6 +79,8 @@ namespace WpfApp1
                 tb_Thaw_Start.IsEnabled = true;
                 tb_Thaw_Stop.IsEnabled = true;
                 cb_Thaw_Juice.IsEnabled = true;
+                btn_AddToThaw.IsEnabled = true;
+                btn_RemoveFromThaw.IsEnabled = true;
             }
 
             else
@@ -86,6 +88,8 @@ namespace WpfApp1
                 tb_Thaw_Start.IsEnabled = false;
                 tb_Thaw_Stop.IsEnabled = false;
                 cb_Thaw_Juice.IsEnabled = false;
+                btn_AddToThaw.IsEnabled = false;
+                btn_RemoveFromThaw.IsEnabled = false;
             }
         }
 
@@ -157,6 +161,16 @@ namespace WpfApp1
             {
                 tb_Batches_Mix.IsEnabled = false;
             }
+        }
+
+        private void btn_AddToThaw_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btn_RemoveFromThaw_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
