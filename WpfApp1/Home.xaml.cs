@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
+using WpfApp1.Classes;
 
 namespace WpfApp1
 {
@@ -65,12 +66,15 @@ namespace WpfApp1
             if (ofd.ShowDialog() == true)
             {
                 Mouse.OverrideCursor = Cursors.Wait;
-                string filename = ofd.FileName;
+                String filename = ofd.FileName;
                 Mouse.OverrideCursor = null;
+
+                Schedule2 s = new Schedule2(filename);
             }
 
-            Generate form = new Generate();
-            form.Show();
+            //Generate form = new Generate();
+            //form.Show();
+
         }
 
         private void btn_Export_Click(object sender, RoutedEventArgs e)
