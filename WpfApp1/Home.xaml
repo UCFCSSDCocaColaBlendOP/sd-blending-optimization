@@ -71,11 +71,18 @@
                     <ComboBox x:Name="cb_Shared_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_Shared_Equip_SelectionChanged"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Transfer_Line" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
+            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Transfer_Line" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
                     <ComboBox x:Name="cb_TL_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_TL_Equip_SelectionChanged"/>
-                </Grid>            </TabItem>            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Aseptic" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Aseptic" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
                     <ComboBox x:Name="cb_Aseptic_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_Aseptic_Equip_SelectionChanged"/>
-                </Grid>            </TabItem>
+                </Grid>
+            </TabItem>
 
         </TabControl>
         <Button x:Name="btn_Generate" Content="Generate Schedule" Margin="5,6.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Height="40" VerticalAlignment="Top" Click="btn_Generate_Click"/>
