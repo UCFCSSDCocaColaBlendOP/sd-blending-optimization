@@ -993,15 +993,16 @@ namespace WpfApp1.Classes
         private void EnterScheduleLine(Equipment x, DateTime startTime, Juice j, int batch, TimeSpan timeSpan)
         {
             List<ScheduleEntry> schedule = x.schedule;
-            if(schedule.Count == 0)
+            if (schedule.Count == 0)
             {
                 schedule.Add(new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-            } else
+            }
+            else
             {
                 int index_insert = 0;
-                for(int i=0; i<schedule.Count; i++)
+                for (int i = 0; i < schedule.Count; i++)
                 {
-                    if(schedule[i].start > startTime)
+                    if (schedule[i].start > startTime)
                     {
                         index_insert = i;
                         break;
@@ -1009,10 +1010,11 @@ namespace WpfApp1.Classes
                 }
 
                 //Deal with cleaning
-                if(x.name.Equals("Thaw Room")) //TODO! Is that the name given exactly?
+                if (x.name.Equals("Thaw Room")) //TODO! Is that the name given exactly?
                 {
                     schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-                } else
+                }
+                else
                 {
                     //TODO: find cleaning string
                     //string cleaning = 
@@ -1105,7 +1107,7 @@ namespace WpfApp1.Classes
             equips.Add(mix3_so2);
 
             Equipment mix4_so2 = new Equipment("Mix Tank 4");
-            mix4_so2 = 2;
+            mix4_so2.so = 2;
             mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Rasberry")));
             mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Rasberry")));
             equips.Add(mix4_so2);
@@ -1438,6 +1440,7 @@ namespace WpfApp1.Classes
             equips.Add(aseptic_7);
 
         }
+    }
 }
 
 
