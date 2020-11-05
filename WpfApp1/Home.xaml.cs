@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,9 +30,14 @@ namespace WpfApp1
             InitializeComponent();
 
             // Functions to fill each tab's DataGrid            
-            fill_SO1();
-            fill_SO2();
-            fill_Shared();
+            fill_SO_Equip(1, cb_SO1_Equip);
+            cb_SO1_Equip.SelectedIndex = 0;
+            fill_SO1(1, cb_SO1_Equip.Text);           
+
+            //fill_SO2(2);
+            //fill_Shared(3);
+            //fill_TL(4);
+            //fill_Aseptic(5);
         }
 
         private void btn_Generate_Click(object sender, RoutedEventArgs e)
@@ -40,7 +48,7 @@ namespace WpfApp1
             ofd.CheckFileExists = true;
             ofd.CheckPathExists = true;
             ofd.RestoreDirectory = true;
-            ofd.Filter = "CSV files (*.csv)|*.csv|Excel Files|*.xls;*.xlsx;*.xlsm";
+            ofd.Filter = "CSV files (*.csv)|*.csv|";
             ofd.FilterIndex = 2;
 
             if (ofd.ShowDialog() == true)
@@ -70,19 +78,178 @@ namespace WpfApp1
             Mouse.OverrideCursor = null;
         }
 
-        private void fill_SO1()
+        private void fill_SO_Equip(int so_ID, ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Equip]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Equipment";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_SO1(int so_ID, string equip)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_SO1.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_SO2(int so_ID)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_SO2.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Shared(int so_ID)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Shared.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_TL(int so_ID)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Transfer_Line.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Aseptic(int so_ID)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Aseptic.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void dg_SO1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
         }
 
-        private void fill_SO2()
+        private void cb_SO1_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-        }
-
-        private void fill_Shared()
-        {
-
+            fill_SO1(1, cb_SO1_Equip.Text);
         }
     }
 }
