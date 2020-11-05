@@ -51,7 +51,8 @@ namespace WpfApp1.Classes
             this.juices_line8 = new List<Juice>();
 
            
-            ExampleOfSchedule();
+            //ExampleOfSchedule();
+            ExampleOfSchedule2(); 
 
             //ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
@@ -1960,6 +1961,26 @@ namespace WpfApp1.Classes
             aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 20:30:00"), Convert.ToDateTime("02/20/2020 20:40:00"), new Juice("Rinse")));
             aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 23:15:00"), Convert.ToDateTime("02/21/2020 03:15:00"), new Juice("Simply Orange Juice")));
             equips.Add(aseptic_7);
+            for (int e = 0; e < equips.Count; e++)
+            {
+                string equipment_name = equips[e].name;
+                List<ScheduleEntry> schedule = equips[e].schedule;
+                int x = equips[e].so;
+
+                //go through each schedule entry in the equipment's schedule
+                for (int s = 0; s < schedule.Count; s++)
+                {
+                    DateTime startTime = schedule[s].start;
+                    DateTime endTime = schedule[s].end;
+                    string juice_name = schedule[s].juice.name;
+                    //checkname = checkProductionSchedule(x, equipment_name, startTime, endTime);
+                    //if (checkname != juice_name)
+                    //{
+                    insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
+                    //.....
+                    // }
+                }
+            }
 
         }
     }
