@@ -1114,7 +1114,7 @@ namespace WpfApp1.Classes
 
             Equipment water_so2 = new Equipment("Water");
             water_so2.so = 2;
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 9:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
             water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
             water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Rasberry")));
             water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
@@ -1202,7 +1202,7 @@ namespace WpfApp1.Classes
             equips.Add(tl_2);
 
             Equipment tl_3_inline = new Equipment("TL 3 INLINE");
-            tl_2.so = 4;
+            tl_3_inline.so = 4;
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 04:30:00"), new Juice("Orange Juice")));
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Orange Juice")));
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
@@ -1249,194 +1249,248 @@ namespace WpfApp1.Classes
 
             //SO1
             Equipment mix1_so1 = new Equipment("Mix Tank 1");
+            mix1_so1.so = 1;
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:30:00"), Convert.ToDateTime("02/19/2020 23:00:00"), new Juice("Rinse")));
-            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:15:00"), Convert.ToDateTime("02/20/2020 06:30:00"), new Juice("Strawberry")));
-            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:15:00"), Convert.ToDateTime("02/20/2020 12:30:00"), new Juice("Strawberry")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:15:00"), Convert.ToDateTime("02/20/2020 06:30:00"), new Juice("Simply Lemonade Strawberry")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:15:00"), Convert.ToDateTime("02/20/2020 12:30:00"), new Juice("Simply Lemonade Strawberry")));
             equips.Add(mix1_so1);
 
             Equipment mix2_so1 = new Equipment("Mix Tank 2");
+            mix2_so1.so = 1;
             mix2_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Rinse")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:15:00"), Convert.ToDateTime("02/20/2020 08:45:00"), new Juice("Honey")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 11:45:00"), new Juice("7 Step Hot Clean")));
-            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:10:00"), Convert.ToDateTime("02/20/2020 19:00:00"), new Juice("Blue")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:10:00"), Convert.ToDateTime("02/20/2020 19:00:00"), new Juice("Blueberry Lemonade")));
             equips.Add(mix2_so1);
 
-            //I'm here...
             Equipment mix3_so1 = new Equipment("Mix Tank 3");
-            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Rinse")));
+            mix2_so1.so = 1;
+            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Rinse")));
+            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 00:15:00"), Convert.ToDateTime("02/20/2020 04:45:00"), new Juice("Honest Tea Jasmine Honey")));
+            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 07:55:00"), new Juice("7 Step Hot Clean")));
+            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:10:00"), Convert.ToDateTime("02/20/2020 21:00:00"), new Juice("Blueberry Lemonade")));
             equips.Add(mix3_so1);
 
             Equipment mix4_so1 = new Equipment("Mix Tank 4");
-            mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:00:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Apricot")));
+            mix4_so1.so = 1;
+            mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 19:00:00"), new Juice("Rinse")));
+            mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 19:00:00"), new Juice("Honest Tea Jasmine Honey")));
             equips.Add(mix4_so1);
 
             Equipment water_so1 = new Equipment("Water");
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 13:00:00"), new Juice("Apricot")));
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 15:00:00"), new Juice("Apricot")));
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Apricot")));
-            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+            water_so1.so = 1;
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 00:45:00"), Convert.ToDateTime("02/20/2020 01:15:00"), new Juice("Honest Tea Jasmine Honey")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:45:00"), Convert.ToDateTime("02/20/2020 03:15:00"), new Juice("Honest Tea Jasmine Honey")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:15:00"), Convert.ToDateTime("02/20/2020 03:45:00"), new Juice("Strawberry")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 05:15:00"), new Juice("Honest Tea Jasmine Honey")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 09:15:00"), new Juice("Strawberry")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:40:00"), Convert.ToDateTime("02/20/2020 16:10:00"), new Juice("Blueberry Lemonade")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:40:00"), Convert.ToDateTime("02/20/2020 18:10:00"), new Juice("Blueberry Lemonade")));
             equips.Add(water_so1);
 
             Equipment sucrose_so1 = new Equipment("Sucrose");
-            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
-            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
-            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+            sucrose_so1.so = 1;
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:15:00"), Convert.ToDateTime("02/20/2020 03:45:00"), new Juice("Strawberry")));
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 09:15:00"), new Juice("Strawberry")));
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:40:00"), Convert.ToDateTime("02/20/2020 16:10:00"), new Juice("Blueberry Lemonade")));
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:40:00"), Convert.ToDateTime("02/20/2020 18:10:00"), new Juice("Blueberry Lemonade")));
             equips.Add(sucrose_so1);
-
-            /*
-            //go through each equipment
-            for(int e = 0; e<equips.Count; e++)
-            {
-                string equipment_name = equips[e].name;
-                List<ScheduleEntry> schedule = equips[e].schedule;
-
-               //go through each schedule entry in the equipment's schedule
-               for(int s = 0; s<schedule.Count; s++)
-                {
-                    DateTime startTime = schedule[s].start;
-                    DateTime endTime = schedule[s].end;
-                    //string juice_name = schedule[s].juice.name;
-
-                    //.....
-
-                }
-
-            } */
-
-
 
             //SO2
             Equipment mix1_so2 = new Equipment("Mix Tank 1");
-            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:15:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
+            mix1_so2.so = 2;
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:00:00"), Convert.ToDateTime("02/19/2020 22:20:00"), new Juice("Rinse")));
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 00:45:00"), Convert.ToDateTime("02/20/2020 04:15:00"), new Juice("Water")));
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:15:00"), Convert.ToDateTime("02/20/2020 06:35:00"), new Juice("3 Step Hot Clean")));
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:15:00"), Convert.ToDateTime("02/20/2020 11:45:00"), new Juice("Fruit Punch")));
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:15:00"), Convert.ToDateTime("02/20/2020 15:45:00"), new Juice("Fruit Punch")));
+            mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 16:15:00"), Convert.ToDateTime("02/20/2020 19:45:00"), new Juice("Fruit Punch")));
             equips.Add(mix1_so2);
 
             Equipment mix2_so2 = new Equipment("Mix Tank 2");
-            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
-            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:15:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
+            mix2_so2.so = 2;
+            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:45:00"), Convert.ToDateTime("02/19/2020 17:05:00"), new Juice("Rinse")));
+            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:45:00"), Convert.ToDateTime("02/20/2020 06:15:00"), new Juice("Water")));
+            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:15:00"), Convert.ToDateTime("02/20/2020 08:35:00"), new Juice("3 Step Hot Clean")));
+            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:15:00"), Convert.ToDateTime("02/20/2020 13:45:00"), new Juice("Fruit Punch")));
+            mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 14:15:00"), Convert.ToDateTime("02/20/2020 17:45:00"), new Juice("Fruit Punch")));
             equips.Add(mix2_so2);
 
             Equipment mix3_so2 = new Equipment("Mix Tank 3");
-            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:15:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
-            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:15:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+            mix3_so2.so = 2;
+            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:45:00"), Convert.ToDateTime("02/19/2020 19:05:00"), new Juice("Rinse")));
+            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:15:00"), Convert.ToDateTime("02/20/2020 08:30:00"), new Juice("Strawberry")));
+            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:30:00"), Convert.ToDateTime("02/20/2020 08:50:00"), new Juice("Rinse")));
+            mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 21:25:00"), Convert.ToDateTime("02/21/2020 03:15:00"), new Juice("Oranje Juice Slurry")));
             equips.Add(mix3_so2);
 
             Equipment mix4_so2 = new Equipment("Mix Tank 4");
-            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Rasberry")));
-            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Rasberry")));
+            mix4_so2.so = 2;
+            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 20:50:00"), new Juice("Rinse")));
+            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:15:00"), Convert.ToDateTime("02/20/2020 10:30:00"), new Juice("Strawberry")));
+            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:30:00"), Convert.ToDateTime("02/20/2020 10:50:00"), new Juice("Rinse")));
+            mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 18:30:00"), Convert.ToDateTime("02/20/2020 20:30:00"), new Juice("Apple Juice")));
             equips.Add(mix4_so2);
 
             Equipment water_so2 = new Equipment("Water");
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 9:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Rasberry")));
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
-            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Rasberry")));
+            water_so2.so = 2;
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 01:15:00"), Convert.ToDateTime("02/19/2020 01:45:00"), new Juice("Water")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:15:00"), Convert.ToDateTime("02/19/2020 03:45:00"), new Juice("Water")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Strawberry")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Strawberry")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Fruit Punch")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:45:00"), Convert.ToDateTime("02/19/2020 11:15:00"), new Juice("Fruit Punch")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:45:00"), Convert.ToDateTime("02/19/2020 13:15:00"), new Juice("Fruit Punch")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 14:45:00"), Convert.ToDateTime("02/19/2020 15:15:00"), new Juice("Fruit Punch")));
+            water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 16:45:00"), Convert.ToDateTime("02/19/2020 17:15:00"), new Juice("Fruit Punch")));
             equips.Add(water_so2);
 
             Equipment sucrose_so2 = new Equipment("Sucrose");
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Rasberry")));
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
-            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Rasberry")));
+            sucrose_so2.so = 2;
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 01:15:00"), Convert.ToDateTime("02/20/2020 01:45:00"), new Juice("Water")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:15:00"), Convert.ToDateTime("02/20/2020 03:45:00"), new Juice("Water")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 05:15:00"), new Juice("Strawberry")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/20/2020 07:15:00"), new Juice("Strawberry")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 09:15:00"), new Juice("Fruit Punch")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:45:00"), Convert.ToDateTime("02/20/2020 11:15:00"), new Juice("Fruit Punch")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:45:00"), Convert.ToDateTime("02/20/2020 13:15:00"), new Juice("Fruit Punch")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 14:45:00"), Convert.ToDateTime("02/20/2020 15:15:00"), new Juice("Fruit Punch")));
+            sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 16:45:00"), Convert.ToDateTime("02/20/2020 17:15:00"), new Juice("Fruit Punch")));
             equips.Add(sucrose_so2);
 
             Equipment soft_melt_chopper = new Equipment("Soft Melt Chopper");
+            soft_melt_chopper.so = 2;
             equips.Add(soft_melt_chopper);
 
             Equipment tote_system = new Equipment("Tote System");
+            tote_system.so = 3;
+            tote_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 09:20:00"), new Juice("Fruit Punch")));
+            tote_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:45:00"), Convert.ToDateTime("02/20/2020 11:20:00"), new Juice("Fruit Punch")));
+            tote_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:45:00"), Convert.ToDateTime("02/20/2020 13:20:00"), new Juice("Fruit Punch")));
+            tote_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 14:45:00"), Convert.ToDateTime("02/20/2020 15:20:00"), new Juice("Fruit Punch")));
+            tote_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 16:45:00"), Convert.ToDateTime("02/20/2020 17:20:00"), new Juice("Fruit Punch")));
             equips.Add(tote_system);
 
             Equipment rt_tank = new Equipment("RT Tank");
+            rt_tank.so = 3;
             equips.Add(rt_tank);
 
             Equipment thaw_room = new Equipment("Thaw Room");
-            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 10:04:00"), Convert.ToDateTime("02/18/2020 10:29:00"), new Juice("Peach")));
-            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:07:00"), Convert.ToDateTime("02/18/2020 17:32:00"), new Juice("Peach")));
-            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:32:00"), Convert.ToDateTime("02/18/2020 17:57:00"), new Juice("Peach")));
-            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:57:00"), Convert.ToDateTime("02/18/2020 17:22:00"), new Juice("Peach")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 08:03:00"), Convert.ToDateTime("02/19/2020 08:19:00"), new Juice("Water")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 08:19:00"), Convert.ToDateTime("02/19/2020 08:35:00"), new Juice("Water")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:25:00"), Convert.ToDateTime("02/19/2020 17:33:00"), new Juice("Fruit Punch")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:33:00"), Convert.ToDateTime("02/19/2020 17:41:00"), new Juice("Fruit Punch")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:41:00"), Convert.ToDateTime("02/19/2020 17:49:00"), new Juice("Fruit Punch")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:49:00"), Convert.ToDateTime("02/19/2020 17:57:00"), new Juice("Fruit Punch")));
+            thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:57:00"), Convert.ToDateTime("02/19/2020 18:05:00"), new Juice("Fruit Punch")));
             equips.Add(thaw_room);
 
             Equipment so1_blend_system = new Equipment("SO1 Blend System");
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:15:00"), Convert.ToDateTime("02/19/2020 02:40:00"), new Juice("Grapefruit")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:15:00"), Convert.ToDateTime("02/19/2020 04:40:00"), new Juice("Grapefruit")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:15:00"), Convert.ToDateTime("02/19/2020 06:40:00"), new Juice("Grapefruit")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:40:00"), Convert.ToDateTime("02/19/2020 10:00:00"), new Juice("7 Step Hot Clean")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Apricot")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Apricot")));
-            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Apricot")));
+            so1_blend_system.so = 1;
+            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:00:00"), Convert.ToDateTime("02/19/2020 02:40:00"), new Juice("Rinse")));
+            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 00:45:00"), Convert.ToDateTime("02/20/2020 02:15:00"), new Juice("Honest Tea Jasmine Honey")));
+            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:45:00"), Convert.ToDateTime("02/20/2020 04:15:00"), new Juice("Honest Tea Jasmine Honey")));
+            so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 06:15:00"), new Juice("Honest Tea Jasmine Honey")));
             equips.Add(so1_blend_system);
 
             Equipment so2_blend_system = new Equipment("SO2 Blend System");
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:45:00"), Convert.ToDateTime("02/19/2020 02:00:00"), new Juice("Orange Juice Slurry")));
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:00:00"), Convert.ToDateTime("02/19/2020 02:25:00"), new Juice("Rinse")));
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
+            so2_blend_system.so = 2;
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:00:00"), Convert.ToDateTime("02/19/2020 18:40:00"), new Juice("Rinse")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 01:15:00"), Convert.ToDateTime("02/20/2020 01:40:00"), new Juice("Water")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:15:00"), Convert.ToDateTime("02/20/2020 03:40:00"), new Juice("Water")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 03:40:00"), Convert.ToDateTime("02/20/2020 05:15:00"), new Juice("3 Step Hot Clean")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/20/2020 09:20:00"), new Juice("Fruit Punch")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:45:00"), Convert.ToDateTime("02/20/2020 11:20:00"), new Juice("Fruit Punch")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:45:00"), Convert.ToDateTime("02/20/2020 13:20:00"), new Juice("Fruit Punch")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 14:45:00"), Convert.ToDateTime("02/20/2020 15:20:00"), new Juice("Fruit Punch")));
+            so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 16:45:00"), Convert.ToDateTime("02/20/2020 17:20:00"), new Juice("Fruit Punch")));
             equips.Add(so2_blend_system);
 
             Equipment so3_blend_system = new Equipment("SO3 Blend System");
-            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 12:00:00"), new Juice("Rasberry")));
-            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Rasberry")));
-            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Rasberry")));
-            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Rasberry")));
-            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 20:00:00"), new Juice("Rasberry")));
+            so3_blend_system.so = 3;
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 20:40:00"), new Juice("Rinse")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:45:00"), Convert.ToDateTime("02/19/2020 04:00:00"), new Juice("Strawberry")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/19/2020 06:00:00"), new Juice("Strawberry")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/19/2020 08:00:00"), new Juice("Strawberry")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:45:00"), Convert.ToDateTime("02/19/2020 10:00:00"), new Juice("Strawberry")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:00:00"), Convert.ToDateTime("02/19/2020 10:40:00"), new Juice("Rinse")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:40:00"), Convert.ToDateTime("02/19/2020 16:50:00"), new Juice("Blueberry Lemonade")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:40:00"), Convert.ToDateTime("02/19/2020 18:50:00"), new Juice("Blueberry Lemonade")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 18:50:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rinse")));
+            so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 21:55:00"), Convert.ToDateTime("02/19/2020 22:45:00"), new Juice("Orange Juice")));
             equips.Add(so3_blend_system);
 
             Equipment tl_1 = new Equipment("TL 1");
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Grapefruit")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:15:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Grapefruit")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Grapefruit")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 11:00:00"), new Juice("7 Step Hot Clean")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Apricot")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Apricot")));
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Apricot")));
+            tl_1.so = 4;
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 24:45:00"), new Juice("Rinse")));
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 04:45:00"), new Juice("Honey")));
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 06:45:00"), new Juice("Honey")));
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/20/2020 08:45:00"), new Juice("Honey")));
             equips.Add(tl_1);
 
             Equipment tl_2 = new Equipment("TL 2");
-            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
-            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:45:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
-            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:45:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
-            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+            tl_2.so = 4;
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:45:00"), Convert.ToDateTime("02/19/2020 18:55:00"), new Juice("Rinse")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:15:00"), Convert.ToDateTime("02/20/2020 04:15:00"), new Juice("Water")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:15:00"), Convert.ToDateTime("02/20/2020 06:15:00"), new Juice("Water")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:15:00"), Convert.ToDateTime("02/20/2020 07:15:00"), new Juice("Step Hot Clean")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 09:45:00"), Convert.ToDateTime("02/20/2020 11:45:00"), new Juice("Punch")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 11:45:00"), Convert.ToDateTime("02/20/2020 13:45:00"), new Juice("Punch")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 13:45:00"), Convert.ToDateTime("02/20/2020 15:45:00"), new Juice("Punch")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 15:45:00"), Convert.ToDateTime("02/20/2020 17:45:00"), new Juice("Punch")));
+            tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:45:00"), Convert.ToDateTime("02/20/2020 19:45:00"), new Juice("Punch")));
             equips.Add(tl_2);
 
             Equipment tl_3_inline = new Equipment("TL 3 INLINE");
-            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 04:30:00"), new Juice("Orange Juice")));
-            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Orange Juice")));
-            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
+            tl_3_inline.so = 4;
+            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:00:00"), Convert.ToDateTime("02/19/2020 22:25:00"), new Juice("Rinse")));
+            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 18:30:00"), Convert.ToDateTime("02/20/2020 20:30:00"), new Juice("Apple")));
+            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 20:30:00"), Convert.ToDateTime("02/20/2020 20:55:00"), new Juice("Rinse")));
+            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 23:15:00"), Convert.ToDateTime("02/21/2020 01:15:00"), new Juice("Orange Juice")));
+            tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/21/2020 01:15:00"), Convert.ToDateTime("02/21/2020 03:15:00"), new Juice("Orange Juice")));
             equips.Add(tl_3_inline);
 
             Equipment tl_4 = new Equipment("TL 4");
-            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Rasberry")));
-            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Rasberry")));
-            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Rasberry")));
-            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Rasberry")));
-            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Rasberry")));
+            tl_4.so = 4;
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:30:00"), Convert.ToDateTime("02/19/2020 22:45:00"), new Juice("Rinse")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:30:00"), Convert.ToDateTime("02/20/2020 06:30:00"), new Juice("Straw")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:30:00"), Convert.ToDateTime("02/20/2020 08:30:00"), new Juice("Straw")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 08:30:00"), Convert.ToDateTime("02/20/2020 10:30:00"), new Juice("Straw")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 10:30:00"), Convert.ToDateTime("02/20/2020 12:30:00"), new Juice("Straw")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:30:00"), Convert.ToDateTime("02/20/2020 12:45:00"), new Juice("Rinse")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:00:00"), Convert.ToDateTime("02/20/2020 19:00:00"), new Juice("Blue")));
+            tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 19:00:00"), Convert.ToDateTime("02/20/2020 21:00:00"), new Juice("Blue")));
             equips.Add(tl_4);
 
             Equipment aseptic_1 = new Equipment("Aseptic 1");
-            aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Apricot")));
-            aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 21:00:00"), Convert.ToDateTime("02/20/2020 03:00:00"), new Juice("CIP")));
+            aseptic_1.so = 5;
+            aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 21:00:00"), Convert.ToDateTime("02/19/2020 03:00:00"), new Juice("CIP")));
+            aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:45:00"), Convert.ToDateTime("02/20/2020 08:45:00"), new Juice("Honey")));
+            aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:22:00"), Convert.ToDateTime("02/20/2020 18:22:00"), new Juice("CIP")));
             equips.Add(aseptic_1);
 
             Equipment aseptic_2 = new Equipment("Aseptic 2");
-            aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+            aseptic_2.so = 5;
+            aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:45:00"), Convert.ToDateTime("02/19/2020 18:55:00"), new Juice("Rinse")));
+            aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 02:15:00"), Convert.ToDateTime("02/20/2020 06:15:00"), new Juice("Waterelon")));
+            aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:15:00"), Convert.ToDateTime("02/20/2020 09:15:00"), new Juice("Step Hot Clean")));
+            aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 09:45:00"), Convert.ToDateTime("02/20/2020 19:45:00"), new Juice("Fruit Punch")));
             equips.Add(aseptic_2);
 
             Equipment aseptic_3 = new Equipment("Aseptic 3");
-            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Grapefruit")));
-            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 09:25:00"), new Juice("Rinse")));
-            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Lemon Rasberry")));
+            aseptic_3.so = 5;
+            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:30:00"), Convert.ToDateTime("02/19/2020 22:40:00"), new Juice("Rinse")));
+            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:30:00"), Convert.ToDateTime("02/20/2020 12:30:00"), new Juice("Lemon Strawberry")));
+            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 12:30:00"), Convert.ToDateTime("02/20/2020 12:40:00"), new Juice("Rinse")));
+            aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 17:00:00"), Convert.ToDateTime("02/20/2020 21:00:00"), new Juice("Lemon Blueberry")));
             equips.Add(aseptic_3);
 
             Equipment aseptic_7 = new Equipment("Aseptic 7");
-            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Orange Juice")));
-            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
+            aseptic_7.so = 5;
+            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 22:00:00"), Convert.ToDateTime("02/19/2020 22:10:00"), new Juice("CIP")));
+            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 18:30:00"), Convert.ToDateTime("02/20/2020 20:30:00"), new Juice("Apple")));
+            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 20:30:00"), Convert.ToDateTime("02/20/2020 20:40:00"), new Juice("Rinse")));
+            aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 23:15:00"), Convert.ToDateTime("02/21/2020 03:15:00"), new Juice("Orange Juice")));
             equips.Add(aseptic_7);
 
         }
