@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
+using WpfApp1.Classes;
 
 namespace WpfApp1
 {
@@ -46,12 +36,15 @@ namespace WpfApp1
             if (ofd.ShowDialog() == true)
             {
                 Mouse.OverrideCursor = Cursors.Wait;
-                string filename = ofd.FileName;
+                String filename = ofd.FileName;
                 Mouse.OverrideCursor = null;
+
+                Schedule2 s = new Schedule2(filename);
             }
 
             Generate form = new Generate();
             form.Show();
+
         }
 
         private void btn_Export_Click(object sender, RoutedEventArgs e)

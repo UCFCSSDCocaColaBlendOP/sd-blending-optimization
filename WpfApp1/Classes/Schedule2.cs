@@ -17,28 +17,28 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace WpfApp1.Classes
 {
-    class Schedule
+    class Schedule2
     {
-        public List<Equipment> extras;
-        public List<Equipment> blendSystems;
-        public Equipment thawRoom;
-        public List<Equipment> blendtanks;
-        public List<Equipment> transferLines;
+        private List<Equipment> extras;
+        private List<Equipment> blendSystems;
+        private Equipment thawRoom;
+        private List<Equipment> blendtanks;
+        private List<Equipment> transferLines;
 
         // TODO - make sure all global variables are intialized when they have to be.. make it's supposed to be in a function and not the constructor
         // TODO - (time permitting) make variables that are needed private
         // TODO :: function to extrapolate juice schedule from equipment schedules
-        public List<Equipment> machines;
+        private List<Equipment> machines;
         public int numFunctions; // TODO: need to fill this in as soon as possible to use it in the rest of the code (1)
         public int numSOs;
 
-        public List<Juice> finished;
-        public List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
-        public List<Juice> juices_line8;
+        private List<Juice> finished;
+        private List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
+        private List<Juice> juices_line8;
         public DateTime scheduleID;
 
 
-        public Schedule(string filename)
+        public Schedule2(string filename)
         {
             this.scheduleID = DateTime.Now;
 
@@ -50,7 +50,10 @@ namespace WpfApp1.Classes
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
 
-            ProcessCSV(filename);
+            Console.WriteLine("Why is this happeninggg?");
+            ExampleOfSchedule();
+
+            //ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
         }
 
@@ -975,7 +978,7 @@ namespace WpfApp1.Classes
             return start;
         }
 
-        public int GetSOs(Equipment tool, bool[] sosavail)
+        private int GetSOs(Equipment tool, bool[] sosavail)
         {
             int cnt = 0;
 
@@ -1023,18 +1026,19 @@ namespace WpfApp1.Classes
             }
         }
 
-        public void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)
+        private void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)
         {
             // for when you need to mark a mix tank open ended, basically EnterScheduleLine
         }
 
-        public void ReleaseMixTank(Equipment x, DateTime y)
+        private void ReleaseMixTank(Equipment x, DateTime y)
         {
             // the other half of Claim Mix Tank
         }
 
         private void ExampleOfSchedule()
         {
+            Console.WriteLine("Hello");
             List<Equipment> equips = new List<Equipment>();
 
             //SO1
@@ -1079,7 +1083,7 @@ namespace WpfApp1.Classes
             //go through each equipment
             for(int e = 0; e<equips.Count; e++)
             {
-                String equipment_name = equips[e].name;
+                string equipment_name = equips[e].name;
                 List<ScheduleEntry> schedule = equips[e].schedule;
 
                //go through each schedule entry in the equipment's schedule
@@ -1087,7 +1091,7 @@ namespace WpfApp1.Classes
                 {
                     DateTime startTime = schedule[s].start;
                     DateTime endTime = schedule[s].end;
-                    String juice_name = schedule[s].juice.name;
+                    //string juice_name = schedule[s].juice.name;
 
                     //.....
 

@@ -187,7 +187,7 @@
     <Compile Include="Classes\CompareRecipe.cs" />
     <Compile Include="Classes\Equipment.cs" />
     <Compile Include="Classes\Juice.cs" />
-    <Compile Include="Classes\Schedule.cs" />
+    <Compile Include="Classes\Schedule2.cs" />
     <Compile Include="Classes\ScheduleEntry.cs" />
     <Compile Include="Generate.xaml.cs">
       <DependentUpon>Generate.xaml</DependentUpon>
