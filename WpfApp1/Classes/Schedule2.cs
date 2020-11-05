@@ -17,7 +17,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace WpfApp1.Classes
 {
-    class Schedule
+    class Schedule2
     {
         public List<Equipment> extras= new List<Equipment>();
         public List<Equipment> blendSystems= new List<Equipment>();
@@ -38,7 +38,7 @@ namespace WpfApp1.Classes
         public DateTime scheduleID;
 
 
-        public Schedule(string filename)
+        public Schedule2(string filename)
         {
             this.scheduleID = DateTime.Now;
 
