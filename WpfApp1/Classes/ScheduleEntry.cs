@@ -25,7 +25,7 @@ namespace WpfApp1
         //                      3 - done
 
         // for equipment schedules:
-        Juice juice;
+        public Juice juice;
         string cleaning;
 
         // for juice schedule
