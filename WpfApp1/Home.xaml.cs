@@ -32,12 +32,23 @@ namespace WpfApp1
             // Functions to fill each tab's DataGrid            
             fill_SO_Equip(1, cb_SO1_Equip);
             cb_SO1_Equip.SelectedIndex = 0;
-            fill_SO1(1, cb_SO1_Equip.Text);           
+            fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
 
-            //fill_SO2(2);
-            //fill_Shared(3);
-            //fill_TL(4);
-            //fill_Aseptic(5);
+            fill_SO_Equip(2, cb_SO2_Equip);
+            cb_SO2_Equip.SelectedIndex = 0;
+            fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(3, cb_Shared_Equip);
+            cb_Shared_Equip.SelectedIndex = 0;
+            fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(4, cb_TL_Equip);
+            cb_TL_Equip.SelectedIndex = 0;
+            fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(5, cb_Aseptic_Equip);
+            cb_Aseptic_Equip.SelectedIndex = 0;
+            fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
         }
 
         private void btn_Generate_Click(object sender, RoutedEventArgs e)
@@ -48,7 +59,7 @@ namespace WpfApp1
             ofd.CheckFileExists = true;
             ofd.CheckPathExists = true;
             ofd.RestoreDirectory = true;
-            ofd.Filter = "CSV files (*.csv)|*.csv|";
+            ofd.Filter = "CSV files (*.csv)|*.csv";
             ofd.FilterIndex = 2;
 
             if (ofd.ShowDialog() == true)
@@ -98,6 +109,7 @@ namespace WpfApp1
 
                 cb.ItemsSource = dt.DefaultView;
                 cb.DisplayMemberPath = "Equipment";
+                cb.SelectedValuePath = "Equipment";
             }
 
             catch (Exception ex)
@@ -134,7 +146,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_SO2(int so_ID)
+        private void fill_SO2(int so_ID, string equip)
         {
             try
             {
@@ -146,6 +158,7 @@ namespace WpfApp1
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_SO_Data]";
                 cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -161,7 +174,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_Shared(int so_ID)
+        private void fill_Shared(int so_ID, string equip)
         {
             try
             {
@@ -173,6 +186,7 @@ namespace WpfApp1
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_SO_Data]";
                 cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -188,7 +202,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_TL(int so_ID)
+        private void fill_TL(int so_ID, string equip)
         {
             try
             {
@@ -200,6 +214,7 @@ namespace WpfApp1
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_SO_Data]";
                 cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -215,7 +230,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_Aseptic(int so_ID)
+        private void fill_Aseptic(int so_ID, string equip)
         {
             try
             {
@@ -227,6 +242,7 @@ namespace WpfApp1
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_SO_Data]";
                 cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -249,7 +265,27 @@ namespace WpfApp1
 
         private void cb_SO1_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_SO1(1, cb_SO1_Equip.Text);
+            fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
+        }
+
+        private void cb_SO2_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
+        }
+
+        private void cb_Shared_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
+        }
+
+        private void cb_TL_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
+        }
+
+        private void cb_Aseptic_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
         }
     }
 }
