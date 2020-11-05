@@ -74,6 +74,11 @@ namespace WpfApp1
             this.starter = started;
         }
 
+        public Juice(String name)
+        {
+            this.name = name;
+        }
+
         // TODO : add a version of this for starters and also, this needs a closer pass through for correctness
         // called during the second stage of GNS when CSV entries are confirmed
         public void UpdateJuice(int batches, int newLine, int newType, DateTime newFill)
