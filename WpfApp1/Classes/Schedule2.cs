@@ -50,7 +50,7 @@ namespace WpfApp1.Classes
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
 
-            Console.WriteLine("Why is this happeninggg?");
+           
             ExampleOfSchedule();
 
             //ProcessCSV(filename);
@@ -1397,7 +1397,7 @@ namespace WpfApp1.Classes
 
         private void ExampleOfSchedule()
         {
-            
+            String checkname; 
             int i = 1;
             List<Equipment> equips = new List<Equipment>();
 
@@ -1447,11 +1447,12 @@ namespace WpfApp1.Classes
             equips.Add(sucrose_so1);
 
             //go through each equipment
-
+            /*
             for (int e = 0; e < equips.Count; e++)
             {
                 string equipment_name = equips[e].name;
                 List<ScheduleEntry> schedule = equips[e].schedule;
+                int x = equips[e].so; 
 
                 //go through each schedule entry in the equipment's schedule
                 for (int s = 0; s < schedule.Count; s++)
@@ -1459,12 +1460,14 @@ namespace WpfApp1.Classes
                     DateTime startTime = schedule[s].start;
                     DateTime endTime = schedule[s].end;
                     string juice_name = schedule[s].juice.name;
-
-                    insertingEquipSchedule(i, equipment_name, startTime, endTime, juice_name);
+                    
+                    insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
                     //.....
 
                 }
             }
+            */
+           // DateTime x = scheduleID; 
 
             //SO2
             Equipment mix1_so2 = new Equipment("Mix Tank 1");
@@ -1521,7 +1524,7 @@ namespace WpfApp1.Classes
             Equipment rt_tank = new Equipment("RT Tank");
             rt_tank.so = 3;
             equips.Add(rt_tank);
-
+            
             Equipment thaw_room = new Equipment("Thaw Room");
             thaw_room.so = 3;
             thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 10:04:00"), Convert.ToDateTime("02/18/2020 10:29:00"), new Juice("Peach")));
@@ -1580,7 +1583,7 @@ namespace WpfApp1.Classes
             equips.Add(tl_2);
 
             Equipment tl_3_inline = new Equipment("TL 3 INLINE");
-            tl_2.so = 4;
+            tl_3_inline.so = 4;
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 04:30:00"), new Juice("Orange Juice")));
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Orange Juice")));
             tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
@@ -1617,10 +1620,32 @@ namespace WpfApp1.Classes
             aseptic_7.so = 5;
             aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Orange Juice")));
             aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Orange Juice")));
-            equips.Add(aseptic_7);
+            equips.Add(aseptic_7); 
+
+            for (int e = 0; e < equips.Count; e++)
+            {
+                string equipment_name = equips[e].name;
+                List<ScheduleEntry> schedule = equips[e].schedule;
+                int x = equips[e].so;
+
+                //go through each schedule entry in the equipment's schedule
+                for (int s = 0; s < schedule.Count; s++)
+                {
+                    DateTime startTime = schedule[s].start;
+                    DateTime endTime = schedule[s].end;
+                    string juice_name = schedule[s].juice.name;
+                    //checkname = checkProductionSchedule(x, equipment_name, startTime, endTime);
+                    //if (checkname != juice_name)
+                    //{
+                        insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
+                        //.....
+                   // }
+                }
+            }
 
 
         }
+
         public void insertingEquipSchedule(int entryid, String equipname, DateTime start, DateTime end, String juice)
         {
             try
@@ -1650,7 +1675,7 @@ namespace WpfApp1.Classes
             }
         }
         /*
-        public String checkProductionSchedule(String equipname, DateTime start, DateTime end)
+        public String checkProductionSchedule(int so, String equipname, DateTime start, DateTime end)
         {
            
             String name = "0";
@@ -1663,18 +1688,23 @@ namespace WpfApp1.Classes
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[check_ProdSch]";
+                cmd.Parameters.Add("so_id", SqlDbType.BigInt).Value = so;
                 cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value =equipname;
-                cmd.Parameters.Add("start", SqlDbType.VarChar).Value = start;
-                cmd.Parameters.Add("end", SqlDbType.VarChar).Value = end;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
                 //cmd.Parameters.Add("entryid", SqlDbType.VarChar).Value = entry;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-                
-                name = Convert.ToInt32(dt.Rows[0]["juice_id"]);
-            }
+                foreach (DataRow dr in dt.Rows)
+                {
+                    name= dr.Field<String>("Juice");
+                }
+                conn.Close();
+            } 
+           
 
             catch (Exception ex)
             {
@@ -1881,10 +1911,4 @@ namespace WpfApp1.Classes
 
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
-
-
->>>>>>> api2
