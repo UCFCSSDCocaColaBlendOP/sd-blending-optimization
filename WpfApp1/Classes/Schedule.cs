@@ -1033,5 +1033,60 @@ namespace WpfApp1.Classes
             // the other half of Claim Mix Tank
         }
 
+        private void ExampleOfSchedule()
+        {
+            //SO1
+            Equipment mix1_so1 = new Equipment("Mix Tank 1");
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 01:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Grapefruit")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:45:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Grapefruit")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Rinse")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
+
+            //List<ScheduleEntry> a = mix1_so1.schedule;
+            //for(int a = 0; a)
+
+            Equipment mix2_so1 = new Equipment("Mix Tank 2");
+            mix2_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:45:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Grapefruit")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 10:20:00"), new Juice("7 Step Hot Clean")));
+            mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:00:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Apricot")));
+
+            Equipment mix3_so1 = new Equipment("Mix Tank 3");
+            mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:00:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Apricot")));
+
+            Equipment mix4_so1 = new Equipment("Mix Tank 4");
+            mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:00:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Apricot")));
+
+            Equipment water_so1 = new Equipment("Water");
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 13:00:00"), new Juice("Apricot")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 15:00:00"), new Juice("Apricot")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Apricot")));
+            water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+
+            Equipment sucrose_so1 = new Equipment("Sucrose");
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
+            sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+
+
+
+
+
+
+            //SO2
+            Equipment mix1_so2 = new Equipment("Mix Tank 1");
+            Equipment mix2_so2 = new Equipment("Mix Tank 2");
+            Equipment mix3_so2 = new Equipment("Mix Tank 3");
+            Equipment mix4_so2 = new Equipment("Mix Tank 4");
+            Equipment water_so2 = new Equipment("Water");
+            Equipment sucrose_so2 = new Equipment("Sucrose");
+
+
+
+        }
+
     }
 }
