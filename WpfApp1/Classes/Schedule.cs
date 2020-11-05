@@ -1035,6 +1035,8 @@ namespace WpfApp1.Classes
 
         private void ExampleOfSchedule()
         {
+            List<Equipment> equips = new List<Equipment>();
+
             //SO1
             Equipment mix1_so1 = new Equipment("Mix Tank 1");
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 01:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Grapefruit")));
@@ -1043,20 +1045,21 @@ namespace WpfApp1.Classes
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
-
-            //List<ScheduleEntry> a = mix1_so1.schedule;
-            //for(int a = 0; a)
+            equips.Add(mix1_so1);
 
             Equipment mix2_so1 = new Equipment("Mix Tank 2");
             mix2_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:45:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Grapefruit")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 10:20:00"), new Juice("7 Step Hot Clean")));
             mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:00:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Apricot")));
+            equips.Add(mix2_so1);
 
             Equipment mix3_so1 = new Equipment("Mix Tank 3");
             mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:00:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Apricot")));
+            equips.Add(mix3_so1);
 
             Equipment mix4_so1 = new Equipment("Mix Tank 4");
             mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:00:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Apricot")));
+            equips.Add(mix4_so1);
 
             Equipment water_so1 = new Equipment("Water");
             water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
@@ -1065,24 +1068,48 @@ namespace WpfApp1.Classes
             water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
             water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Apricot")));
             water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+            equips.Add(water_so1);
 
             Equipment sucrose_so1 = new Equipment("Sucrose");
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Rasberry")));
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Rasberry")));
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Rasberry")));
+            equips.Add(sucrose_so1);
 
+            //go through each equipment
+            for(int e = 0; e<equips.Count; e++)
+            {
+                String equipment_name = equips[e].name;
+                List<ScheduleEntry> schedule = equips[e].schedule;
 
+               //go through each schedule entry in the equipment's schedule
+               for(int s = 0; s<schedule.Count; s++)
+                {
+                    DateTime startTime = schedule[s].start;
+                    DateTime endTime = schedule[s].end;
+                    String juice_name = schedule[s].juice.name;
 
+                    //.....
+
+                }
+
+            }
 
 
 
             //SO2
             Equipment mix1_so2 = new Equipment("Mix Tank 1");
+            //mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 01:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Grapefruit")));
+
+
+
             Equipment mix2_so2 = new Equipment("Mix Tank 2");
             Equipment mix3_so2 = new Equipment("Mix Tank 3");
             Equipment mix4_so2 = new Equipment("Mix Tank 4");
             Equipment water_so2 = new Equipment("Water");
             Equipment sucrose_so2 = new Equipment("Sucrose");
+
+
 
 
 
