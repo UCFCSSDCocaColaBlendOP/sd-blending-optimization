@@ -37,6 +37,12 @@ namespace WpfApp1.Classes
         private List<Juice> juices_line8;
         public DateTime scheduleID;
 
+        /*
+        public List<int> CIP_ids;
+        public List<DateTime> CIP_datetimes;
+        public int id_cip; 
+        public DateTime cip_timing; 
+        */
 
         public Schedule2(string filename)
         {
@@ -50,10 +56,12 @@ namespace WpfApp1.Classes
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
 
+           // this.CIP_ids = new List<int>();
+           // this.CIP_datetimes = new List<DateTime>();
+
            
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
-
             //ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
         }
@@ -1351,6 +1359,7 @@ namespace WpfApp1.Classes
         private void EnterScheduleLine(Equipment x, DateTime startTime, Juice j, int batch, TimeSpan timeSpan)
         {
             List<ScheduleEntry> schedule = x.schedule;
+            
             if (schedule.Count == 0)
             {
                 schedule.Add(new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
@@ -1368,22 +1377,200 @@ namespace WpfApp1.Classes
                 }
 
                 //Deal with cleaning
-                if (x.name.Equals("Thaw Room")) //TODO! Is that the name given exactly?
+                if (x.type == 8) //might need to change this to 0
                 {
                     schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
                 }
                 else
                 {
-                    //TODO: find cleaning string
-                    //string cleaning = 
+                    //find cleaning string
 
-                    //how long the cleaning will take
-                    //TimeSpan q = 
+                    int flag = 0; 
+                    int juice1 = j.type;
+                    if (index_insert != 0)
+                    {
+                        int juice2 = schedule[index_insert - 1].juice.type;
+                        int cleaningprocess=0;
+                       
+                        int cleaningTimes =0;
+                        String cleaning="";
+                        if (juice1 != juice2)
+                        {
+                            try
+                            {
+                                SqlConnection conn = new SqlConnection();
+                                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                                conn.Open();
 
-                    //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                    //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                                SqlCommand cmd = new SqlCommand();
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.CommandText = "[select_Flavor_Process]";
+                                cmd.Parameters.Add("juice1_type", SqlDbType.BigInt).Value = juice1;
+                                cmd.Parameters.Add("juice2_type", SqlDbType.BigInt).Value = juice2;
+
+                                cmd.Connection = conn;
+
+                                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                                DataTable dt = new DataTable();
+                                da.Fill(dt);
+
+                                cleaningprocess = Convert.ToInt32(dt.Rows[0]["process_id"]);
+                                cleaning = Convert.ToString(dt.Rows[0]["process"]);
+                                
+                                Console.WriteLine(cleaningprocess);
+                                Console.WriteLine(cleaning);
+                                if(cleaningprocess==3|| cleaningprocess==7 || cleaningprocess == 8)
+                                {
+                                    flag = 0; 
+                                }
+                                else
+                                {
+                                    flag = 1; 
+                                }          
+                                conn.Close();      
+                            }
+
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(ex.ToString());
+                            }
+
+                            /*
+                            if (flag == 1)
+                            {
+                                processes= getCleanTypes(cleaningprocess); 
+                                if (processes.Count != 0)
+                                {
+                                    if (x.cleaningProcessEquip == 1)
+                                    {
+                                        for(int z=0; z<processes.Count; z++)
+                                        {
+                                            cleaningTimes=getEquipCleaningTimes(x.e_type,processes[z]);
+                                            if (cleaningTimes != 0)
+                                            {
+
+                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                                schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                                            }
+                                        }
+                                        
+                                    }
+                                    else if (x.cleaningProcessEquip == 2)
+                                    {
+                                        DateTime cip_time; 
+                                        for (int z = 0; z < processes.Count; z++)
+                                        {
+                                            cleaningTimes = getMixTanksCleaningTimes(processes[z]);
+                                            if (cleaningTimes != 0)
+                                            {
+                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                                for (int i=0; i<CIP_ids.Count; i++)
+                                                {
+                                                    if (id_cip == CIP_ids[i])
+                                                    {
+                                                        cip_time = CIP_datetimes[i]; 
+                                                        
+                                                        // do this TimeSpan or dataTime; 
+                                                    }
+                                                    
+                                                }
+                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                            }
+                                        }
+                                       
+                                    }
+                                    else if (x.cleaningProcessEquip == 3)
+                                    {
+                                        for (int z = 0; z < processes.Count; z++)
+                                        {
+                                            cleaningTimes = getATCleaningTimes(processes[z]);
+                                            if (cleaningTimes != 0)
+                                            {
+                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                            }
+                                        }
+                                    }
+                                    else if (x.cleaningProcessEquip == 4)
+                                    {
+                                        for (int z = 0; z < processes.Count; z++)
+                                        {
+                                            cleaningTimes = getTLCleaningTimes(processes[z]);
+                                            if (cleaningTimes != 0)
+                                            {
+                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                            }
+                                        }
+                                    }
+                                }
+                                //how long the cleaning will take
+                                //TimeSpan q = 0; 
+                                //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                            }
+                            */
+                        }
+                    }
+                    schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
                 }
             }
+        }
+        /*
+        private List<int> getCleanTypes(int process_id)
+        {
+            List<int> cleaningProcess = new List<int>(); 
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Cleaning]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process_id;
+                // cmd.Parameters.Add("cleaning_name", SqlDbType.BigInt).Value = cleaning_name;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                foreach (DataRow dr in dt.Rows)
+                {
+                    //this.cleaningProcess = new List<int>();
+                    //this.cleaningTimes = new List<int>();
+                    cleaningProcess.Add(Convert.ToInt32(dr["cleaningType_id"]));                     
+                }
+                conn.Close(); 
+
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            return cleaningProcess; 
+        }
+        */
+        
+        private int getATCleaningTimes(int process)
+        {
+            return 0; 
+        }
+        private int getMixTanksCleaningTimes(int process)
+        {
+            return 0; 
+        }
+        private int getTLCleaningTimes(int process)
+        {
+            return 0; 
+        }
+
+        private int getEquipCleaningTimes(int equipmentType, int process)
+        {
+            return 0; 
         }
 
         private void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)
@@ -1446,29 +1633,6 @@ namespace WpfApp1.Classes
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Lemonade Rasberry")));
             sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Lemonade Rasberry")));
             equips.Add(sucrose_so1);
-
-            //go through each equipment
-            /*
-            for (int e = 0; e < equips.Count; e++)
-            {
-                string equipment_name = equips[e].name;
-                List<ScheduleEntry> schedule = equips[e].schedule;
-                int x = equips[e].so; 
-
-                //go through each schedule entry in the equipment's schedule
-                for (int s = 0; s < schedule.Count; s++)
-                {
-                    DateTime startTime = schedule[s].start;
-                    DateTime endTime = schedule[s].end;
-                    string juice_name = schedule[s].juice.name;
-                    
-                    insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
-                    //.....
-
-                }
-            }
-            */
-           // DateTime x = scheduleID; 
 
             //SO2
             Equipment mix1_so2 = new Equipment("Mix Tank 1");
@@ -1645,7 +1809,7 @@ namespace WpfApp1.Classes
             }
         }
 
-        public void insertingEquipSchedule(int entryid, String equipname, DateTime start, DateTime end, String juice)
+        public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice)
         {
             try
             {
@@ -1656,11 +1820,37 @@ namespace WpfApp1.Classes
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[insert_ProdSch]";
-                cmd.Parameters.Add("entryid", SqlDbType.Int).Value = entryid;
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID; 
+                cmd.Parameters.Add("id_so", SqlDbType.Int).Value = id_so;
                 cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
                 cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
                 cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
                 cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        public void insertingScheduleID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_ScheduleID]";
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
 
                 cmd.Connection = conn;
 
@@ -1891,7 +2081,7 @@ namespace WpfApp1.Classes
 
             Equipment tl_1 = new Equipment("TL 1");
             tl_1.so = 4;
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 24:45:00"), new Juice("Rinse")));
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 23:45:00"), new Juice("Rinse")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 04:45:00"), new Juice("Honest Green Tea Jasmine Honey")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 06:45:00"), new Juice("Honest Green Tea Jasmine Honey")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/20/2020 08:45:00"), new Juice("Honest Green Tea Jasmine Honey")));

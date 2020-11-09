@@ -16,13 +16,15 @@ namespace WpfApp1
         public List<bool> SOs = new List<bool>(); // ordered list, with a boolean value for each SO
         public List<ScheduleEntry> schedule;  // this is a list of schedules
         public int so;
-
+        
         //1 = SO 1
         //2 = SO 2
         //3 = SO 3
         //4 = TL
         //5 = Aseptic
 
+        //public int cleaningProcessEquip;
+        //public int e_type; 
         public Equipment(String name, int type)
         {
             this.name = name;
