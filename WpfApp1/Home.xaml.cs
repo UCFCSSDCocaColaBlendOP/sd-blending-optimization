@@ -31,25 +31,7 @@ namespace WpfApp1
             InitializeComponent();
 
             // Functions to fill each tab's DataGrid            
-            fill_SO_Equip(1, cb_SO1_Equip);
-            cb_SO1_Equip.SelectedIndex = 0;
-            fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
-
-            fill_SO_Equip(2, cb_SO2_Equip);
-            cb_SO2_Equip.SelectedIndex = 0;
-            fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
-
-            fill_SO_Equip(3, cb_Shared_Equip);
-            cb_Shared_Equip.SelectedIndex = 0;
-            fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
-
-            fill_SO_Equip(4, cb_TL_Equip);
-            cb_TL_Equip.SelectedIndex = 0;
-            fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
-
-            fill_SO_Equip(5, cb_Aseptic_Equip);
-            cb_Aseptic_Equip.SelectedIndex = 0;
-            fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
+            refresh();
         }
 
         private void btn_Generate_Click(object sender, RoutedEventArgs e)
@@ -269,27 +251,65 @@ namespace WpfApp1
 
         private void cb_SO1_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
+            if (cb_SO1_Equip.SelectedValue != null)
+                fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
         }
 
         private void cb_SO2_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
+            if (cb_SO2_Equip.SelectedValue != null)
+                fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
         }
 
         private void cb_Shared_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
+            if (cb_Shared_Equip.SelectedValue != null)
+                fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
         }
 
         private void cb_TL_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
+            if (cb_TL_Equip.SelectedValue != null)
+                fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
         }
 
         private void cb_Aseptic_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
+            if (cb_Aseptic_Equip.SelectedValue != null)
+                fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
+        }
+
+        private void btn_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            refresh();
+        }
+
+        private void refresh()
+        {
+            fill_SO_Equip(1, cb_SO1_Equip);
+            cb_SO1_Equip.SelectedIndex = 0;
+            if (cb_SO1_Equip.SelectedValue != null)
+                fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(2, cb_SO2_Equip);
+            cb_SO2_Equip.SelectedIndex = 0;
+            if (cb_SO2_Equip.SelectedValue != null)
+                fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(3, cb_Shared_Equip);
+            cb_Shared_Equip.SelectedIndex = 0;
+            if (cb_Shared_Equip.SelectedValue != null)
+                fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(4, cb_TL_Equip);
+            cb_TL_Equip.SelectedIndex = 0;
+            if (cb_TL_Equip.SelectedValue != null)
+                fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
+
+            fill_SO_Equip(5, cb_Aseptic_Equip);
+            cb_Aseptic_Equip.SelectedIndex = 0;
+            if (cb_Aseptic_Equip.SelectedValue != null)
+                fill_Aseptic(5, cb_Aseptic_Equip.SelectedValue.ToString());
         }
     }
 }

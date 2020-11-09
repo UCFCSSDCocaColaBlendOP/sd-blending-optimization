@@ -52,7 +52,7 @@ namespace WpfApp1.Classes
 
            
             //ExampleOfSchedule();
-            //ExampleOfSchedule2(); 
+            ExampleOfSchedule2(); 
 
             //ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
@@ -1891,7 +1891,7 @@ namespace WpfApp1.Classes
 
             Equipment tl_1 = new Equipment("TL 1");
             tl_1.so = 4;
-            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 24:45:00"), new Juice("Rinse")));
+            tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 20:45:00"), new Juice("Rinse")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 04:45:00"), new Juice("Honest Green Tea Jasmine Honey")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 04:45:00"), Convert.ToDateTime("02/20/2020 06:45:00"), new Juice("Honest Green Tea Jasmine Honey")));
             tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/20/2020 06:45:00"), Convert.ToDateTime("02/20/2020 08:45:00"), new Juice("Honest Green Tea Jasmine Honey")));
