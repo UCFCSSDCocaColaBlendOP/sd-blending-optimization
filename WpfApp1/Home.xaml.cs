@@ -26,6 +26,8 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        Schedule2 sch;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -51,11 +53,11 @@ namespace WpfApp1
                 String filename = ofd.FileName;
                 Mouse.OverrideCursor = null;
 
-                Schedule2 s = new Schedule2(filename);
+                sch = new Schedule2(filename);
             }
 
-            //Generate form = new Generate();
-            //form.Show();
+            Generate form = new Generate(sch);
+            form.Show();
 
         }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApp1.Classes
 {
-    class CompareRecipe
+    public class CompareRecipe
     {
         // TODO - fix the initialization... I don't THINK this is the right way to initialize it and might run into problems with it
         public DateTime startBlending;

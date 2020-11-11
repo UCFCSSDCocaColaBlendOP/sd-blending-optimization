@@ -8,7 +8,7 @@ namespace WpfApp1
 {
 
     // TODO - is this right
-    class ScheduleEntry
+    public class ScheduleEntry
     {
         public DateTime start;
         public DateTime end;

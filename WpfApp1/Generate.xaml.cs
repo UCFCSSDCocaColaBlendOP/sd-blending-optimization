@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
+using WpfApp1.Classes;
 
 namespace WpfApp1
 {
@@ -21,15 +23,58 @@ namespace WpfApp1
     /// </summary>
     public partial class Generate : MetroWindow
     {
-        public Generate()
+        Schedule2 sch;
+
+        public struct JuiceList
+        {
+            public string juice { set; get; }
+            public bool start { set; get; }
+            public DateTime time { set; get; }
+            public bool mixing { set; get; }
+            public int line { set; get; }
+        }
+
+        public Generate(Schedule2 sch)
         {
             InitializeComponent();
+            this.sch = sch;
 
+            List<Juice> juices = sch.get_inProgress();
+
+            DataGridTextColumn colJuice = new DataGridTextColumn();
+            colJuice.Header = "Juices";
+            colJuice.Binding = new Binding("juice");
+            dg_Juices.Columns.Add(colJuice);
+
+            DataGridTextColumn colStart = new DataGridTextColumn();
+            colStart.Header = "Starter";
+            colStart.Binding = new Binding("start");
+            dg_Juices.Columns.Add(colStart);
+
+            DataGridTextColumn colTime = new DataGridTextColumn();
+            colTime.Header = "Time";
+            colTime.Binding = new Binding("time");
+            dg_Juices.Columns.Add(colTime);
+
+            DataGridTextColumn colMixing = new DataGridTextColumn();
+            colMixing.Header = "Mixing";
+            colMixing.Binding = new Binding("mixing");
+            dg_Juices.Columns.Add(colMixing);
+
+            DataGridTextColumn colTL = new DataGridTextColumn();
+            colTL.Header = "Transfer Line";
+            colTL.Binding = new Binding("line");
+            dg_Juices.Columns.Add(colTL);
+
+            foreach (Juice juice in juices)
+            {
+                dg_Juices.Items.Add(new JuiceList { juice = juice.name, start = juice.starter, time = juice.OGFillTime, mixing = juice.mixing, line = juice.line });
+            }
         }
 
         private void tc_Home_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            
         }
 
         private void btn_Cancel_Click(object sender, RoutedEventArgs e)
@@ -69,7 +114,7 @@ namespace WpfApp1
 
         private void cb_State_Copy_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            
         }
 
         private void chck_Enable_Click(object sender, RoutedEventArgs e)
@@ -171,6 +216,82 @@ namespace WpfApp1
         private void btn_RemoveFromThaw_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private string get_Juice_Time(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Time"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private int get_TL(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return 0;
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return Convert.ToInt32(row["Transfer Line"]);
+            }
+
+            catch (Exception ex)
+            { return 0; }
+        }
+
+        private bool get_Starter(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return false;
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return Convert.ToBoolean(row["Starter"]);
+            }
+
+            catch (Exception ex)
+            { return false; }
+        }
+
+        private bool get_Mixing(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return false;
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return Convert.ToBoolean(row["Mixing"]);
+            }
+
+            catch (Exception ex)
+            { return false; }
+        }
+
+        private void dg_Juices_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            chck_Start_Juice.IsChecked = get_Starter(dg_Juices);
+            tb_Juice_Time.Text = get_Juice_Time(dg_Juices);
+            chck_Juice_Mix.IsChecked = get_Mixing(dg_Juices);
+            cb_Transfer_Line.Text = get_TL(dg_Juices).ToString();
         }
     }
 }

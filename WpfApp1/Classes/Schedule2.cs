@@ -17,7 +17,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace WpfApp1.Classes
 {
-    class Schedule2
+    public class Schedule2
     {
         private List<Equipment> extras;
         private List<Equipment> blendSystems;
@@ -33,7 +33,7 @@ namespace WpfApp1.Classes
         public int numSOs;
 
         private List<Juice> finished;
-        private List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
+        public List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
         private List<Juice> juices_line8;
         public DateTime scheduleID;
 
@@ -52,10 +52,15 @@ namespace WpfApp1.Classes
 
            
             //ExampleOfSchedule();
-            ExampleOfSchedule2(); 
+            //ExampleOfSchedule2(); 
 
-            //ProcessCSV(filename);
+            ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
+        }
+
+        public List<Juice> get_inProgress()
+        {
+            return inprogress;
         }
 
         //TODO: if string is empty then we should pop up an ERROR box
@@ -148,7 +153,7 @@ namespace WpfApp1.Classes
                 }
             }
 
-            PullEquipment();
+            //PullEquipment();
             PrintAllJuices();
         }
 
@@ -746,20 +751,20 @@ namespace WpfApp1.Classes
             }
         }
 
-        public DateTime FindTimeInTheThawRoom(Juice x)
+        private DateTime FindTimeInTheThawRoom(Juice x)
         {
             // try to find space in the thaw room schedule near the ideal time
             return new DateTime(0, 0, 0);
         }
 
-        public DateTime FindEntryInThawRoom(Juice x)
+        private DateTime FindEntryInThawRoom(Juice x)
         {
             // first you need to check if the juice already has allocated time on the schedule for the thaw room
             //      if yes start time is when this batch is done with the thaw room
             return new DateTime(0, 0, 0);
         }
 
-        public CompareRecipe PrepRecipe(Juice x, int y)
+        private CompareRecipe PrepRecipe(Juice x, int y)
         {
             CompareRecipe option = new CompareRecipe();
             bool pickedStartTime = false; // has option.startBlending been set
@@ -1000,7 +1005,7 @@ namespace WpfApp1.Classes
             return option;
         }
 
-        public CompareRecipe PrepRecipe(Juice x, int y, int slurrySize)
+        private CompareRecipe PrepRecipe(Juice x, int y, int slurrySize)
         {
             return new CompareRecipe();
         }
@@ -1247,7 +1252,7 @@ namespace WpfApp1.Classes
             }
         }
 
-        public void AcquireTransferLine(Juice x, DateTime y, Equipment tank)
+        private void AcquireTransferLine(Juice x, DateTime y, Equipment tank)
         {
             // go through list of transfer lines and pick the one that's best for x at time y
             // then assign the juice to it
@@ -1284,7 +1289,7 @@ namespace WpfApp1.Classes
             }
         }
 
-        public List<List<Equipment>> SortByOptions(List<int> x)
+        private List<List<Equipment>> SortByOptions(List<int> x)
         {
             // takes the recipe and builds a new recipe sorted by the availability of the equipment
             List<List<Equipment>> options = new List<List<Equipment>>();
@@ -1324,13 +1329,13 @@ namespace WpfApp1.Classes
             return options;
         }
 
-        public int GetOtherFuncs(Equipment x, List<int> recipes)
+        private int GetOtherFuncs(Equipment x, List<int> recipes)
         {
             return 0;
         }
 
         // TODO - fill in function
-        public DateTime GetStart(Equipment tool, TimeSpan length, DateTime ideal)
+        private DateTime GetStart(Equipment tool, TimeSpan length, DateTime ideal)
         {
             DateTime start = new DateTime();
             return start;

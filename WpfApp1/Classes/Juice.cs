@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    class Juice
+    public class Juice
     {
         public bool parsing;
         public bool starter; // check for whereami, askForBatches, no_batches, currentBatch
