@@ -25,11 +25,12 @@ namespace WpfApp1
         //                      3 - done
 
         // for equipment schedules:
-        Juice juice;
-        string cleaning;
+        public Juice juice;
+        public bool cleaning;
+        string cleaningtype;
 
         // for juice schedule
-        Equipment tool;
+        public Equipment tool;
 
         public ScheduleEntry(DateTime start, DateTime end, Juice juice)
         {
@@ -46,7 +47,7 @@ namespace WpfApp1
             this.end = end;
 
             this.state = 1;
-            this.cleaning = cleaning;
+            this.cleaningtype = cleaning;
         }
 
         public ScheduleEntry(DateTime start, DateTime end, Equipment tool, int recipeStage)

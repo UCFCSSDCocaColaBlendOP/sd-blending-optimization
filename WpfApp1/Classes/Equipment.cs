@@ -15,6 +15,7 @@ namespace WpfApp1
         public List<bool> functionalities = new List<bool>(); // ordered list, with a boolean value for each functionality
         public List<bool> SOs = new List<bool>(); // ordered list, with a boolean value for each SO
         public List<ScheduleEntry> schedule = new List<ScheduleEntry>(); // this is a list of schedules
+        public Equipment cipGroup;
 
         public Equipment(String name, int type)
         {

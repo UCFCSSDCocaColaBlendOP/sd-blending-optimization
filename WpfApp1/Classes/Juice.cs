@@ -40,7 +40,7 @@ namespace WpfApp1
         public bool inlineposs; // or of inlineflags
         public int transferTime;
 
-        public List<DateTime> idealTime = new List<DateTime>();
+        public List<DateTime> idealTime;
             /* ideal start time = fill time - (the time it takes to transfer from blend to aseptic + 
 								                postblend time +
 								                the sum of all the blend equipment times in the recipe) */
@@ -96,19 +96,34 @@ namespace WpfApp1
         }
 
         // TODO - fill in function
-        public void RecalculateFillTime()
+        public void RecalculateFillTime(DateTime lastbatchend)
         {
+            // find the ideal times for each recipe
+            for (int i = 0; i < idealTime.Count; i++)
+                idealTime[i] = lastbatchend.Subtract(currentFillTime.Subtract(idealTime[i]));
+
             // find the fill time for the next batch
-            // also find the ideal times for each recipe
+            currentFillTime = lastbatchend;
         }
 
-        // TODO - fill in function
-        public DateTime CanDoInline()
+        public void InitializeIdealTime()
         {
-            return new DateTime(10, 10, 2020); //delete just so no error
-            // checks if a juice can do inline
-            // first and most obviously check if it has inline recipes
-            // check
+            for (int i = 0; i < recipes.Count; i++)
+            {
+                int max = 0;
+                for (int j = 1; j < recipes[i].Count; j++)
+                    if (recipes[i][j] > max)
+                        max = recipes[i][j];
+
+                max += recipePostTimes[i];
+
+                idealTime.Add(currentFillTime.Subtract(new TimeSpan(0, max, 0)));
+            }
+        }
+
+        public void SortSchedule()
+        {
+
         }
     }
 }
