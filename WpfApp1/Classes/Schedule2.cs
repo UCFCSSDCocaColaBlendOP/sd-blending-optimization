@@ -49,9 +49,9 @@ namespace WpfApp1.Classes
             this.finished = new List<Juice>();
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
-
+            this.blendSystems = new List<Equipment>();
+            this.extras = new List<Equipment>(); 
             
-            //PullEquipment();
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
             //ProcessCSV(filename);
@@ -255,7 +255,8 @@ namespace WpfApp1.Classes
                     {
                         temp.SOs.Add(false);
                     }
-                    temp.cleaningProcess = 1; 
+                    temp.cleaningProcess = 1;
+                    temp.e_type = equip_type; 
                     blendSystems.Add(temp);
                 }
                 conn.Close();
@@ -323,6 +324,13 @@ namespace WpfApp1.Classes
             // sets the index the correlates to the functionality and so id true if 
             // equipment has that functionality and so
             getEquipFuncSos();
+            /*
+            Console.WriteLine("blendsystem");
+            for (int i = 0; i < blendSystems.Count; i++)
+            {
+                Console.WriteLine(blendSystems[i].name);
+            }
+            */
         }
 
         //gets the maximum number of functions
@@ -425,7 +433,8 @@ namespace WpfApp1.Classes
                     {
                         temp.SOs.Add(false);
                     }
-                    temp.cleaningProcess =3; 
+                    temp.cleaningProcess =3;
+                    temp.e_type = id_tl; 
                     transferLines.Add(temp);
                 }
                 conn.Close();
@@ -472,6 +481,13 @@ namespace WpfApp1.Classes
                         }
                     }
                 }
+                /*
+                Console.WriteLine("tl");
+                for (int i=0; i<transferLines.Count; i++)
+                {
+                    Console.WriteLine(transferLines[i].name); 
+                }
+                */
 
                 conn.Close();
             }
@@ -506,9 +522,10 @@ namespace WpfApp1.Classes
                 foreach (DataRow dr in dt.Rows)
                 {
                     id_so = Convert.ToInt32(dr["id_SO"]);
-                    name_mt = dr.Field<String>("Mix Tank"); ;
+                    name_mt = dr.Field<String>("Mix Tank");
                     Equipment temp = new Equipment(name_mt, id_so);
-                    temp.cleaningProcess = 2; 
+                    temp.cleaningProcess = 2;
+                    temp.e_type = 1; 
                     blendtanks.Add(temp);
                 }
                 conn.Close();
@@ -518,6 +535,13 @@ namespace WpfApp1.Classes
             {
                 MessageBox.Show(ex.Message);
             }
+            /*
+            Console.WriteLine("blendTanks");
+            for (int i = 0; i < blendtanks.Count; i++)
+            {
+                Console.WriteLine(blendtanks[i].name);
+            }
+            */
         }
         private void getBlendSystem_FuncSos()
         {
@@ -560,6 +584,11 @@ namespace WpfApp1.Classes
                 Equipment blendmachine;
                 for (int i = 0; i < blendSystems.Count; i++)
                 {
+                    if(flag==1 && i==1)
+                    {
+                        i = 0;
+                    }
+
                     flag = 0;
                     int x = 0;
                     String name_func = "";
@@ -580,14 +609,23 @@ namespace WpfApp1.Classes
                     {
                         Equipment temp = new Equipment(name_func, x);
                         temp.SOs = blendSystems[i].SOs;
-                        temp.cleaningProcess = 1; 
+                        temp.cleaningProcess = 1;
                         extras.Add(temp);
                         blendmachine = blendSystems[i];
+
                         blendSystems.Remove(blendmachine);
+                        if (i != 0)
+                        {
+                            i = i - 1;
+                        }
+                       
+                        //blendSystems.RemoveAt(i); 
                     }
 
                 }
+                
                 conn.Close();
+                
             }
 
             catch (Exception ex)
@@ -643,7 +681,8 @@ namespace WpfApp1.Classes
                                         e.SOs.Add(false);
                                     }
                                 }
-                                e.cleaningProcess = 1; 
+                                e.cleaningProcess = 1;
+                                e.e_type = 0; 
                                 extras.Add(e);
                                 count++;
                             }
@@ -679,6 +718,13 @@ namespace WpfApp1.Classes
                     }
                 }
             }
+            /*
+            Console.WriteLine("extras"); 
+            for (int i = 0; i < extras.Count; i++)
+            {
+                Console.WriteLine(extras[i].name);
+            }
+            */
         }
         private void getEquipFuncSos()
         {
@@ -1432,30 +1478,30 @@ namespace WpfApp1.Classes
                             // for mix tanks that the blendtank list, is there a way to 
                             if (flag == 1)
                             {
-
-                                if (x.cleaningProcess == 1)
+                                if (x.e_type != 0)
                                 {
-
-                                    cleaningTimes = getEquipCleaningTimes(x.cleaningProcess, process);
-                                    if (cleaningTimes != 0)
+                                    if (x.cleaningProcess == 1)
                                     {
-                                        TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                        schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                        schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                                        cleaningTimes = getEquipCleaningTimes(x.e_type, process);
+                                        if (cleaningTimes != 0)
+                                        {
+                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                            //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                                        }
                                     }
-                                }
-                                else if (x.cleaningProcess == 2)
-                                {
-
-                                    cleaningTimes = getMixTanksCleaningTimes(x.cleaningProcess, process);
-                                    if (cleaningTimes != 0)
+                                    else if (x.cleaningProcess == 2)
                                     {
-                                        TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                        schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                        cleaningTimes = getMixTanksCleaningTimes(x.e_type, process);
+                                        if (cleaningTimes != 0)
+                                        {
+                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                        }
                                     }
                                     else if (x.cleaningProcess == 3)
                                     {
-                                        cleaningTimes = getTLCleaningTimes(x.cleaningProcess, process);
+                                        cleaningTimes = getTLCleaningTimes(x.e_type, process);
                                         if (cleaningTimes != 0)
                                         {
                                             TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);

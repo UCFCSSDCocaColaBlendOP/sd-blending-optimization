@@ -24,7 +24,7 @@ namespace WpfApp1
         //5 = Aseptic
 
         public int cleaningProcess;
-        //public int e_type; 
+        public int e_type; 
         public Equipment(String name, int type)
         {
             this.name = name;
