@@ -37,13 +37,7 @@ namespace WpfApp1.Classes
         private List<Juice> juices_line8;
         public DateTime scheduleID;
 
-        /*
-        public List<int> CIP_ids;
-        public List<DateTime> CIP_datetimes;
-        public int id_cip; 
-        public DateTime cip_timing; 
-        */
-
+        
         public Schedule2(string filename)
         {
             this.scheduleID = DateTime.Now;
@@ -56,10 +50,8 @@ namespace WpfApp1.Classes
             this.inprogress = new List<Juice>();
             this.juices_line8 = new List<Juice>();
 
-           // this.CIP_ids = new List<int>();
-           // this.CIP_datetimes = new List<DateTime>();
-
-           
+            
+            //PullEquipment();
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
             //ProcessCSV(filename);
@@ -263,6 +255,7 @@ namespace WpfApp1.Classes
                     {
                         temp.SOs.Add(false);
                     }
+                    temp.cleaningProcess = 1; 
                     blendSystems.Add(temp);
                 }
                 conn.Close();
@@ -432,6 +425,7 @@ namespace WpfApp1.Classes
                     {
                         temp.SOs.Add(false);
                     }
+                    temp.cleaningProcess =3; 
                     transferLines.Add(temp);
                 }
                 conn.Close();
@@ -514,7 +508,7 @@ namespace WpfApp1.Classes
                     id_so = Convert.ToInt32(dr["id_SO"]);
                     name_mt = dr.Field<String>("Mix Tank"); ;
                     Equipment temp = new Equipment(name_mt, id_so);
-
+                    temp.cleaningProcess = 2; 
                     blendtanks.Add(temp);
                 }
                 conn.Close();
@@ -586,6 +580,7 @@ namespace WpfApp1.Classes
                     {
                         Equipment temp = new Equipment(name_func, x);
                         temp.SOs = blendSystems[i].SOs;
+                        temp.cleaningProcess = 1; 
                         extras.Add(temp);
                         blendmachine = blendSystems[i];
                         blendSystems.Remove(blendmachine);
@@ -648,6 +643,7 @@ namespace WpfApp1.Classes
                                         e.SOs.Add(false);
                                     }
                                 }
+                                e.cleaningProcess = 1; 
                                 extras.Add(e);
                                 count++;
                             }
@@ -1390,7 +1386,7 @@ namespace WpfApp1.Classes
                     if (index_insert != 0)
                     {
                         int juice2 = schedule[index_insert - 1].juice.type;
-                        int cleaningprocess=0;
+                        int process=0;
                        
                         int cleaningTimes =0;
                         String cleaning="";
@@ -1414,19 +1410,16 @@ namespace WpfApp1.Classes
                                 DataTable dt = new DataTable();
                                 da.Fill(dt);
 
-                                cleaningprocess = Convert.ToInt32(dt.Rows[0]["process_id"]);
+                                process = Convert.ToInt32(dt.Rows[0]["process_id"]);
                                 cleaning = Convert.ToString(dt.Rows[0]["process"]);
                                 
-                                Console.WriteLine(cleaningprocess);
-                                Console.WriteLine(cleaning);
-                                if(cleaningprocess==3|| cleaningprocess==7 || cleaningprocess == 8)
-                                {
-                                    flag = 0; 
-                                }
-                                else
+                                //Console.WriteLine(process);
+                                //Console.WriteLine(cleaning);
+                                if(process!=0)
                                 {
                                     flag = 1; 
-                                }          
+                                }
+                                  
                                 conn.Close();      
                             }
 
@@ -1435,92 +1428,75 @@ namespace WpfApp1.Classes
                                 MessageBox.Show(ex.ToString());
                             }
 
-                            /*
+                            // go to the table and get cleaning time
+                            // for mix tanks that the blendtank list, is there a way to 
                             if (flag == 1)
                             {
-                                processes= getCleanTypes(cleaningprocess); 
-                                if (processes.Count != 0)
-                                {
-                                    if (x.cleaningProcessEquip == 1)
-                                    {
-                                        for(int z=0; z<processes.Count; z++)
-                                        {
-                                            cleaningTimes=getEquipCleaningTimes(x.e_type,processes[z]);
-                                            if (cleaningTimes != 0)
-                                            {
 
-                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                                schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-                                            }
-                                        }
-                                        
-                                    }
-                                    else if (x.cleaningProcessEquip == 2)
+                                if (x.cleaningProcess == 1)
+                                {
+
+                                    cleaningTimes = getEquipCleaningTimes(x.cleaningProcess, process);
+                                    if (cleaningTimes != 0)
                                     {
-                                        DateTime cip_time; 
-                                        for (int z = 0; z < processes.Count; z++)
-                                        {
-                                            cleaningTimes = getMixTanksCleaningTimes(processes[z]);
-                                            if (cleaningTimes != 0)
-                                            {
-                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                                for (int i=0; i<CIP_ids.Count; i++)
-                                                {
-                                                    if (id_cip == CIP_ids[i])
-                                                    {
-                                                        cip_time = CIP_datetimes[i]; 
-                                                        
-                                                        // do this TimeSpan or dataTime; 
-                                                    }
-                                                    
-                                                }
-                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                            }
-                                        }
-                                       
-                                    }
-                                    else if (x.cleaningProcessEquip == 3)
-                                    {
-                                        for (int z = 0; z < processes.Count; z++)
-                                        {
-                                            cleaningTimes = getATCleaningTimes(processes[z]);
-                                            if (cleaningTimes != 0)
-                                            {
-                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                            }
-                                        }
-                                    }
-                                    else if (x.cleaningProcessEquip == 4)
-                                    {
-                                        for (int z = 0; z < processes.Count; z++)
-                                        {
-                                            cleaningTimes = getTLCleaningTimes(processes[z]);
-                                            if (cleaningTimes != 0)
-                                            {
-                                                TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                                schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                            }
-                                        }
+                                        TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                        schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                        schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
                                     }
                                 }
-                                //how long the cleaning will take
-                                //TimeSpan q = 0; 
-                                //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+                                else if (x.cleaningProcess == 2)
+                                {
+
+                                    cleaningTimes = getMixTanksCleaningTimes(x.cleaningProcess, process);
+                                    if (cleaningTimes != 0)
+                                    {
+                                        TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                        schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                    }
+                                    else if (x.cleaningProcess == 3)
+                                    {
+                                        cleaningTimes = getTLCleaningTimes(x.cleaningProcess, process);
+                                        if (cleaningTimes != 0)
+                                        {
+                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                        }
+
+                                    }
+                                    /*
+                                    // Aseptic Tanks
+                                    else if (x.cleaningProcess == 4)
+                                    {
+
+                                        cleaningTimes = getATCleaningTimes(x.cleaningProcess, process);
+                                        if (cleaningTimes != 0)
+                                        {
+                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
+                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                        }
+                                    }
+                                    */
+                                    //how long the cleaning will take
+                                    //TimeSpan q = 0; 
+                                    //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
+                                    //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
+
+                                }
                             }
-                            */
                         }
                     }
                     schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
                 }
             }
         }
+
         /*
-        private List<int> getCleanTypes(int process_id)
+        // get Asceptic Cleaning Times
+        private int getATCleaningTimes(int equipType, int process)
         {
-            List<int> cleaningProcess = new List<int>(); 
+            // get the cleaning time and return
+            //  set public cip
+            int time=0; 
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -1529,48 +1505,125 @@ namespace WpfApp1.Classes
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_Cleaning]";
-                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process_id;
-                // cmd.Parameters.Add("cleaning_name", SqlDbType.BigInt).Value = cleaning_name;
+                cmd.CommandText = "[select_ATCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-                foreach (DataRow dr in dt.Rows)
-                {
-                    //this.cleaningProcess = new List<int>();
-                    //this.cleaningTimes = new List<int>();
-                    cleaningProcess.Add(Convert.ToInt32(dr["cleaningType_id"]));                     
-                }
-                conn.Close(); 
 
+                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
+                conn.Close();
             }
 
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
-            return cleaningProcess; 
+
+            return time; 
+
         }
         */
-        
-        private int getATCleaningTimes(int process)
+        private int getMixTanksCleaningTimes(int equipType, int process)
         {
-            return 0; 
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_MTCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            return time;
         }
-        private int getMixTanksCleaningTimes(int process)
+        private int getTLCleaningTimes(int equipType,int process)
         {
-            return 0; 
-        }
-        private int getTLCleaningTimes(int process)
-        {
-            return 0; 
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_TLCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            return time;
         }
 
-        private int getEquipCleaningTimes(int equipmentType, int process)
+        private int getEquipCleaningTimes(int equipType, int process)
         {
-            return 0; 
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_EquipCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            return time;
         }
 
         private void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)

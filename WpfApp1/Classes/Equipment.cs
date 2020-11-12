@@ -23,7 +23,7 @@ namespace WpfApp1
         //4 = TL
         //5 = Aseptic
 
-        //public int cleaningProcessEquip;
+        public int cleaningProcess;
         //public int e_type; 
         public Equipment(String name, int type)
         {
