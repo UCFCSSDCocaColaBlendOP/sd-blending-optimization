@@ -1585,7 +1585,7 @@ namespace WpfApp1.Classes
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_MTCleaningType]";
+                cmd.CommandText = "[select_MTCleaningTime]";
                 cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
                 cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
                 cmd.Connection = conn;
@@ -1594,14 +1594,14 @@ namespace WpfApp1.Classes
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
 
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
 
             return time;
@@ -1617,7 +1617,7 @@ namespace WpfApp1.Classes
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_TLCleaningType]";
+                cmd.CommandText = "[select_TLCleaningTime]";
                 cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
                 cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
                 cmd.Connection = conn;
@@ -1626,14 +1626,14 @@ namespace WpfApp1.Classes
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
 
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
 
             return time;
@@ -1650,7 +1650,7 @@ namespace WpfApp1.Classes
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_EquipCleaningType]";
+                cmd.CommandText = "[select_EquipCleaningTime]";
                 cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
                 cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
                 cmd.Connection = conn;
@@ -1659,14 +1659,14 @@ namespace WpfApp1.Classes
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                time = Convert.ToInt32(dt.Rows[0]["time"]);
+                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
 
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
 
             return time;
