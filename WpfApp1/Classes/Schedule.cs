@@ -19,429 +19,421 @@ namespace WpfApp1.Classes
 {
     class Schedule
     {
-        public List<Equipment> extras;
-        public List<Equipment> blendSystems;
-        public Equipment thawRoom;
-        public List<Equipment> blendtanks;
-        public List<Equipment> transferLines;
-        public List<Equipment> aseptics;
-
-        public List<Equipment> cipGroups;
-
-        // TODO - make sure all global variables are intialized when they have to be.. make it's supposed to be in a function and not the constructor
-        // TODO - (time permitting) make variables that are needed private
-        // TODO :: function to extrapolate juice schedule from equipment schedules
-        public List<Equipment> machines;
-        public int numFunctions; // TODO: need to fill this in as soon as possible to use it in the rest of the code (1)
-        public int numSOs;
-        
-        public List<Juice> finished;
-        public List<Juice> inprogress;// this is "juices" i went through and changed all references to "juices" even in commented out sections
-        public List<Juice> juices_line8;
         public DateTime scheduleID;
 
+        // all of the equipment in the system
+        public List<Equipment> extras;          // tools with only one functionality
+        public List<Equipment> blendSystems;    // tools with multiple functionalities
+        public Equipment thawRoom;              // the thaw room
+        public List<Equipment> blendtanks;      // blend tanks/ mix tanks
+        public List<Equipment> transferLines;   // transfer lines
+
+        // each piece of equipment belongs to a cip group, only one piece of equipment in the group
+        // can CIP at a time
+        public List<Equipment> cipGroups;
+
+        // info about the system
+        public int numFunctions; 
+        public int numSOs;
+        
+        // lists of juices
+        public List<Juice> finished;
+        public List<Juice> inprogress;
+        
+        /// <summary>
+        /// Creates a Schedule object, initializing lists of equipment
+        /// </summary>
         public Schedule()
         {
-            this.scheduleID = DateTime.Now;
-
-            this.machines = new List<Equipment>();
-            this.blendtanks = new List<Equipment>();
-            this.transferLines = new List<Equipment>();
-            this.numFunctions = 10; // TODO: need to change this (1)
-            this.finished = new List<Juice>();
-            this.inprogress = new List<Juice>();
-            this.juices_line8 = new List<Juice>();
-            //this.juices_line9 = new List<Juice>();
-        }
-
-        //TODO: if string is empty then we should pop up an ERROR box
-        public void ProcessCSV(string fileName)
-        {
-            List<String[]> lines = new List<string[]>();
-            int row_start = 0;
-            bool row_starter = false;
-            int counter = 0;
-
-            if(!fileName.Contains("csv"))
-            {
-                throw new SystemException("The selected file is not a csv.");
-            }
-
-            using(TextFieldParser parser = new TextFieldParser(fileName))
-            {
-                parser.TrimWhiteSpace = true;
-                parser.Delimiters = new string[] { "," };
-                parser.HasFieldsEnclosedInQuotes = true;
-                while (!parser.EndOfData)
-                {
-                    string[] line = parser.ReadFields();
-                    if(line[8].Contains("F_LINE") && !row_starter) 
-                    { 
-                        row_start = counter;
-                        row_starter = true;
-                    }
-                    if(line[0] == "") {break;}
-                    lines.Add(line);
-                    counter++;
-                }
-            }
-
-            Equipment thaw_room = new Equipment("Thaw Room", 0);
-            machines.Add(thaw_room);
-
-
-            int num_rows = lines.Count;
-
+            scheduleID = DateTime.Now;
+            extras = new List<Equipment>();
+            blendSystems = new List<Equipment>();
+            blendtanks = new List<Equipment>();
+            transferLines = new List<Equipment>();
+            cipGroups = new List<Equipment>();
+            finished = new List<Juice>();
             inprogress = new List<Juice>();
-            juices_line8 = new List<Juice>();
+        }
 
-            //Get all the info for each "F_LINE" to make each juice needed
-            for (int i = row_start; i < num_rows; i++)
+        // TODO :: comment, add errors, add calls to functions that add to database
+        public void GenerateNewSchedule()
+        {
+            // sort inprogress juices so inprogress[0] is the juice with the earliest currentFillTime
+            SortByFillTime();
+
+            // while there are juices with batches left
+            while (inprogress.Count != 0)
             {
-                if (lines[i][0] != "*" && lines[i][8].Contains("F_LINE"))
+                // if the current batch is mixing at run time
+                if (inprogress[0].mixing)
                 {
+                    // you only have to acquire a transfer line
+                    // get the time it's gonna start transferring at
+                    DateTime done = AcquireTransferLine(inprogress[0].inline, inprogress[0], inprogress[0].mixingDoneBlending, inprogress[0].BlendTank);
 
-                    string line_name = lines[i][8];
-                    int line = Int32.Parse(line_name.Substring(line_name.Length - 1, 1));
+                    // update the batch counts
+                    inprogress[0].neededBatches--;
+                    if (inprogress[0].inline)
+                        inprogress[0].slurryBatches--;
 
-                    // if it's not line 1,2,3,7, or 8, we can continue to the next line
-                    if (!(line == 1 || line == 2 || line == 3 || line == 7 || line == 8))
+                    // either move juice to finished list or recalculate fill time
+                    if (inprogress[0].neededBatches == 0)
                     {
-                        continue;
+                        finished.Add(inprogress[0]);
+                        inprogress.RemoveAt(0);
                     }
-
-                    string material = lines[i][2];
-
-                    //Processing quantities to check if the juice is at it's ending stage
-                    int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
-                    int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
-                    bool no_batches = quantity_juice <= quantity_juice_2;
-                    
-
-                    string name = lines[i][3];
-
-                    int type = name.Contains("CIP") ? -1: getJuiceType(name);
-                    Console.WriteLine(name + " " + type);
-
-                    string date = lines[i][0];
-                    string seconds = lines[i][1];
-                    string dateTime = date + " " + seconds;
-                    DateTime fillTime = Convert.ToDateTime(dateTime);
-
-                    bool starterFlag = quantity_juice_2 != 0;
-
-                    Juice new_juice = new Juice(0, line, material, name, fillTime,  starterFlag, no_batches);
-
-                    if(line == 8)
+                    else
                     {
-                        juices_line8.Add(new_juice);
-                    } else
-                    {
-                        inprogress.Add(new_juice);
+                        inprogress[0].RecalculateFillTime(done.Add(inprogress[0].transferTime));
+                        SortByFillTime();
                     }
-                    
                 }
-            }
-
-            PrintAllJuices();
-        }
-
-        private int getJuiceType(String material_name)
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_JuiceId]";
-                cmd.Parameters.Add("mat_name", SqlDbType.VarChar).Value = material_name;
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                return Convert.ToInt32(dt.Rows[0]["juice_id"]);
-            }
-
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.ToString());
-            }
-
-            return -1;
-        }
-
-        private void PrintAllJuices()
-        {
-            Console.WriteLine("Juices in lne 1,2,3,7:");
-            for(int i=0; i<inprogress.Count; i++)
-            {
-                Console.WriteLine("Name: " + inprogress[i].name);
-            }
-
-            Console.WriteLine("Juices in line 8:");
-            for (int i = 0; i < juices_line8.Count; i++)
-            {
-                Console.WriteLine("Name: " + inprogress[i].name);
-            }
-
-        }
-
-
-        // TODO - add pull equipment function
-        // extras are pieces of equipment with a single functionality, their type is their functionality
-        // blendtanks are blendtanks their type is their SO
-        void PullEquipment()
-        {
-            // access the database
-            // initialize SOcount and functionCount
-            //methods used to get the maximum sos and functionalities
-
-            numSOs = getNumSOs();
-            numFunctions = getNumFunctions();
-
-            // find the equipment list in the database
-            // iterate through each piece of equipment
-
-            try
-            {
-                int equip_type;
-                String equip_name;
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_Equip_id]";
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                else
                 {
-                    equip_type = Convert.ToInt32(dr["id"]);
-                    equip_name = dr.Field<String>("Equipment");
-                    Equipment temp = new Equipment(equip_name, equip_type);
-
-                    //set all the number of functions in the list
-                    //set all to false
-                    //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
-                    for (int i = 0; i < numFunctions + 1; i++)
+                    if (inprogress[0].inline)
                     {
-                        temp.functionalities.Add(false);
-                    }
+                        // you only need to acquire a transfer line
+                        bool flag = AcquireTransferLine(true, inprogress[0], inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)), inprogress[0].BlendTank);
 
-                    for (int j = 0; j < numSOs + 1; j++)
-                    {
-                        temp.SOs.Add(false);
-                    }
-                    machines.Add(temp);
-                }
-                conn.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-            // sees what functionality and sos each equipment has
-            // sets the index the correlates to the functionality and so id true if 
-            // equipment has that functionality and so
-            getEquipFuncSos();
-        }
-
-        //gets the maximum number of functions
-        private int getNumFunctions()
-        {
-            int numofFunctions = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_FuncMaxId]";
-
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-
-                numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
-                conn.Close();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-
-            return numofFunctions;
-        }
-
-        // get maximum number of sos
-        private int getNumSOs()
-        {
-            int s = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_SOsMaxId]";
-
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-
-                s = Convert.ToInt32(dt.Rows[0]["id"]);
-                conn.Close();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-
-            return s;
-        }
-
-        private void getEquipFuncSos()
-        {
-            try
-            {
-                int id_equip;
-                int id_func;
-                int id_so;
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_FuncSO]";
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
-                {
-                    id_equip = Convert.ToInt32(dr["id_Equip"]);
-                    id_func = Convert.ToInt32(dr["id_Func"]);
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    for (int i = 0; i < machines.Count; i++)
-                    {
-                        if (machines[i].type == id_equip)
+                        if (flag)
                         {
-                            machines[i].functionalities[id_func] = true;
-                            machines[i].SOs[id_so] = true;
+                            // transfer line 3 is really behind and this batch is late
+                        }
+
+                        // update the batch counts
+                        inprogress[0].neededBatches--;
+                        inprogress[0].slurryBatches--;
+
+                        // move to finished list or continue
+                        if (inprogress[0].neededBatches == 0)
+                        {
+                            finished.Add(inprogress[0]);
+                            inprogress.RemoveAt(0);
+
+                            // mark the mix tank ended
+                            ReleaseMixTank(inprogress[0].BlendTank, inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)));
+                        }
+                        else
+                        {
+                            if (inprogress[0].slurryBatches == 0)
+                            {
+                                inprogress[0].inline = false;
+
+                                // mark the mix tank ended
+                                ReleaseMixTank(inprogress[0].BlendTank, inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)));
+                            }
+
+                            inprogress[0].RecalculateFillTime();
+                            SortByFillTime();
+                        }
+                    }
+                    else
+                    {
+                        // it wouldn't make sense to do inline for a single batch
+                        if (inprogress[0].neededBatches != 1 && inprogress[0].inlineposs)
+                        {
+                            // decide if you can do inline: can you finish the slurry for 2,3,4,or5 batches before the fill time?
+
+                            CompareRecipe pick = null;
+                            int pickIdx = -1;
+                            int size = -1;
+                            DateTime goTime = new DateTime(0, 0, 0);
+
+                            // try all the slurry sizes
+                            for (int i = 2; i < 5; i++)
+                            {
+                                bool canDo = false;
+
+                                // try all the inline recipes
+                                for (int j = 0; j < inprogress[0].recipes.Count; j++)
+                                {
+                                    if (!inprogress[0].inlineflags[j])
+                                        continue;
+
+                                    CompareRecipe test = PrepRecipe(inprogress[0], j, i);
+                                    if (!test.conceivable || !test.onTime)
+                                        continue;
+
+                                    canDo = true;
+
+                                    if (pick == null || size < i || DateTime.Compare(goTime, test.startBlending) < 0)
+                                    {
+                                        pick = test;
+                                        pickIdx = j;
+                                        size = i;
+                                        goTime = test.startBlending;
+                                    }
+                                }
+
+                                // if three isn't possible 4 definitely won't be
+                                if (!canDo)
+                                    break;
+                            }
+
+                            // inline was possible and a choice was made
+                            if (pick != null)
+                            {
+                                // assign equipment
+                                int bnum = inprogress[0].totalBatches - inprogress[0].neededBatches;
+
+                                if (pick.makeANewThawEntry)
+                                    EnterScheduleLine(thawRoom, pick.thawTime, inprogress[0], bnum, new TimeSpan(0, inprogress[0].recipes[pickIdx][0] * size, 0));
+
+                                for (int i = 0; i < pick.neededExtras.Count; i++)
+                                {
+                                    TimeSpan ts = new TimeSpan(0, inprogress[0].recipes[pickIdx][pick.neededExtras[i].type] * size, 0);
+                                    EnterScheduleLine(pick.neededExtras[i], pick.extraTimes[i], inprogress[0], bnum, ts);
+                                }
+
+                                if (pick.blendSystem != null)
+                                    EnterScheduleLine(pick.blendSystem, pick.blendTime, inprogress[0], bnum, pick.blendLength);
+
+                                ClaimMixTank(pick.mixTank, pick.mixTime, inprogress[0], bnum, size);
+                                EnterScheduleLine(pick.transferLine, pick.transferTime, inprogress[0], bnum, pick.transferLength);
+
+
+                                // set up for the next batch
+                                inprogress[0].inline = true;
+                                inprogress[0].BlendTank = pick.mixTank;
+                                inprogress[0].slurryBatches = size - 1;
+                                inprogress[0].neededBatches--;
+                                inprogress[0].RecalculateFillTime();
+                                SortByFillTime();
+
+                                continue;
+                            }
+
+                            // otherwise continue on
+                        }
+
+                        // pick a batched recipe
+                        CompareRecipe choice = null;
+                        int choiceIdx = -1;
+                        bool onTime = false;
+                        DateTime start = new DateTime(0, 0, 0);
+
+                        CompareRecipe temp;
+
+                        for (int i = 0; i < inprogress[0].recipes.Count; i++)
+                        {
+                            if (inprogress[0].inlineflags[i])
+                                continue;
+
+                            temp = PrepRecipe(inprogress[0], i);
+
+                            if (!temp.conceivable)
+                                continue;
+
+                            if (choice == null || (!onTime && temp.onTime))
+                            {
+                                choice = temp;
+                                choiceIdx = i;
+                                onTime = temp.onTime;
+                                start = temp.startBlending;
+                            }
+                            else if (onTime && !temp.onTime)
+                            {
+                                continue;
+                            }
+                            else if (!onTime)
+                            {
+                                if (DateTime.Compare(start, temp.startBlending) < 0)
+                                    continue;
+                                else
+                                {
+                                    choice = temp;
+                                    choiceIdx = i;
+                                    onTime = temp.onTime;
+                                    start = temp.startBlending;
+                                }
+                            }
+                            else
+                            {
+                                if (DateTime.Compare(start, temp.startBlending) > 0)
+                                    continue;
+                                else
+                                {
+                                    choice = temp;
+                                    choiceIdx = i;
+                                    onTime = temp.onTime;
+                                    start = temp.startBlending;
+                                }
+                            }
+                        }
+
+                        if (choice == null)
+                        {
+                            // error no recipe works, not even late
+                        }
+                        else if (!onTime)
+                        {
+                            // warning all recipes are late
+                        }
+
+                        // assign equipment
+                        // all of the choices have been made and the times are in choice
+                        int batch = inprogress[0].totalBatches - inprogress[0].neededBatches;
+
+                        if (choice.makeANewThawEntry)
+                            EnterScheduleLine(thawRoom, choice.thawTime, inprogress[0], batch, new TimeSpan(0, inprogress[0].recipes[choiceIdx][0], 0));
+
+                        for (int i = 0; i < choice.neededExtras.Count; i++)
+                        {
+                            TimeSpan ts = new TimeSpan(0, inprogress[0].recipes[choiceIdx][choice.neededExtras[i].type], 0);
+                            EnterScheduleLine(choice.neededExtras[i], choice.extraTimes[i], inprogress[0], batch, ts);
+                        }
+
+                        if (choice.blendSystem != null)
+                            EnterScheduleLine(choice.blendSystem, choice.blendTime, inprogress[0], batch, choice.blendLength);
+
+                        EnterScheduleLine(choice.mixTank, choice.mixTime, inprogress[0], batch, choice.mixLength);
+                        EnterScheduleLine(choice.transferLine, choice.transferTime, inprogress[0], batch, choice.transferLength);
+
+                        // move to finished list if possible
+                        inprogress[0].neededBatches--;
+
+                        if (inprogress[0].neededBatches == 0)
+                        {
+                            finished.Add(inprogress[0]);
+                            inprogress.RemoveAt(0);
+                        }
+                        else
+                        {
+                            inprogress[0].RecalculateFillTime();
+                            SortByFillTime();
                         }
                     }
                 }
-                /*
-                for (int i = 0; i < machines.Count; i++)
-                {
-                    Console.WriteLine(machines[i].type);
-                    for (int j = 0; j < machines[i].functionalities.Count; j++)
-                    {
-                        Console.WriteLine(j);
-                        Console.WriteLine(machines[i].functionalities[j]);
-                    }
-                    Console.WriteLine();
-                }
-                for (int i = 0; i < machines.Count; i++)
-                {
-                    Console.WriteLine(machines[i].type);
-                    for (int j = 0; j < machines[i].SOs.Count; j++)
-                    {
-                        Console.WriteLine(j);
-                        Console.WriteLine(machines[i].SOs[j]);
-                    }
-
-                    Console.WriteLine();
-                }
-                */
-
-                conn.Close();
             }
 
-            catch (Exception ex)
+            GrabJuiceSchedules();
+            // call Alisa's functions to add schedules to database
+        }
+        
+        // grab from alisa
+        public void SortByFillTime()
+        {
+            // sorts inprogress by current filltime
+            // use insertion sort because most calls will be on an already sorted list
+            if (inprogress.Count > 1)
             {
-                MessageBox.Show(ex.Message);
+                Juice tempjuice;
+                for (int i = 1; i < inprogress.Count; i++)
+                {
+                    for (int j = i; j > 0; j--)
+                    {
+                        if (inprogress[j - 1].OGFillTime > inprogress[j].OGFillTime)
+                        {
+                            tempjuice = inprogress[j];
+                            inprogress[j] = inprogress[j - 1];
+                            inprogress[j - 1] = tempjuice;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        // TODO - comments
-        public DateTime FindTimeInTheThawRoom(Juice x, int recipeID)
+        /// <summary>
+        /// will find and schedule time for the juice in the tank to use a transfer line
+        /// if the juice is inline, it will find time on transfer line 3
+        /// otherwise, it will find time first on transfer line 1/2 which is restricted to one SO and then try four then three
+        ///      to find a on time transfer line or the least late option
+        /// </summary>
+        /// <param name="inline"></param>
+        /// <param name="juice"></param>
+        /// <param name="startTrans"></param>
+        /// <param name="tank"></param>
+        /// <returns>transfer time, either ontime or late</returns>
+        public DateTime AcquireTransferLine(bool inline, Juice juice, DateTime startTrans, Equipment tank)
         {
-            // try to find space in the thaw room schedule near the ideal time
-            DateTime ideal = x.idealTime[recipeID].Subtract(new TimeSpan(0, x.recipes[recipeID][0], 0));
-            DateTime limit = ideal.Subtract(new TimeSpan(12, 0, 0));
+            // go through list of transfer lines and pick the one that's best for juice at transferTime
+            // then assign the juice to it
 
-            int firstBefore = -1;
+            int batch = juice.totalBatches - juice.neededBatches;
 
-            if (thawRoom.schedule.Count == 0)
-                return ideal;
-
-            if (DateTime.Compare(thawRoom.schedule[thawRoom.schedule.Count - 1].end, ideal) < 0)
-                return ideal;
-
-            for (int i = thawRoom.schedule.Count - 2; i >= 0; i--)
+            if (inline)
             {
-                if (DateTime.Compare(thawRoom.schedule[i].end, ideal) > 0)
-                    continue;
-                if (firstBefore == -1)
-                    firstBefore = i;
-                if (DateTime.Compare(thawRoom.schedule[i + 1].start, limit) < 0)
-                    break;
-                if (TimeSpan.Compare(thawRoom.schedule[i + 1].start.Subtract(thawRoom.schedule[i].end), new TimeSpan(0, x.recipes[recipeID][0], 0)) >= 0)
-                    return thawRoom.schedule[i].end;
-            }
+                // grab a time on transfer line 3, inline can only use transfer line 3
+                // three will always be either late or ontime
+                DateTime three = FindTimeInTL(transferLines[2], juice.transferTime, startTrans);
 
-            if (DateTime.Compare(thawRoom.schedule[0].start, ideal) > 0)
+                // check if it's late
+                bool late = false;
+                if (DateTime.Compare(three, startTrans) > 0)
+                    late = true;
+
+                // add schedule entry to transfer line 3
+                EnterScheduleLine(transferLines[2], three, juice, batch, juice.transferTime, late);
+
+                return three;
+            }
+            else
             {
-                if (DateTime.Compare(ideal.Add(new TimeSpan(0, x.recipes[recipeID][0], 0)), thawRoom.schedule[0].start) < 0)
-                    return ideal;
-                else if (DateTime.Compare(thawRoom.schedule[0].start.Subtract(new TimeSpan(0, x.recipes[recipeID][0], 0)), limit) >= 0)
-                    return thawRoom.schedule[0].start.Subtract(new TimeSpan(0, x.recipes[recipeID][0], 0));
+                // try transfer line 1 or 2 (depends on tank)
+                DateTime oneTwo = FindTimeInTL(transferLines[tank.type], juice.transferTime, startTrans);
+
+                // tansfer line 1/2 is late
+                if (DateTime.Compare(oneTwo, startTrans) > 0)
+                {
+                    // try transfer line 4
+                    DateTime four = FindTimeInTL(transferLines[3], juice.transferTime, startTrans);
+
+                    // transfer line 4 is ontime
+                    if (DateTime.Compare(four, startTrans) == 0)
+                    {
+                        EnterScheduleLine(transferLines[3], four, juice, batch, juice.transferTime, false);
+                        return four;
+                    }
+                    // transfer line four is less late than 1/2
+                    else if (DateTime.Compare(four, oneTwo) < 0)
+                    {
+                        // try 3
+                        DateTime three = FindTimeInTL(transferLines[2], juice.transferTime, startTrans);
+
+                        // 3 is ontime
+                        if (DateTime.Compare(three, startTrans) == 0)
+                        {
+                            EnterScheduleLine(transferLines[2], three, juice, batch, juice.transferTime, false);
+                            return three;
+                        }
+                        // transfer line 3 is less late than 4
+                        else if (DateTime.Compare(three, four) < 0)
+                        {
+                            EnterScheduleLine(transferLines[2], three, juice, batch, juice.transferTime, true);
+                            return three;
+                        }
+                        // transfer line four is the least late
+                        else
+                        {
+                            EnterScheduleLine(transferLines[3], four, juice, batch, juice.transferTime, true);
+                            return four;
+                        }
+                    }
+                    // transfer line 1/2 is less late than four
+                    else
+                    {
+                        EnterScheduleLine(transferLines[tank.type], oneTwo, juice, batch, juice.transferTime, true);
+                        return oneTwo;
+                    }
+                }
+                // transfer line 1/2 is ontime
+                else
+                {
+                    EnterScheduleLine(transferLines[tank.type], oneTwo, juice, batch, juice.transferTime, false);
+                    return oneTwo;
+                }
             }
+        }
 
-            for (int i = firstBefore + 1; i < thawRoom.schedule.Count - 1; i++)
-                if (TimeSpan.Compare(thawRoom.schedule[i + 1].start.Subtract(thawRoom.schedule[i].end), new TimeSpan(0, x.recipes[recipeID][0], 0)) >= 0)
-                    return thawRoom.schedule[i].end;
-
-            return thawRoom.schedule[thawRoom.schedule.Count - 1].end;
+        // grab from tati's and edit
+        public void EnterScheduleLine(Equipment x, DateTime y, Juice z, int batch, TimeSpan q, bool late)
+        {
+            // mark x's schedule at time y for Juice z, batch for time span q
+            // make sure to also apply the appropriate cleaning in between
         }
 
         // TODO - comments
@@ -607,192 +599,6 @@ namespace WpfApp1.Classes
         }
 
         // TODO - comments
-        public DateTime FindTimeInTL(Equipment y, TimeSpan length, DateTime goal)
-        {
-            // ALISA TODO - cleaning space should hold the cleaning time if it's null, just leave it as new TimeSpan(0,0,0);
-            TimeSpan cleaningspace = new TimeSpan(0, 0, 0);
-
-            TimeSpan totalspace = cleaningspace.Add(length);
-
-            DateTime ideal = goal.Subtract(totalspace);
-
-            int firstBefore = -1;
-
-            // schedule is empty
-            if (y.schedule.Count == 0)
-            {
-                DateTime cleanStart = CIPGapSearch(y.cipGroup, ideal, ideal.Add(cleaningspace), cleaningspace);
-
-                if (DateTime.Compare(cleanStart, new DateTime(0, 0, 0)) == 0)
-                    return CIPGapSearch(y.cipGroup, ideal, ideal, cleaningspace).Add(cleaningspace);
-                else
-                    return cleanStart.Add(cleaningspace);
-            }
-
-            // all of the schedule is early
-            if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, ideal) < 0)
-            {
-                DateTime start = CIPGapSearch(y.cipGroup, ideal, ideal.Add(cleaningspace), cleaningspace);
-
-                if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                    start = CIPGapSearch(y.cipGroup, ideal, ideal, cleaningspace);
-
-                return start.Add(cleaningspace);
-            }
-
-            // working backwards to find an ontime gap
-            for (int i = y.schedule.Count - 2; i >= 0; i--)
-            {
-                if (DateTime.Compare(y.schedule[i].end, ideal) > 0)
-                    continue;
-                if (firstBefore == -1)
-                    firstBefore = i;
-                if (DateTime.Compare(y.schedule[i + 1].start, ideal) < 0)
-                    break;
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            if (DateTime.Compare(y.schedule[0].start, ideal) > 0)
-            {
-                if (DateTime.Compare(ideal.Add(totalspace), y.schedule[0].start) < 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, ideal, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, ideal, y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-                    else
-                        return start.Add(cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            for (int i = firstBefore + 1; i < y.schedule.Count - 1; i++)
-            {
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            DateTime gotime = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, y.schedule[y.schedule.Count - 1].end, cleaningspace);
-            return gotime.Add(cleaningspace);
-        }
-
-        // TODO - comments
-        public DateTime FindTimeInAnExtra(Equipment y, Juice x, int recipeID)
-        {
-            // ALISA TODO - cleaning space should hold the cleaning time if it's null, just leave it as new TimeSpan(0,0,0);
-            TimeSpan cleaningspace = new TimeSpan(0, 0, 0);
-            
-            TimeSpan totalspace = cleaningspace.Add(new TimeSpan(0, x.recipes[recipeID][y.type], 0));
-
-            DateTime ideal = x.idealTime[recipeID].Subtract(totalspace);
-            DateTime limit = ideal.Subtract(new TimeSpan(1, 0, 0));
-
-            int firstBefore = -1;
-
-            // schedule is empty
-            if (y.schedule.Count == 0)
-            {
-                DateTime cleanStart = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                if (DateTime.Compare(cleanStart, new DateTime(0, 0, 0)) == 0)
-                    return CIPGapSearch(y.cipGroup, limit, limit, cleaningspace).Add(cleaningspace);
-                else
-                    return cleanStart.Add(cleaningspace);
-            }
-
-            // all of the schedule is early
-            if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, ideal) < 0)
-            {
-                DateTime start;
-
-                if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, limit) < 0)
-                {
-                    start = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, limit, limit, cleaningspace);
-                }
-                else
-                {
-                    start = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, y.schedule[y.schedule.Count - 1].end, cleaningspace);
-                }
-
-                return start.Add(cleaningspace);
-            }
-
-            // working backwards to find an ontime gap
-            for (int i = y.schedule.Count - 2; i >= 0; i--)
-            {
-                if (DateTime.Compare(y.schedule[i].end, ideal) > 0)
-                    continue;
-                if (firstBefore == -1)
-                    firstBefore = i;
-                if (DateTime.Compare(y.schedule[i + 1].start, limit) < 0)
-                    break;
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0,0,0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            if (DateTime.Compare(y.schedule[0].start, ideal) > 0)
-            {
-                if (DateTime.Compare(ideal.Add(totalspace), y.schedule[0].start) < 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, limit, y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-                    else
-                        return start.Add(cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0,0,0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-                else if (DateTime.Compare(y.schedule[0].start.Subtract(totalspace), limit) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, limit, y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0,0,0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            for (int i = firstBefore + 1; i < y.schedule.Count - 1; i++)
-            {
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0,0,0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            DateTime gotime = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, y.schedule[y.schedule.Count - 1].end, cleaningspace);
-            return gotime.Add(cleaningspace);
-        }
-
-        // TODO - comments
         public ScheduleEntry FindEntryInThawRoom(Juice x, int recipeID)
         {
             // first you need to check if the juice already has allocated time on the schedule for the thaw room
@@ -828,50 +634,6 @@ namespace WpfApp1.Classes
             }
 
             return null;
-        }
-
-        // TODO - comments
-        public bool FindTimeInMixTank(Equipment y, TimeSpan length, DateTime goal)
-        {
-            // ALISA TODO - cleaning space should hold the cleaning time if it's null, just leave it as new TimeSpan(0,0,0);
-            TimeSpan cleaningspace = new TimeSpan(0, 0, 0);
-
-            TimeSpan totalspace = cleaningspace.Add(length);
-
-            DateTime ideal = goal.Subtract(totalspace);
-
-            int firstBefore = -1;
-
-            // schedule is empty
-            if (y.schedule.Count == 0)
-                return CIPGapSearchMixTank(y.cipGroup, ideal.Subtract(cleaningspace), cleaningspace);
-
-            // all of the schedule is early
-            if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, ideal) < 0)
-                return CIPGapSearchMixTank(y.cipGroup, ideal, cleaningspace);
-
-            // working backwards to find an ontime gap
-            for (int i = y.schedule.Count - 2; i >= 0; i--)
-            {
-                if (DateTime.Compare(y.schedule[i].end, ideal) > 0)
-                    continue;
-                if (firstBefore == -1)
-                    firstBefore = i;
-                if (DateTime.Compare(y.schedule[i + 1].start, ideal) < 0)
-                    break;
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return true;
-                }
-            }
-
-            if (DateTime.Compare(ideal.Add(totalspace), y.schedule[0].start) < 0)
-                return CIPGapSearchMixTank(y.cipGroup, ideal, cleaningspace);
-
-            return false;
         }
 
         // TODO - comments
@@ -1783,367 +1545,6 @@ namespace WpfApp1.Classes
             return option;
         }
 
-        // TODO :: comment, add errors, add calls to functions that add to database
-        public void GenerateNewSchedule()
-        {
-            SortByFillTime();
-
-            while (inprogress.Count != 0)
-            {
-                if (inprogress[0].mixing)
-                {
-                    // you only have to acquire a transfer line
-                    bool flag = AcquireTransferLine(inprogress[0].inline, inprogress[0], inprogress[0].readytotrans, inprogress[0].BlendTank);
-
-                    if (flag)
-                    {
-                        // for whatever reason this batch is late because of the transfer line
-                    }
-
-                    // update the batch counts
-                    inprogress[0].neededBatches--;
-                    if (inprogress[0].inline)
-                        inprogress[0].slurryBatches--;
-
-                    // either move juice to finished list or recalculate fill time
-                    if (inprogress[0].neededBatches == 0)
-                    {
-                        finished.Add(inprogress[0]);
-                        inprogress.RemoveAt(0);
-                    }
-                    else
-                    {
-                        inprogress[0].RecalculateFillTime();
-                        SortByFillTime();
-                    }
-                }
-                else
-                {
-                    if (inprogress[0].inline)
-                    {
-                        // you only need to acquire a transfer line
-                        bool flag = AcquireTransferLine(true, inprogress[0], inprogress[0].currentFillTime.Subtract(new TimeSpan(0,inprogress[0].transferTime,0)), inprogress[0].BlendTank);
-
-                        if (flag)
-                        {
-                            // transfer line 3 is really behind and this batch is late
-                        }
-
-                        // update the batch counts
-                        inprogress[0].neededBatches--;
-                        inprogress[0].slurryBatches--;
-
-                        // move to finished list or continue
-                        if (inprogress[0].neededBatches == 0)
-                        {
-                            finished.Add(inprogress[0]);
-                            inprogress.RemoveAt(0);
-
-                            // mark the mix tank ended
-                            ReleaseMixTank(inprogress[0].BlendTank, inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)));
-                        }
-                        else
-                        {
-                            if (inprogress[0].slurryBatches == 0)
-                            {
-                                inprogress[0].inline = false;
-                                
-                                // mark the mix tank ended
-                                ReleaseMixTank(inprogress[0].BlendTank, inprogress[0].currentFillTime.Subtract(new TimeSpan(0, inprogress[0].transferTime, 0)));
-                            }
-
-                            inprogress[0].RecalculateFillTime();
-                            SortByFillTime();
-                        }
-                    }
-                    else
-                    {
-                        // it wouldn't make sense to do inline for a single batch
-                        if (inprogress[0].neededBatches != 1 && inprogress[0].inlineposs)
-                        {
-                            // decide if you can do inline: can you finish the slurry for 2,3,4,or5 batches before the fill time?
-                            
-                            CompareRecipe pick = null;
-                            int pickIdx = -1;
-                            int size = -1;
-                            DateTime goTime = new DateTime(0, 0, 0);
-
-                            // try all the slurry sizes
-                            for (int i = 2; i < 5; i++)
-                            {
-                                bool canDo = false;
-
-                                // try all the inline recipes
-                                for (int j = 0; j < inprogress[0].recipes.Count; j++)
-                                {
-                                    if (!inprogress[0].inlineflags[j])
-                                        continue;
-
-                                    CompareRecipe test = PrepRecipe(inprogress[0], j, i);
-                                    if (!test.conceivable || !test.onTime)
-                                        continue;
-
-                                    canDo = true;
-
-                                    if (pick == null || size < i || DateTime.Compare(goTime, test.startBlending) < 0)
-                                    {
-                                        pick = test;
-                                        pickIdx = j;
-                                        size = i;
-                                        goTime = test.startBlending;
-                                    }
-                                }
-
-                                // if three isn't possible 4 definitely won't be
-                                if (!canDo)
-                                    break;
-                            }
-
-                            // inline was possible and a choice was made
-                            if (pick != null)
-                            {
-                                // assign equipment
-                                int bnum = inprogress[0].totalBatches - inprogress[0].neededBatches;
-
-                                if (pick.makeANewThawEntry)
-                                    EnterScheduleLine(thawRoom, pick.thawTime, inprogress[0], bnum, new TimeSpan(0, inprogress[0].recipes[pickIdx][0] * size, 0));
-
-                                for (int i = 0; i < pick.neededExtras.Count; i++)
-                                {
-                                    TimeSpan ts = new TimeSpan(0, inprogress[0].recipes[pickIdx][pick.neededExtras[i].type] * size, 0);
-                                    EnterScheduleLine(pick.neededExtras[i], pick.extraTimes[i], inprogress[0], bnum, ts);
-                                }
-
-                                if (pick.blendSystem != null)
-                                    EnterScheduleLine(pick.blendSystem, pick.blendTime, inprogress[0], bnum, pick.blendLength);
-
-                                ClaimMixTank(pick.mixTank, pick.mixTime, inprogress[0], bnum, size);
-                                EnterScheduleLine(pick.transferLine, pick.transferTime, inprogress[0], bnum, pick.transferLength);
-
-
-                                // set up for the next batch
-                                inprogress[0].inline = true;
-                                inprogress[0].BlendTank = pick.mixTank;
-                                inprogress[0].slurryBatches = size - 1;
-                                inprogress[0].neededBatches--;
-                                inprogress[0].RecalculateFillTime();
-                                SortByFillTime();
-
-                                continue;
-                            }
-
-                            // otherwise continue on
-                        }
-
-                        // pick a batched recipe
-                        CompareRecipe choice = null;
-                        int choiceIdx = -1;
-                        bool onTime = false;
-                        DateTime start = new DateTime(0, 0, 0);
-
-                        CompareRecipe temp;
-
-                        for (int i = 0; i < inprogress[0].recipes.Count; i++)
-                        {
-                            if (inprogress[0].inlineflags[i])
-                                continue;
-
-                            temp = PrepRecipe(inprogress[0], i);
-
-                            if (!temp.conceivable)
-                                continue;
-
-                            if (choice == null || (!onTime && temp.onTime))
-                            {
-                                choice = temp;
-                                choiceIdx = i;
-                                onTime = temp.onTime;
-                                start = temp.startBlending;
-                            }
-                            else if (onTime && !temp.onTime)
-                            {
-                                continue;
-                            }
-                            else if (!onTime)
-                            {
-                                if (DateTime.Compare(start, temp.startBlending) < 0)
-                                    continue;
-                                else
-                                {
-                                    choice = temp;
-                                    choiceIdx = i;
-                                    onTime = temp.onTime;
-                                    start = temp.startBlending;
-                                }
-                            }
-                            else
-                            {
-                                if (DateTime.Compare(start, temp.startBlending) > 0)
-                                    continue;
-                                else
-                                {
-                                    choice = temp;
-                                    choiceIdx = i;
-                                    onTime = temp.onTime;
-                                    start = temp.startBlending;
-                                }
-                            }
-                        }
-
-                        if (choice == null)
-                        {
-                            // error no recipe works, not even late
-                        }
-                        else if (!onTime)
-                        {
-                            // warning all recipes are late
-                        }
-
-                        // assign equipment
-                        // all of the choices have been made and the times are in choice
-                        int batch = inprogress[0].totalBatches - inprogress[0].neededBatches;
-
-                        if (choice.makeANewThawEntry)
-                            EnterScheduleLine(thawRoom, choice.thawTime, inprogress[0], batch, new TimeSpan(0, inprogress[0].recipes[choiceIdx][0], 0));
-
-                        for (int i = 0; i < choice.neededExtras.Count; i++)
-                        {
-                            TimeSpan ts = new TimeSpan(0, inprogress[0].recipes[choiceIdx][choice.neededExtras[i].type], 0);
-                            EnterScheduleLine(choice.neededExtras[i], choice.extraTimes[i], inprogress[0], batch, ts);
-                        }
-
-                        if (choice.blendSystem != null)
-                            EnterScheduleLine(choice.blendSystem, choice.blendTime, inprogress[0], batch, choice.blendLength);
-
-                        EnterScheduleLine(choice.mixTank, choice.mixTime, inprogress[0], batch, choice.mixLength);
-                        EnterScheduleLine(choice.transferLine, choice.transferTime, inprogress[0], batch, choice.transferLength);
-
-                        // move to finished list if possible
-                        inprogress[0].neededBatches--;
-
-                        if (inprogress[0].neededBatches == 0)
-                        {
-                            finished.Add(inprogress[0]);
-                            inprogress.RemoveAt(0);
-                        }
-                        else
-                        {
-                            inprogress[0].RecalculateFillTime();
-                            SortByFillTime();
-                        }
-                    }
-                }
-            }
-
-            GrabJuiceSchedules();
-            // call Alisa's functions to add schedules to database
-        }
-
-        // will find and schedule time for the juice x in the tank to use a transfer line
-        // if the juice is inline, it will find time on transfer line 3, returning true for ontime and false for late
-        // otherwise, it will find time first on transfer line 1/2 which is restricted to one SO and then try four then three
-        //      to find a on time transfer line or the least late option. returns true for ontime and false for late
-        public bool AcquireTransferLine(bool inline, Juice x, DateTime y, Equipment tank)
-        {
-            // go through list of transfer lines and pick the one that's best for x at time y
-            // then assign the juice to it
-
-            if (inline)
-            {
-                // grab a time on transfer line 3, inline can only use transfer line 3
-                DateTime when = FindTimeInTL(transferLines[2], new TimeSpan(0, x.transferTime, 0), y);
-
-                EnterScheduleLine(transferLines[2], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                
-                if (DateTime.Compare(when, y) > 0)
-                    return false;
-                return true;
-            }
-            else
-            {
-                // try transfer line 1 or 2 (depends on tank
-                DateTime when = FindTimeInTL(transferLines[tank.type], new TimeSpan(0, x.transferTime, 0), y);
-
-                // tansfer line 1/2 is late
-                if (DateTime.Compare(when, y) > 0)
-                {
-                    // try transfer line 4
-                    DateTime when2 = FindTimeInTL(transferLines[3], new TimeSpan(0, x.transferTime, 0), y);
-
-                    // transfer line 4 is ontime
-                    if (DateTime.Compare(when2, y) == 0)
-                    {
-                        EnterScheduleLine(transferLines[3], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                        return true;
-                    }
-                    // transfer line four is less late than 1/2
-                    else if (DateTime.Compare(when2, when) < 0)
-                    {
-                        // try 3
-                        DateTime when3 = FindTimeInTL(transferLines[2], new TimeSpan(0, x.transferTime, 0), y);
-
-                        // 3 is ontime
-                        if (DateTime.Compare(when3, y) == 0)
-                        {
-                            EnterScheduleLine(transferLines[2], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                            return true;
-                        }
-                        // transfer line 3 is less late than 4
-                        else if (DateTime.Compare(when3, when2) < 0)
-                        {
-                            EnterScheduleLine(transferLines[2], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                            return false;
-                        }
-                        // transfer line four is the least late
-                        else
-                        {
-                            EnterScheduleLine(transferLines[3], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                            return false;
-                        }
-                    }
-                    // transfer line 1/2 is less late than four
-                    else
-                    {
-                        EnterScheduleLine(transferLines[tank.type], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                        return false;
-                    }
-                }
-                // transfer line 1/2 is ontime
-                else
-                {
-                    EnterScheduleLine(transferLines[tank.type], when, x, x.totalBatches - x.neededBatches, new TimeSpan(0, x.transferTime, 0));
-                    return true;
-                }
-            }
-        }
-
-        // grab from alisa
-        public void SortByFillTime()
-        {
-            // sorts inprogress by current filltime
-            // use insertion sort because most calls will be on an already sorted list
-            if (inprogress.Count > 1)
-            {
-                Juice tempjuice;
-                for (int i = 1; i < inprogress.Count; i++)
-                {
-                    for (int j = i; j > 0; j--)
-                    {
-                        if (inprogress[j - 1].OGFillTime > inprogress[j].OGFillTime)
-                        {
-                            tempjuice = inprogress[j];
-                            inprogress[j] = inprogress[j - 1];
-                            inprogress[j - 1] = tempjuice;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
         // takes a recipe and a tool and returns the number of functionalities the tool supports,
         // which the recipe doesn't need
         public int GetOtherFuncs(Equipment x, List<int> recipe)
@@ -2157,134 +1558,6 @@ namespace WpfApp1.Classes
             return cnt;
         }
 
-        // TODO - comment
-        public DateTime GetStart(Equipment y, TimeSpan length, DateTime justForBlending)
-        {
-            // ALISA TODO - cleaning space should hold the cleaning time if it's null, just leave it as new TimeSpan(0,0,0);
-            TimeSpan cleaningspace = new TimeSpan(0, 0, 0);
-
-            TimeSpan totalspace = cleaningspace.Add(length);
-
-            DateTime ideal = justForBlending.Subtract(totalspace);
-            DateTime limit = ideal.Subtract(new TimeSpan(0, 30, 0));
-            DateTime lateLimit = ideal.Add(new TimeSpan(0, 30, 0));
-
-            int firstBefore = -1;
-
-            // schedule is empty
-            if (y.schedule.Count == 0)
-            {
-                DateTime cleanStart = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                if (DateTime.Compare(cleanStart, new DateTime(0, 0, 0)) == 0)
-                {
-                    cleanStart = CIPGapSearch(y.cipGroup, limit, lateLimit, cleaningspace);
-                    if (DateTime.Compare(cleanStart, new DateTime(0, 0, 0)) == 0)
-                        return cleanStart;
-                    else
-                        return cleanStart.Add(cleaningspace);
-                }
-                else
-                    return cleanStart.Add(cleaningspace);
-            }
-
-            // all of the schedule is early
-            if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, ideal) < 0)
-            {
-                DateTime start;
-
-                if (DateTime.Compare(y.schedule[y.schedule.Count - 1].end, limit) < 0)
-                {
-                    start = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, limit, lateLimit, cleaningspace);
-                }
-                else
-                {
-                    start = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                        start = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, lateLimit, cleaningspace);
-                }
-
-                if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                    return start;
-                else
-                    return start.Add(cleaningspace);
-            }
-
-            // working backwards to find an ontime gap
-            for (int i = y.schedule.Count - 2; i >= 0; i--)
-            {
-                if (DateTime.Compare(y.schedule[i].end, ideal) > 0)
-                    continue;
-                if (firstBefore == -1)
-                    firstBefore = i;
-                if (DateTime.Compare(y.schedule[i + 1].start, limit) < 0)
-                    break;
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            // look at the time before the schedule
-            if (DateTime.Compare(y.schedule[0].start, ideal) > 0)
-            {
-                // if the schedule is completely after the time we want
-                if (DateTime.Compare(ideal.Add(totalspace), y.schedule[0].start) < 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, limit, ideal.Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) == 0)
-                    {
-                        if (DateTime.Compare(y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), lateLimit) < 0)
-                            start = CIPGapSearch(y.cipGroup, limit, y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-                        else
-                            start = CIPGapSearch(y.cipGroup, limit, lateLimit, cleaningspace);
-                    }
-                    else
-                        return start.Add(cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-                // as long as the time we want is after limit
-                else if (DateTime.Compare(y.schedule[0].start.Subtract(totalspace), limit) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, limit, y.schedule[0].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            // working forwards to find a late gap
-            for (int i = firstBefore + 1; i < y.schedule.Count - 1; i++)
-            {
-                if (DateTime.Compare(y.schedule[i].end, lateLimit) > 0)
-                    return new DateTime(0, 0, 0);
-                if (TimeSpan.Compare(y.schedule[i + 1].start.Subtract(y.schedule[i].end), totalspace) >= 0)
-                {
-                    DateTime start = CIPGapSearch(y.cipGroup, y.schedule[i].end, y.schedule[i + 1].start.Subtract(totalspace).Add(cleaningspace), cleaningspace);
-
-                    if (DateTime.Compare(start, new DateTime(0, 0, 0)) != 0)
-                        return start.Add(cleaningspace);
-                }
-            }
-
-            DateTime gotime = CIPGapSearch(y.cipGroup, y.schedule[y.schedule.Count - 1].end, y.schedule[y.schedule.Count - 1].end, cleaningspace);
-
-            if (DateTime.Compare(gotime.Add(cleaningspace), lateLimit) > 0)
-                return new DateTime(0, 0, 0);
-
-            return gotime.Add(cleaningspace);
-        }
-        
         // takes a list of SOs still available returns the number of those SOs that are also
         // available to the tool
         public int GetSOs(Equipment tool, bool[] sosavail)
@@ -2298,13 +1571,7 @@ namespace WpfApp1.Classes
             return cnt;
         }
 
-        // grab from tati's and edit
-        public void EnterScheduleLine(Equipment x, DateTime y, Juice z, int batch, TimeSpan q)
-        {
-            // mark x's schedule at time y for Juice z, batch for time span q
-            // make sure to also apply the appropriate cleaning in between
-        }
-
+        
         // TODO :: 3
         public void ClaimMixTank(Equipment x, DateTime y, Juice z, int batch, int slurrySize)
         {

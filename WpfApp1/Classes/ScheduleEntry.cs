@@ -6,55 +6,73 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-
-    // TODO - is this right
     class ScheduleEntry
     {
+        public bool late;
+
         public DateTime start;
         public DateTime end;
-        public int state;
-        // for equipment, state =
-        //                      0 - clean, waiting
-        //                      1 - cleaning
-        //                      2 - juice active
-        //                      3 - out
-        // for juice, state =
-        //                      0 - not started yet
-        //                      1 - in blend tank only
-        //                      2 - using other equipment
-        //                      3 - done
 
         // for equipment schedules:
         public Juice juice;
         public bool cleaning;
-        string cleaningtype;
+        public string cleaningdescription;
 
         // for juice schedule
         public Equipment tool;
 
-        public ScheduleEntry(DateTime start, DateTime end, Juice juice)
+        /// <summary>
+        /// Creates a juice schedule entry for an equipment schedule
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="juice"></param>
+        /// <param name="late"></param>
+        public ScheduleEntry(DateTime start, DateTime end, Juice juice, bool late)
         {
             this.start = start;
             this.end = end;
+            this.juice = juice;
+            this.late = late;
+        }
 
-            this.state = 2;
+        /// <summary>
+        /// Creates a schedule entry for a mix tank holding an inline slurry
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="juice"></param>
+        public ScheduleEntry(DateTime start, Juice juice)
+        {
+            this.start = start;
             this.juice = juice;
         }
 
+        /// <summary>
+        /// Creates a cleaning schedule entry for an equipment schedule
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="cleaning"></param>
         public ScheduleEntry(DateTime start, DateTime end, string cleaning)
         {
             this.start = start;
             this.end = end;
-
-            this.state = 1;
-            this.cleaningtype = cleaning;
+            this.cleaningdescription = cleaning;
+            this.cleaning = true;
         }
 
-        public ScheduleEntry(DateTime start, DateTime end, Equipment tool, int recipeStage)
+        /// <summary>
+        /// Creates a schedule entry for a juice schedule
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="tool"></param>
+        /// <param name="recipeStage"></param>
+        public ScheduleEntry(DateTime start, DateTime end, Equipment tool)
         {
             this.start = start;
             this.end = end;
-            // come back
+            this.tool = tool;
         }
     }
 }
