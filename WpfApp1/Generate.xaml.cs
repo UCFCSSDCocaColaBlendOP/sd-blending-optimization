@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,6 +71,66 @@ namespace WpfApp1
             foreach (Juice juice in juices)
             {
                 dg_Juices.Items.Add(new JuiceList { juice = juice.name, start = juice.starter, time = juice.OGFillTime, mixing = juice.mixing, line = juice.line });
+            }
+
+            fill_Juice_Dropdown(cb_Juice_Type);
+            fill_BT_Dropdown(cb_Blend_Tank_Fill);
+            fill_BT_Dropdown(cb_Blend_Tank_Mix);
+        }
+
+        private void fill_BT_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_BlendTanks]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Mix Tank";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Juice_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Juice_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Juice";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -166,7 +228,6 @@ namespace WpfApp1
             if (chck_Juice_Mix.IsChecked == true)
             {
                 chck_Inline_Mix.IsEnabled = true;
-                cb_Equipment_Mix.IsEnabled = true;
                 cb_Blend_Tank_Mix.IsEnabled = true;
                 tb_Equip_Duration.IsEnabled = true;
             }
@@ -176,7 +237,6 @@ namespace WpfApp1
                 chck_Inline_Mix.IsChecked = false;
                 tb_Batches_Mix.IsEnabled = false;
                 chck_Inline_Mix.IsEnabled = false;
-                cb_Equipment_Mix.IsEnabled = false;
                 cb_Blend_Tank_Mix.IsEnabled = false;
                 tb_Equip_Duration.IsEnabled = false;
             }
@@ -218,6 +278,50 @@ namespace WpfApp1
 
         }
 
+        private string get_Juice_Name(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                JuiceList row = (JuiceList)dg.SelectedItems[0];
+                return row.juice.ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private void get_Juice_Type(string pseudo)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Pseudo_Juice]";
+                cmd.Parameters.Add("pseudo", SqlDbType.VarChar).Value = pseudo;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Juice_Type.SelectedValue = Convert.ToInt32(dt.Rows[0]["Juice"]);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private string get_Juice_Time(DataGrid dg)
         {
             try
@@ -227,8 +331,8 @@ namespace WpfApp1
                     return "";
                 }
 
-                DataRowView row = (DataRowView)dg.SelectedItems[0];
-                return row["Time"].ToString();
+                JuiceList row = (JuiceList)dg.SelectedItems[0];
+                return row.time.ToString();
             }
 
             catch (Exception ex)
@@ -244,8 +348,8 @@ namespace WpfApp1
                     return 0;
                 }
 
-                DataRowView row = (DataRowView)dg.SelectedItems[0];
-                return Convert.ToInt32(row["Transfer Line"]);
+                JuiceList row = (JuiceList)dg.SelectedItems[0];
+                return Convert.ToInt32(row.line);
             }
 
             catch (Exception ex)
@@ -261,8 +365,8 @@ namespace WpfApp1
                     return false;
                 }
 
-                DataRowView row = (DataRowView)dg.SelectedItems[0];
-                return Convert.ToBoolean(row["Starter"]);
+                JuiceList row = (JuiceList)dg.SelectedItems[0];
+                return Convert.ToBoolean(row.start);
             }
 
             catch (Exception ex)
@@ -278,8 +382,8 @@ namespace WpfApp1
                     return false;
                 }
 
-                DataRowView row = (DataRowView)dg.SelectedItems[0];
-                return Convert.ToBoolean(row["Mixing"]);
+                JuiceList row = (JuiceList)dg.SelectedItems[0];
+                return Convert.ToBoolean(row.mixing);
             }
 
             catch (Exception ex)
@@ -288,6 +392,7 @@ namespace WpfApp1
 
         private void dg_Juices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            get_Juice_Type(get_Juice_Name(dg_Juices));
             chck_Start_Juice.IsChecked = get_Starter(dg_Juices);
             tb_Juice_Time.Text = get_Juice_Time(dg_Juices);
             chck_Juice_Mix.IsChecked = get_Mixing(dg_Juices);

@@ -22,7 +22,7 @@ namespace WpfApp1.Classes
         private List<Equipment> extras;
         private List<Equipment> blendSystems;
         private Equipment thawRoom;
-        private List<Equipment> blendtanks;
+        public List<Equipment> blendtanks;
         private List<Equipment> transferLines;
 
         // TODO - make sure all global variables are intialized when they have to be.. make it's supposed to be in a function and not the constructor
