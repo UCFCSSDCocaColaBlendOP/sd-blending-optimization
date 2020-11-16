@@ -221,6 +221,7 @@ namespace WpfApp1.Classes
             {
                 int equip_type;
                 String equip_name;
+                //int cip; 
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -241,6 +242,7 @@ namespace WpfApp1.Classes
                 {
                     equip_type = Convert.ToInt32(dr["id"]);
                     equip_name = dr.Field<String>("Equipment");
+                    //cip = Convert.ToInt32(dr["cip_id"]); 
                     Equipment temp = new Equipment(equip_name, equip_type);
 
                     //set all the number of functions in the list
@@ -255,6 +257,7 @@ namespace WpfApp1.Classes
                     {
                         temp.SOs.Add(false);
                     }
+                    //temp.cip_id=cip; 
                     temp.cleaningProcess = 1;
                     temp.e_type = equip_type; 
                     blendSystems.Add(temp);
@@ -406,6 +409,7 @@ namespace WpfApp1.Classes
         {
             int id_tl;
             String name_tl;
+            //int cip; 
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -427,12 +431,14 @@ namespace WpfApp1.Classes
                 foreach (DataRow dr in dt.Rows)
                 {
                     id_tl = Convert.ToInt32(dr["id"]);
-                    name_tl = dr.Field<String>("Transfer Lines"); ;
+                    name_tl = dr.Field<String>("Transfer Lines");
+                    //cip = Convert.ToInt32(dr["cip_id"]);
                     Equipment temp = new Equipment(name_tl, id_tl);
                     for (int i = 0; i < numSOs + 1; i++)
                     {
                         temp.SOs.Add(false);
                     }
+                    //temp.cip_id=cip; 
                     temp.cleaningProcess =3;
                     temp.e_type = id_tl; 
                     transferLines.Add(temp);
@@ -501,6 +507,7 @@ namespace WpfApp1.Classes
         {
             int id_so;
             String name_mt;
+            //int cip; 
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -523,7 +530,9 @@ namespace WpfApp1.Classes
                 {
                     id_so = Convert.ToInt32(dr["id_SO"]);
                     name_mt = dr.Field<String>("Mix Tank");
+                    //cip = Convert.ToInt32(dr["cip_id"]); 
                     Equipment temp = new Equipment(name_mt, id_so);
+                    //temp.cip_id=cip
                     temp.cleaningProcess = 2;
                     temp.e_type = 1; 
                     blendtanks.Add(temp);
@@ -1455,10 +1464,11 @@ namespace WpfApp1.Classes
                                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                                 DataTable dt = new DataTable();
                                 da.Fill(dt);
-
-                                process = Convert.ToInt32(dt.Rows[0]["process_id"]);
-                                cleaning = Convert.ToString(dt.Rows[0]["process"]);
-                                
+                                if (dt.Rows.Count > 0)
+                                {
+                                    process = Convert.ToInt32(dt.Rows[0]["process_id"]);
+                                    cleaning = Convert.ToString(dt.Rows[0]["process"]);
+                                }
                                 //Console.WriteLine(process);
                                 //Console.WriteLine(cleaning);
                                 if(process!=0)
@@ -1594,7 +1604,11 @@ namespace WpfApp1.Classes
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+                
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
@@ -1625,8 +1639,11 @@ namespace WpfApp1.Classes
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
-                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+                
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
@@ -1658,8 +1675,11 @@ namespace WpfApp1.Classes
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
-                time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+                
                 //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
                 conn.Close();
             }
