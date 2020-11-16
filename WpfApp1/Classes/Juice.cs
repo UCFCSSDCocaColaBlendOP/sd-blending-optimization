@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    class Juice
+    public class Juice
     {
         // info all juices have, input needed at runtime
         public DateTime OGFillTime;

@@ -32,6 +32,8 @@ namespace WpfApp1
             public string juice { set; get; }
             public bool start { set; get; }
             public DateTime time { set; get; }
+            public int batchFilled { set; get; }
+            public int batchTotal { set; get; }
             public bool mixing { set; get; }
             public int line { set; get; }
         }
@@ -58,6 +60,16 @@ namespace WpfApp1
             colTime.Binding = new Binding("time");
             dg_Juices.Columns.Add(colTime);
 
+            DataGridTextColumn colBatchFill = new DataGridTextColumn();
+            colBatchFill.Header = "Batches Filled";
+            colBatchFill.Binding = new Binding("batchFilled");
+            dg_Juices.Columns.Add(colBatchFill);
+
+            DataGridTextColumn colBatchTotal = new DataGridTextColumn();
+            colBatchTotal.Header = "Batches Total";
+            colBatchTotal.Binding = new Binding("batchTotal");
+            dg_Juices.Columns.Add(colBatchTotal);
+
             DataGridTextColumn colMixing = new DataGridTextColumn();
             colMixing.Header = "Mixing";
             colMixing.Binding = new Binding("mixing");
@@ -70,7 +82,13 @@ namespace WpfApp1
 
             foreach (Juice juice in juices)
             {
-                dg_Juices.Items.Add(new JuiceList { juice = juice.name, start = juice.starter, time = juice.OGFillTime, mixing = juice.mixing, line = juice.line });
+                dg_Juices.Items.Add(new JuiceList { juice = juice.name, 
+                                                    start = juice.starter, 
+                                                    time = juice.OGFillTime,
+                                                    batchFilled = juice.batchesFilled,
+                                                    batchTotal = juice.totalBatches,
+                                                    mixing = juice.mixing, 
+                                                    line = juice.line });
             }
 
             fill_Juice_Dropdown(cb_Juice_Type);
