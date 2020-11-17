@@ -32,6 +32,12 @@ namespace WpfApp1
 
             fill_Recipes();
             fill_Equipment();
+            fill_Juices();
+            fill_Users();
+            fill_Juice_Dropdown(cb_Juice_Recipe);
+            fill_Juice_Dropdown(cb_Juice1);
+            fill_Function_Dropdown(cb_Function_Recipe);
+            fill_Cleaning_Dropdown(cb_Cleaning_Process);
         }
 
         private void fill_Functions(string equip)
@@ -88,6 +94,90 @@ namespace WpfApp1
             }
         }
 
+        private void fill_Juice_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Juice_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Juice";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Cleaning_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Cleaning_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "process";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Function_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Function_List_All]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "Functionality";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private string get_Equipment(DataGrid dg)
         {
             try
@@ -119,7 +209,109 @@ namespace WpfApp1
             }
 
             catch (Exception ex)
-            { return null; }
+            { return ""; }
+        }
+
+        private string get_Pseudo(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Pseudonym"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private string get_Material_Num(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Material #"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private string get_Recipe(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Recipe"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private string get_Juice(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Juice"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private string get_Time(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["Time"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private string get_User(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                DataRowView row = (DataRowView)dg.SelectedItems[0];
+                return row["User"].ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
         }
 
         private void fill_Recipes()
@@ -148,6 +340,32 @@ namespace WpfApp1
             }
         }
 
+        private void fill_Juices()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Juice_List_All]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Juice.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private void fill_Equipment()
         {
             try
@@ -166,6 +384,32 @@ namespace WpfApp1
                 da.Fill(dt);
 
                 dg_Equip.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_Users()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_User_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Users.ItemsSource = dt.DefaultView;
             }
 
             catch (Exception ex)
@@ -560,6 +804,1001 @@ namespace WpfApp1
             btn_Save_Function.Visibility = Visibility.Hidden;
             btn_Submit_Function.Visibility = Visibility.Hidden;
             btn_Cancel_Function.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Edit_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Recipe.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Recipe.IsEnabled = false;
+            tb_Name_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.IsEnabled = true;
+            chck_Inline.IsEnabled = true;
+            tb_PreBlend.IsEnabled = true;
+            tb_PostBlend.IsEnabled = true;
+            cb_Function_Recipe.IsEnabled = true;
+            tb_Time_Recipe.IsEnabled = true;
+            btn_Set_Time.IsEnabled = true;
+
+            btn_Edit_Recipe.Visibility = Visibility.Hidden;
+            btn_Add_Recipe.Visibility = Visibility.Hidden;
+            btn_Save_Recipe.Visibility = Visibility.Visible;
+            btn_Cancel_Recipe.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Recipe.IsEnabled = false;
+            dg_Recipe.UnselectAll();
+            dg_Function_Times.ItemsSource = null;
+            tb_Name_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.IsEnabled = true;
+            cb_Juice_Recipe.SelectedIndex = -1;
+            chck_Inline.IsEnabled = true;
+            chck_Inline.IsChecked = false;
+            tb_PreBlend.IsEnabled = true;
+            tb_PreBlend.Text = "0";
+            tb_PostBlend.IsEnabled = true;
+            tb_PostBlend.Text = "0";
+
+            btn_Edit_Recipe.Visibility = Visibility.Hidden;
+            btn_Add_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Visible;
+            btn_Cancel_Recipe.Visibility = Visibility.Visible;
+        }
+
+        private void dg_Recipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selected_Recipe = get_Recipe(dg_Recipe);
+            tb_Name_Recipe.Text = selected_Recipe;
+
+            if (String.IsNullOrEmpty(selected_Recipe))
+            {
+                return;
+            }
+
+            fill_RecipeInfo(selected_Recipe);
+            fill_FunctionTimes(selected_Recipe);
+        }
+
+        private void fill_RecipeInfo(string recipe)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Recipe]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = recipe;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Juice_Recipe.SelectedValue = Convert.ToInt32(dt.Rows[0]["Juice"]);
+                chck_Inline.IsChecked = Convert.ToBoolean(dt.Rows[0]["Inline"]);
+                tb_PreBlend.Text = Convert.ToString(dt.Rows[0]["Pre-Blend"]);
+                tb_PostBlend.Text = Convert.ToString(dt.Rows[0]["Post-Blend"]);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void fill_FunctionTimes(string recipe)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_FunctionTimes]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = recipe;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Function_Times.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void btn_Cancel_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_Recipe.Text = get_Recipe(dg_Recipe);
+
+            dg_Recipe.IsEnabled = true;
+            dg_Function_Times.IsEnabled = true;
+
+            tb_Name_Recipe.IsEnabled = false;
+            cb_Juice_Recipe.IsEnabled = false;
+            chck_Inline.IsEnabled = false;
+            tb_PreBlend.IsEnabled = false;
+            tb_PostBlend.IsEnabled = false;
+            cb_Function_Recipe.IsEnabled = false;
+            tb_Time_Recipe.IsEnabled = false;
+            btn_Set_Time.IsEnabled = false;
+
+            btn_Edit_Recipe.Visibility = Visibility.Visible;
+            btn_Add_Recipe.Visibility = Visibility.Visible;
+            btn_Save_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Hidden;
+            btn_Cancel_Recipe.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Recipe.Text) || 
+                cb_Juice_Recipe.SelectedIndex == -1 ||
+                String.IsNullOrEmpty(tb_PreBlend.Text) ||
+                String.IsNullOrEmpty(tb_PostBlend.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_Recipe]";
+                cmd.Parameters.Add("oldRecipe", SqlDbType.VarChar).Value = get_Recipe(dg_Recipe);
+                cmd.Parameters.Add("newRecipe", SqlDbType.VarChar).Value = tb_Name_Recipe.Text;
+                cmd.Parameters.Add("juice", SqlDbType.BigInt).Value = cb_Juice_Recipe.SelectedValue;
+                cmd.Parameters.Add("inline", SqlDbType.Bit).Value = chck_Inline.IsChecked;
+                cmd.Parameters.Add("preBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PreBlend.Text);
+                cmd.Parameters.Add("postBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PostBlend.Text);
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Recipes();
+            dg_Recipe.IsEnabled = true;
+            dg_Function_Times.IsEnabled = true;
+
+            tb_Name_Recipe.IsEnabled = false;
+            tb_Name_Recipe.Text = "";
+            cb_Juice_Recipe.IsEnabled = false;
+            cb_Juice_Recipe.SelectedIndex = -1;
+            chck_Inline.IsEnabled = false;
+            chck_Inline.IsChecked = false;
+            tb_PreBlend.IsEnabled = false;
+            tb_PreBlend.Text = "";
+            tb_PostBlend.IsEnabled = false;
+            tb_PostBlend.Text = "";
+
+            cb_Function_Recipe.IsEnabled = false;
+            tb_Time_Recipe.IsEnabled = false;
+            btn_Set_Time.IsEnabled = false;
+            dg_Function_Times.ItemsSource = null;
+
+            btn_Edit_Recipe.Visibility = Visibility.Visible;
+            btn_Add_Recipe.Visibility = Visibility.Visible;
+            btn_Save_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Hidden;
+            btn_Cancel_Recipe.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Submit_Recipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Recipe.Text) ||
+                cb_Juice_Recipe.SelectedIndex == -1 ||
+                String.IsNullOrEmpty(tb_PreBlend.Text) ||
+                String.IsNullOrEmpty(tb_PostBlend.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_Recipe]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = tb_Name_Recipe.Text;
+                cmd.Parameters.Add("juice", SqlDbType.BigInt).Value = cb_Juice_Recipe.SelectedValue;
+                cmd.Parameters.Add("inline", SqlDbType.Bit).Value = chck_Inline.IsChecked;
+                cmd.Parameters.Add("preBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PreBlend.Text);
+                cmd.Parameters.Add("postBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PostBlend.Text);
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Recipes();
+            dg_Recipe.IsEnabled = true;
+            dg_Function_Times.IsEnabled = true;
+
+            tb_Name_Recipe.IsEnabled = false;
+            tb_Name_Recipe.Text = "";
+            cb_Juice_Recipe.IsEnabled = false;
+            cb_Juice_Recipe.SelectedIndex = -1;
+            chck_Inline.IsEnabled = false;
+            chck_Inline.IsChecked = false;
+            tb_PreBlend.IsEnabled = false;
+            tb_PreBlend.Text = "";
+            tb_PostBlend.IsEnabled = false;
+            tb_PostBlend.Text = "";
+
+            cb_Function_Recipe.IsEnabled = false;
+            tb_Time_Recipe.IsEnabled = false;
+            btn_Set_Time.IsEnabled = false;
+            dg_Function_Times.ItemsSource = null;
+
+            btn_Edit_Recipe.Visibility = Visibility.Visible;
+            btn_Add_Recipe.Visibility = Visibility.Visible;
+            btn_Save_Recipe.Visibility = Visibility.Hidden;
+            btn_Submit_Recipe.Visibility = Visibility.Hidden;
+            btn_Cancel_Recipe.Visibility = Visibility.Hidden;
+        }
+
+        private void dg_Function_Times_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            cb_Function_Recipe.Text = get_Function(dg_Function_Times);
+            tb_Time_Recipe.Text = get_Time(dg_Function_Times);
+        }
+
+        private void cb_Function_Recipe_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void btn_Set_Time_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Time_Recipe.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_FunctionTime]";
+                cmd.Parameters.Add("recipe", SqlDbType.VarChar).Value = get_Recipe(dg_Recipe);
+                cmd.Parameters.Add("juice", SqlDbType.BigInt).Value = cb_Juice_Recipe.SelectedValue;
+                cmd.Parameters.Add("func", SqlDbType.VarChar).Value = cb_Function_Recipe.Text;
+                cmd.Parameters.Add("time", SqlDbType.BigInt).Value = Convert.ToInt32(tb_Time_Recipe.Text);
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_FunctionTimes(get_Recipe(dg_Recipe));
+        }
+
+        private void cb_Juice1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            cb_Juice2.SelectedIndex = -1;
+            cb_Cleaning_Process.SelectedIndex = -1;
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_CIP_Juices]";
+                cmd.Parameters.Add("juice1", SqlDbType.BigInt).Value = cb_Juice1.SelectedValue;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb_Juice2.ItemsSource = dt.DefaultView;
+                cb_Juice2.DisplayMemberPath = "Juice";
+                cb_Juice2.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void cb_Juice2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            get_Clean_Process();
+        }
+
+        private void get_Clean_Process()
+        {
+            if (cb_Juice2.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_CIP_Process]";
+                cmd.Parameters.Add("juice1", SqlDbType.BigInt).Value = cb_Juice1.SelectedValue;
+                cmd.Parameters.Add("juice2", SqlDbType.BigInt).Value = cb_Juice2.SelectedValue;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count == 0)
+                { cb_Cleaning_Process.Text = "None"; }
+                else
+                { cb_Cleaning_Process.SelectedValue = Convert.ToInt32(dt.Rows[0]["process_id"]); }
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void btn_Edit_CIP_Click(object sender, RoutedEventArgs e)
+        {
+            if (cb_Juice1.SelectedIndex == -1 || cb_Juice2.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            cb_Juice1.IsEnabled = false;
+            cb_Juice2.IsEnabled = false;
+            cb_Cleaning_Process.IsEnabled = true;
+
+            btn_Edit_CIP.Visibility = Visibility.Hidden;
+            btn_Save_CIP.Visibility = Visibility.Visible;
+            btn_Cancel_CIP.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_CIP_Click(object sender, RoutedEventArgs e)
+        {
+            get_Clean_Process();
+
+            cb_Juice1.IsEnabled = true;
+            cb_Juice2.IsEnabled = true;
+            cb_Cleaning_Process.IsEnabled = false;
+
+            btn_Edit_CIP.Visibility = Visibility.Visible;
+            btn_Save_CIP.Visibility = Visibility.Hidden;
+            btn_Cancel_CIP.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_CIP_Click(object sender, RoutedEventArgs e)
+        {
+            if (cb_Juice1.SelectedIndex == -1 || 
+                cb_Juice2.SelectedIndex == -1 || 
+                cb_Cleaning_Process.Text == "None")
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_CIP_Process]";
+                cmd.Parameters.Add("juice1", SqlDbType.BigInt).Value = cb_Juice1.SelectedValue;
+                cmd.Parameters.Add("juice2", SqlDbType.BigInt).Value = cb_Juice2.SelectedValue;
+                cmd.Parameters.Add("process", SqlDbType.BigInt).Value = cb_Cleaning_Process.SelectedValue;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            cb_Juice1.IsEnabled = true;
+            cb_Juice2.IsEnabled = true;
+            cb_Cleaning_Process.IsEnabled = false;
+
+            btn_Edit_CIP.Visibility = Visibility.Visible;
+            btn_Save_CIP.Visibility = Visibility.Hidden;
+            btn_Cancel_CIP.Visibility = Visibility.Hidden;
+        }
+
+        private void dg_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selected_Juice = get_Juice(dg_Juice);
+            tb_Name_Juice.Text = selected_Juice;
+
+            if (String.IsNullOrEmpty(selected_Juice))
+            {
+                return;
+            }
+
+            fill_Pseudonyms(selected_Juice);
+        }
+
+        private void fill_Pseudonyms(string juice)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Pseudo_List]";
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg_Pseudo_List.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void dg_Pseudo_List_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            tb_Name_Pseudo.Text = get_Pseudo(dg_Pseudo_List);
+            tb_Mat_Num.Text = get_Material_Num(dg_Pseudo_List);
+        }
+
+        private void btn_Edit_Juice_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Juice.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Juice.IsEnabled = false;
+            tb_Name_Juice.IsEnabled = true;
+            btn_Edit_Pseudo.IsEnabled = true;
+            btn_Add_Pseudo.IsEnabled = true;
+
+            btn_Edit_Juice.Visibility = Visibility.Hidden;
+            btn_Add_Juice.Visibility = Visibility.Hidden;
+            btn_Save_Juice.Visibility = Visibility.Visible;
+            btn_Cancel_Juice.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_Juice_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Juice.IsEnabled = false;
+            dg_Juice.UnselectAll();
+            dg_Pseudo_List.ItemsSource = null;
+            tb_Name_Juice.IsEnabled = true;
+
+            btn_Edit_Juice.Visibility = Visibility.Hidden;
+            btn_Add_Juice.Visibility = Visibility.Hidden;
+            btn_Submit_Juice.Visibility = Visibility.Visible;
+            btn_Cancel_Juice.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_Juice_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_Juice.Text = get_Juice(dg_Juice);
+
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+
+            tb_Name_Juice.IsEnabled = false;
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Mat_Num.IsEnabled = false;
+
+            btn_Edit_Juice.Visibility = Visibility.Visible;
+            btn_Add_Juice.Visibility = Visibility.Visible;
+            btn_Save_Juice.Visibility = Visibility.Hidden;
+            btn_Submit_Juice.Visibility = Visibility.Hidden;
+            btn_Cancel_Juice.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_Juice_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Juice.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_Juice]";
+                cmd.Parameters.Add("oldJuice", SqlDbType.VarChar).Value = get_Juice(dg_Juice);
+                cmd.Parameters.Add("newJuice", SqlDbType.VarChar).Value = tb_Name_Juice.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Juices();
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+            tb_Name_Juice.IsEnabled = false;
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Mat_Num.IsEnabled = false;
+
+            btn_Edit_Juice.Visibility = Visibility.Visible;
+            btn_Add_Juice.Visibility = Visibility.Visible;
+            btn_Save_Juice.Visibility = Visibility.Hidden;
+            btn_Submit_Juice.Visibility = Visibility.Hidden;
+            btn_Cancel_Juice.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Submit_Juice_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Juice.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_Juice]";
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = tb_Name_Juice.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Juices();
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+            tb_Name_Juice.IsEnabled = false;
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Mat_Num.IsEnabled = false;
+
+            btn_Edit_Juice.Visibility = Visibility.Visible;
+            btn_Add_Juice.Visibility = Visibility.Visible;
+            btn_Save_Juice.Visibility = Visibility.Hidden;
+            btn_Submit_Juice.Visibility = Visibility.Hidden;
+            btn_Cancel_Juice.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Edit_Pseudo_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Pseudo_List.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Juice.IsEnabled = false;
+            dg_Pseudo_List.IsEnabled = false;
+
+            tb_Name_Pseudo.IsEnabled = true;
+            tb_Mat_Num.IsEnabled = true;
+
+            btn_Edit_Pseudo.Visibility = Visibility.Hidden;
+            btn_Add_Pseudo.Visibility = Visibility.Hidden;
+            btn_Save_Pseudo.Visibility = Visibility.Visible;
+            btn_Cancel_Pseudo.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_Pseudo_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Juice.IsEnabled = false;
+            dg_Pseudo_List.IsEnabled = false;
+            dg_Pseudo_List.UnselectAll();
+
+            tb_Name_Pseudo.IsEnabled = true;
+            tb_Mat_Num.IsEnabled = true;
+
+            btn_Edit_Pseudo.Visibility = Visibility.Hidden;
+            btn_Add_Pseudo.Visibility = Visibility.Hidden;
+            btn_Save_Pseudo.Visibility = Visibility.Visible;
+            btn_Cancel_Pseudo.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_Pseudo_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_Pseudo.Text = get_Pseudo(dg_Pseudo_List);
+            tb_Mat_Num.Text = get_Material_Num(dg_Pseudo_List);
+
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Mat_Num.IsEnabled = false;
+
+            btn_Edit_Pseudo.Visibility = Visibility.Visible;
+            btn_Add_Pseudo.Visibility = Visibility.Visible;
+            btn_Save_Pseudo.Visibility = Visibility.Hidden;
+            btn_Submit_Pseudo.Visibility = Visibility.Hidden;
+            btn_Cancel_Pseudo.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_Pseudo_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Pseudo.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_Pseudo]";
+                cmd.Parameters.Add("oldPseudo", SqlDbType.VarChar).Value = get_Pseudo(dg_Pseudo_List);
+                cmd.Parameters.Add("newPseudo", SqlDbType.VarChar).Value = tb_Name_Pseudo.Text;
+                cmd.Parameters.Add("matNum", SqlDbType.VarChar).Value = tb_Mat_Num.Text;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Pseudonyms(get_Juice(dg_Juice));
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Name_Pseudo.Text = "";
+            tb_Mat_Num.IsEnabled = false;
+            tb_Mat_Num.Text = "";
+
+            btn_Edit_Pseudo.Visibility = Visibility.Visible;
+            btn_Add_Pseudo.Visibility = Visibility.Visible;
+            btn_Save_Pseudo.Visibility = Visibility.Hidden;
+            btn_Submit_Pseudo.Visibility = Visibility.Hidden;
+            btn_Cancel_Pseudo.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Submit_Pseudo_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_Pseudo.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_Pseudo]";
+                cmd.Parameters.Add("pseudo", SqlDbType.VarChar).Value = tb_Name_Pseudo.Text;
+                cmd.Parameters.Add("matNum", SqlDbType.VarChar).Value = tb_Mat_Num.Text;
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = get_Juice(dg_Juice);
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Pseudonyms(get_Juice(dg_Juice));
+            dg_Juice.IsEnabled = true;
+            dg_Pseudo_List.IsEnabled = true;
+
+            tb_Name_Pseudo.IsEnabled = false;
+            tb_Name_Pseudo.Text = "";
+            tb_Mat_Num.IsEnabled = false;
+            tb_Mat_Num.Text = "";
+
+            btn_Edit_Pseudo.Visibility = Visibility.Visible;
+            btn_Add_Pseudo.Visibility = Visibility.Visible;
+            btn_Save_Pseudo.Visibility = Visibility.Hidden;
+            btn_Submit_Pseudo.Visibility = Visibility.Hidden;
+            btn_Cancel_Pseudo.Visibility = Visibility.Hidden;
+        }
+
+        private void dg_Users_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selected_User = get_User(dg_Users);
+            tb_Name_User.Text = selected_User;
+
+            if (String.IsNullOrEmpty(selected_User))
+            {
+                return;
+            }
+
+            fill_UserInfo(selected_User);
+        }
+
+        private void fill_UserInfo(string user)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_User]";
+                cmd.Parameters.Add("user", SqlDbType.VarChar).Value = user;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows[0]["email"] == DBNull.Value)
+                { tb_Email_User.Text = ""; }
+                else
+                { tb_Email_User.Text = Convert.ToString(dt.Rows[0]["Email"]); }                
+                tb_CCID.Text = Convert.ToString(dt.Rows[0]["CCID"]);
+                chck_Active_User.IsChecked = Convert.ToBoolean(dt.Rows[0]["Active"]);
+                chck_Admin_User.IsChecked = Convert.ToBoolean(dt.Rows[0]["Admin"]);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void btn_Edit_User_Click(object sender, RoutedEventArgs e)
+        {
+            if (dg_Users.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            dg_Users.IsEnabled = false;
+            tb_Name_User.IsEnabled = true;
+            tb_Email_User.IsEnabled = true;
+            tb_CCID.IsEnabled = true;
+            chck_Active_User.IsEnabled = true;
+            chck_Admin_User.IsEnabled = true;
+
+            btn_Edit_User.Visibility = Visibility.Hidden;
+            btn_Add_User.Visibility = Visibility.Hidden;
+            btn_Save_User.Visibility = Visibility.Visible;
+            btn_Cancel_User.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Add_User_Click(object sender, RoutedEventArgs e)
+        {
+            dg_Users.IsEnabled = false;
+            dg_Users.UnselectAll();
+            tb_Name_User.IsEnabled = true;
+            tb_Name_User.Text = "";
+            tb_Email_User.IsEnabled = true;
+            tb_Email_User.Text = "";
+            tb_CCID.IsEnabled = true;
+            tb_CCID.Text = "";
+
+            chck_Active_User.IsEnabled = false;
+            chck_Active_User.IsChecked = true;
+            chck_Admin_User.IsEnabled = true;
+            chck_Admin_User.IsChecked = false;
+
+            btn_Edit_User.Visibility = Visibility.Hidden;
+            btn_Add_User.Visibility = Visibility.Hidden;
+            btn_Submit_User.Visibility = Visibility.Visible;
+            btn_Cancel_User.Visibility = Visibility.Visible;
+        }
+
+        private void btn_Cancel_User_Click(object sender, RoutedEventArgs e)
+        {
+            tb_Name_User.Text = get_User(dg_Users);
+
+            dg_Users.IsEnabled = true;
+            tb_Name_User.IsEnabled = false;
+            tb_Email_User.IsEnabled = false;
+            tb_CCID.IsEnabled = false;
+            chck_Active_User.IsEnabled = false;
+            chck_Admin_User.IsEnabled = false;
+
+            btn_Edit_User.Visibility = Visibility.Visible;
+            btn_Add_User.Visibility = Visibility.Visible;
+            btn_Save_User.Visibility = Visibility.Hidden;
+            btn_Submit_User.Visibility = Visibility.Hidden;
+            btn_Cancel_User.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Save_User_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_User.Text) ||
+                String.IsNullOrEmpty(tb_CCID.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[update_User]";
+                cmd.Parameters.Add("oldUser", SqlDbType.VarChar).Value = get_User(dg_Users);
+                cmd.Parameters.Add("newUser", SqlDbType.VarChar).Value = tb_Name_User.Text;
+                cmd.Parameters.Add("email", SqlDbType.VarChar).Value = tb_Email_User.Text;
+                cmd.Parameters.Add("ccid", SqlDbType.VarChar).Value = tb_CCID.Text;
+                cmd.Parameters.Add("active", SqlDbType.Bit).Value = chck_Active_User.IsChecked;
+                cmd.Parameters.Add("admin", SqlDbType.Bit).Value = chck_Admin_User.IsChecked;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Users();
+            dg_Users.IsEnabled = true;
+
+            tb_Name_User.IsEnabled = false;
+            tb_Name_Recipe.Text = "";
+            tb_Email_User.IsEnabled = false;
+            tb_Email_User.Text = "";
+            tb_CCID.IsEnabled = false;
+            tb_CCID.Text = "";
+            chck_Active_User.IsEnabled = false;
+            chck_Active_User.IsChecked = false;
+            chck_Admin_User.IsEnabled = false;
+            chck_Admin_User.IsChecked = false;
+
+            btn_Edit_User.Visibility = Visibility.Visible;
+            btn_Add_User.Visibility = Visibility.Visible;
+            btn_Save_User.Visibility = Visibility.Hidden;
+            btn_Submit_User.Visibility = Visibility.Hidden;
+            btn_Cancel_User.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Submit_User_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(tb_Name_User.Text) ||
+                String.IsNullOrEmpty(tb_CCID.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_User]";
+                cmd.Parameters.Add("user", SqlDbType.VarChar).Value = tb_Name_User.Text;
+                cmd.Parameters.Add("email", SqlDbType.VarChar).Value = tb_Email_User.Text;
+                cmd.Parameters.Add("ccid", SqlDbType.VarChar).Value = tb_CCID.Text;
+                cmd.Parameters.Add("active", SqlDbType.Bit).Value = chck_Active_User.IsChecked;
+                cmd.Parameters.Add("admin", SqlDbType.Bit).Value = chck_Admin_User.IsChecked;
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            fill_Users();
+            dg_Users.IsEnabled = true;
+
+            tb_Name_User.IsEnabled = false;
+            tb_Name_Recipe.Text = "";
+            tb_Email_User.IsEnabled = false;
+            tb_Email_User.Text = "";
+            tb_CCID.IsEnabled = false;
+            tb_CCID.Text = "";
+            chck_Active_User.IsEnabled = false;
+            chck_Active_User.IsChecked = false;
+            chck_Admin_User.IsEnabled = false;
+            chck_Admin_User.IsChecked = false;
+
+            btn_Edit_User.Visibility = Visibility.Visible;
+            btn_Add_User.Visibility = Visibility.Visible;
+            btn_Save_User.Visibility = Visibility.Hidden;
+            btn_Submit_User.Visibility = Visibility.Hidden;
+            btn_Cancel_User.Visibility = Visibility.Hidden;
+        }
+
+        private void btn_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

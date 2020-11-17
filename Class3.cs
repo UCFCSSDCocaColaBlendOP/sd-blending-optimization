@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    public class ScheduleEntry
+    class ScheduleEntry
     {
-        public bool slurry;
-        public int batch;
+        public bool late;
 
         public DateTime start;
         public DateTime end;
@@ -17,7 +16,7 @@ namespace WpfApp1
         // for equipment schedules:
         public Juice juice;
         public bool cleaning;
-        public int cleaningType;
+        public string cleaningdescription;
 
         // for juice schedule
         public Equipment tool;
@@ -28,15 +27,13 @@ namespace WpfApp1
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="juice"></param>
-        /// <param name="slurry"></param>
-        /// <param name="batch"></param>
-        public ScheduleEntry(DateTime start, DateTime end, Juice juice, bool slurry, int batch)
+        /// <param name="late"></param>
+        public ScheduleEntry(DateTime start, DateTime end, Juice juice, bool late)
         {
             this.start = start;
             this.end = end;
             this.juice = juice;
-            this.slurry = slurry;
-            this.batch = batch;
+            this.late = late;
         }
 
         /// <summary>
@@ -48,7 +45,6 @@ namespace WpfApp1
         {
             this.start = start;
             this.juice = juice;
-            this.slurry = true;
         }
 
         /// <summary>
@@ -56,13 +52,13 @@ namespace WpfApp1
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
-        /// <param name="type"></param>
-        public ScheduleEntry(DateTime start, DateTime end, int type)
+        /// <param name="cleaning"></param>
+        public ScheduleEntry(DateTime start, DateTime end, string cleaning)
         {
             this.start = start;
             this.end = end;
+            this.cleaningdescription = cleaning;
             this.cleaning = true;
-            this.cleaningType = type;
         }
 
         /// <summary>
@@ -77,21 +73,6 @@ namespace WpfApp1
             this.start = start;
             this.end = end;
             this.tool = tool;
-        }
-
-        /// <summary>
-        /// Given a schedule for a mix tank holding a slurry, marks the end of the last entry of the schedule
-        /// </summary>
-        /// <param name="schedule"></param>
-        /// <param name="end"></param>
-        public static void ReleaseMixTank(List<ScheduleEntry> schedule, DateTime end)
-        {
-            schedule[schedule.Count - 1].end = end;
-        }
-
-        public static void SortSchedule(List<ScheduleEntry> schedule)
-        {
-
         }
     }
 }
