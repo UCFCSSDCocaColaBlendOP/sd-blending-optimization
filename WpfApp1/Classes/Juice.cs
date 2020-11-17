@@ -24,11 +24,11 @@ namespace WpfApp1
         public int fillingSlurry;
         public Equipment fillingTransferLine;
         public DateTime finishedWithTransferLine;
-        public Equipment fillingBlendTank;
+        public Equipment fillingTank;
         public bool mixing;
         public bool mixingInline;
         public int mixingSlurry;
-        public Equipment mixingBlendTank;
+        public Equipment mixingTank;
         public DateTime mixingDoneBlending;
         public List<Equipment> mixingEquipment;
         public List<DateTime> mixingDoneWithEquipment;
@@ -41,6 +41,7 @@ namespace WpfApp1
         public List<bool> inlineflags; // marks whether or not each recipe is inline
         public bool inlineposs; // or of inlineflags
         public TimeSpan transferTime;
+        public TimeSpan fillTime;
 
         // special fields used in scheduling
         public int neededBatches;
@@ -49,7 +50,7 @@ namespace WpfApp1
         public DateTime currentFillTime;
         public List<DateTime> idealTime;
         public List<ScheduleEntry> schedule;
-        public Equipment BlendTank;
+        public Equipment tank;
 
         /// <summary>
         /// Creates a Juice from the schedule.
@@ -60,14 +61,14 @@ namespace WpfApp1
         /// <param name="type"></param>
         /// <param name="fill"></param>
         /// <param name="batches"></param>
-        public Juice(string name, string material, int line, int type, DateTime fill, int batches)
+        public Juice(string name, string material, int line, int type, DateTime fill)
         {
             this.name = name;
             this.material = material;
             this.line = line;
             this.type = type;
             this.OGFillTime = fill;
-            this.totalBatches = batches;
+           //this.totalBatches = batches;  //TODO: assign somewhere else, from frontend
         }
 
         /// <summary>
@@ -112,28 +113,28 @@ namespace WpfApp1
                 if (fillingInline && fillingSlurry == 1)
                 {
                     // mark the transferline 
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
                     // mark the blend tank, it ends at finishedwithtransferline
-                    fillingBlendTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false));
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
                 }
                 // you're part way through a slurry
                 else if (fillingInline)
                 {
                     inline = true;
                     slurryBatches = fillingSlurry - 1;
-                    BlendTank = fillingBlendTank;
+                    tank = fillingTank;
                     // mark the transferline
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
                     // mark the blend tank, open ended
-                    fillingBlendTank.schedule.Add(new ScheduleEntry(scheduleID, this));
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                 }
                 // it's a batch
                 else
                 {
                     // mark the transferline
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false, totalBatches - neededBatches));
                     // mark the blend tank, it ends at finishedwithtransferline
-                    fillingBlendTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false));
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false, totalBatches - neededBatches));
                 }
             }
 
@@ -145,21 +146,21 @@ namespace WpfApp1
                 {
                     inline = true;
                     slurryBatches = mixingSlurry - 1;
-                    BlendTank = mixingBlendTank;
+                    tank = mixingTank;
                     // mark the blend tank open ended
-                    mixingBlendTank.schedule.Add(new ScheduleEntry(scheduleID, this));
+                    mixingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                     // mark all the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, -1));
                 }
                 // mixing a batch
                 else
                 {
                     // mark the blend tank
-                    mixingBlendTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false));
+                    mixingTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false, totalBatches - neededBatches));
                     // mark the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false, totalBatches - neededBatches));
                 }
             }
 
@@ -185,14 +186,14 @@ namespace WpfApp1
         /// allowing for that batch to be early or late
         /// </summary>
         /// <param name="lastbatchend"></param>
-        public void RecalculateFillTime(DateTime lastbatchend)
+        public void RecalculateFillTime()
         {
+            // find the fill time for the next batch
+            currentFillTime = currentFillTime.Add(fillTime);
+            
             // find the ideal times for each recipe
             for (int i = 0; i < idealTime.Count; i++)
-                idealTime[i] = lastbatchend.Subtract(currentFillTime.Subtract(idealTime[i]));
-
-            // find the fill time for the next batch
-            currentFillTime = lastbatchend;
+                idealTime[i] = currentFillTime.Subtract(new TimeSpan(0, idealmixinglength[i],0));
         }
 
         /// <summary>
