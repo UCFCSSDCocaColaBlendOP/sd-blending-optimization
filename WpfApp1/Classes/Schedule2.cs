@@ -17,7 +17,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace WpfApp1
 {
-    class Schedule2
+    public class Schedule2
     {
         public bool inconceivable;
         public Juice inconceiver;
@@ -50,7 +50,7 @@ namespace WpfApp1
         /// <summary>
         /// Creates a Schedule object, initializing lists of equipment
         /// </summary>
-        public Schedule2()
+        public Schedule2(string filename)
         {
             scheduleID = DateTime.Now;
             extras = new List<Equipment>();
@@ -63,6 +63,11 @@ namespace WpfApp1
 
             inconceivable = false;
             late = false;
+
+            //ExampleOfSchedule();
+            //ExampleOfSchedule2(); 
+            //ProcessCSV(filename);
+            //this.juices_line9 = new List<Juice>();
         }
 
         //TODO: 0=1,1=2,2=3,3=7
