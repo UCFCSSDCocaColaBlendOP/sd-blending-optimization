@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    class Equipment
+    public class Equipment
     {
         public bool down;
         public String name;
