@@ -71,11 +71,18 @@
                     <ComboBox x:Name="cb_Shared_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_Shared_Equip_SelectionChanged"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Transfer_Line" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
+            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Transfer_Line" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
                     <ComboBox x:Name="cb_TL_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_TL_Equip_SelectionChanged"/>
-                </Grid>            </TabItem>            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">                <Grid Background="#FF1F1E1E">                    <DataGrid x:Name="dg_Aseptic" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Aseptic" Background="#FF132226" FontSize="18" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8" SelectionChanged="dg_SO1_SelectionChanged"/>
                     <ComboBox x:Name="cb_Aseptic_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217" SelectionChanged="cb_Aseptic_Equip_SelectionChanged"/>
-                </Grid>            </TabItem>
+                </Grid>
+            </TabItem>
 
         </TabControl>
         <Button x:Name="btn_Generate" Content="Generate Schedule" Margin="5,6.2,0,0" FontFamily="Segoe UI Semibold" FontSize="18" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="200" Grid.Column="1" Grid.Row="1" Height="40" VerticalAlignment="Top" Click="btn_Generate_Click"/>
@@ -84,7 +91,7 @@
         <Button x:Name="btn_Settings" Grid.Column="5" Height="90" Margin="0,0.2,4.8,0" Grid.Row="1" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="90" Click="btn_Settings_Click">
             <iconPacks:PackIconEntypo x:Name="settingsIcon" Kind="Cog" Margin="0" Foreground="White" Height="Auto" Width="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         </Button>
-        <Button x:Name="btn_Refresh" Content="Refresh" Height="31" Margin="0,2.2,6.8,0" FontFamily="Segoe UI Semibold" FontSize="14" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" Grid.Column="5" Grid.Row="2" HorizontalAlignment="Right" Width="117"/>
+        <Button x:Name="btn_Refresh" Content="Refresh" Height="31" Margin="0,2.2,6.8,0" FontFamily="Segoe UI Semibold" FontSize="14" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" Grid.Column="5" Grid.Row="2" HorizontalAlignment="Right" Width="117" Click="btn_Refresh_Click"/>
         <Ellipse x:Name="online_Status" Grid.Column="1" Fill="#FF15CD38" HorizontalAlignment="Left" Height="20" Margin="10,5,0,0" Grid.Row="3" Stroke="White" VerticalAlignment="Top" Width="20"/>
         <Label x:Name="label_Online" Content="Services Online" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="1" HorizontalAlignment="Left" Margin="35,0,0,0" VerticalAlignment="Top" Height="30" Width="130" Grid.Row="3"/>
         <Label x:Name="label_Offline" Content="Services Offline" Visibility="Hidden" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="1" HorizontalAlignment="Left" Margin="35,0,0,0" VerticalAlignment="Top" Height="30" Width="130" Grid.Row="3"/>

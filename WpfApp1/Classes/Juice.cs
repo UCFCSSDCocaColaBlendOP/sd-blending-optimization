@@ -6,114 +6,209 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    class Juice
+    public class Juice
     {
-        public bool parsing;
-        public bool starter; // check for whereami, askForBatches, no_batches, currentBatch
-        public bool mixing;
-        public DateTime readytotrans; // set when mixing == true, this is the time the transferline should be acquired by
-        // i got rid of the no_batches flag since we're asking about batches regardless
-
-        public int totalBatches; // used to be quantity
-        public int neededBatches;
-
-        public bool inline;
-        public int slurryBatches;
-
-        public int orderID; // for finding schedule entries for this juice in equipment schedules
-        public DateTime OGFillTime; // used to be fillTime
-        public DateTime currentFillTime;
-
-        public int line;
+        // info all juices have, input needed at runtime
+        public DateTime OGFillTime;
         public int type;
+        public int totalBatches;
+        public int line;
         public string name;
         public string material;
 
-        // TODO - make these initializations elsewhere... (2)
+        // info for starter juices
+        public bool starter;
+        public int batchesFilled;
+        public bool filling;
+        public bool fillingInline;
+        public int fillingSlurry;
+        public Equipment fillingTransferLine;
+        public DateTime finishedWithTransferLine;
+        public Equipment fillingTank;
+        public bool mixing;
+        public bool mixingInline;
+        public int mixingSlurry;
+        public Equipment mixingTank;
+        public DateTime mixingDoneBlending;
+        public List<Equipment> mixingEquipment;
+        public List<DateTime> mixingDoneWithEquipment;
 
-        public List<ScheduleEntry> schedule = new List<ScheduleEntry>();
-
-        public List<List<int>> recipes = new List<List<int>>(); // for each recipe there's a list, each list a list of times each functionality is needed for, -1 if not needed
-        public List<int> recipePreTimes = new List<int>();
-        public List<int> recipePostTimes = new List<int>();
-        public List<bool> inlineflags = new List<bool>(); // marks whether or not each recipe is inline
+        // info pulled from the database used in the scheduling process
+        public List<List<int>> recipes; // for each recipe there's a list, each list a list of times each functionality is needed for, 0 if not needed
+        public List<int> recipePreTimes;
+        public List<int> recipePostTimes;
+        public List<int> idealmixinglength;
+        public List<bool> inlineflags; // marks whether or not each recipe is inline
         public bool inlineposs; // or of inlineflags
-        public int transferTime;
+        public TimeSpan transferTime;
+        public TimeSpan fillTime;
 
-        public List<DateTime> idealTime = new List<DateTime>();
-            /* ideal start time = fill time - (the time it takes to transfer from blend to aseptic + 
-								                postblend time +
-								                the sum of all the blend equipment times in the recipe) */
-        public int numUniqueToolsNeeded; // the number of tools which only one machine supports that all the recipes need
+        // special fields used in scheduling
+        public int neededBatches;
+        public bool inline;
+        public int slurryBatches;
+        public DateTime currentFillTime;
+        public List<DateTime> idealTime;
+        public List<ScheduleEntry> schedule;
+        public Equipment tank;
 
-        public Equipment BlendTank;
-
-        // TODO - decide on cosntructor with Noelle (1)
-        // case when juice type can be parsed from the SAP schedule??? Not sure anymore
-        public Juice(int line, int type, string material, string name, DateTime fill, bool started, bool no_batches)
+        /// <summary>
+        /// Creates a Juice from the schedule.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="material"></param>
+        /// <param name="line"></param>
+        /// <param name="type"></param>
+        /// <param name="fill"></param>
+        /// <param name="batches"></param>
+        public Juice(string name, string material, int line, int type, DateTime fill)
         {
+            this.name = name;
+            this.material = material;
             this.line = line;
             this.type = type;
-            this.material = material;
-            this.name = name;
-            this.parsing = false;
             this.OGFillTime = fill;
-            this.starter = started;
-
-            // pull info from database
+           //this.totalBatches = batches;  //TODO: assign somewhere else, from frontend
         }
 
-        // case when juice type cannot be parsed from the SAP schedule
-        // UpdateJuice will be called later to fix type and database dependent fields
-        public Juice(int quantity, int line, string material, string name, DateTime fill, bool started)
+        /// <summary>
+        /// Sets up a standard juice (ie not a starter) by pulling data and setting needed variables
+        /// </summary>
+        public void UpdateStandardJuice()
         {
-            this.line = line;
-            this.name = name;
-            this.parsing = true;
-            this.OGFillTime = fill;
-            this.starter = started;
+            neededBatches = totalBatches;
+            inline = false;
+            currentFillTime = OGFillTime;
+            schedule = new List<ScheduleEntry>();
+
+            // insert code to pull info from the database using attribute type to find the correct juice
+            // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, idealmixinglength, and transferTime
+
+            // set inlineposs
+            inlineposs = false;
+            for (int i = 0; i < inlineflags.Count; i++)
+                inlineposs = inlineposs || inlineflags[i];
+
+            InitializeIdealTime();
         }
 
-        public Juice(String name)
+        /// <summary>
+        /// Sets up a starter juice by filling in equipment schedules and necessary fields and by pulling from database
+        /// </summary>
+        /// <param name="scheduleID"></param>
+        public void UpdateStarterJuice(DateTime scheduleID)
         {
-            this.name = name;
-        }
+            // calculate needed batches
+            neededBatches = totalBatches - batchesFilled;
+            if (filling)
+                neededBatches--;
 
-        // TODO : add a version of this for starters and also, this needs a closer pass through for correctness
-        // called during the second stage of GNS when CSV entries are confirmed
-        public void UpdateJuice(int batches, int newLine, int newType, DateTime newFill)
-        {
-            if (parsing)
+            // // insert code to pull info from the database using attribute type to find the correct juice
+            // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, and transferTime
+
+            // deal with the filling juice
+            if (filling)
             {
-                // add name as a pseudonym for the type specified by newType
-                type = newType;
-                // pull info from database
-            }
-            else if (newType != type)
-            {
-                type = newType;
-                // pull info from database
+                // you're finishing up with a slurry
+                if (fillingInline && fillingSlurry == 1)
+                {
+                    // mark the transferline 
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    // mark the blend tank, it ends at finishedwithtransferline
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                }
+                // you're part way through a slurry
+                else if (fillingInline)
+                {
+                    inline = true;
+                    slurryBatches = fillingSlurry - 1;
+                    tank = fillingTank;
+                    // mark the transferline
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    // mark the blend tank, open ended
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
+                }
+                // it's a batch
+                else
+                {
+                    // mark the transferline
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false, totalBatches - neededBatches));
+                    // mark the blend tank, it ends at finishedwithtransferline
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false, totalBatches - neededBatches));
+                }
             }
 
-            totalBatches = batches;
-            line = newLine;
-            OGFillTime = newFill;
+            // deal with mixing batch
+            if (mixing)
+            {
+                // mixing a slurry
+                if (mixingInline)
+                {
+                    inline = true;
+                    slurryBatches = mixingSlurry - 1;
+                    tank = mixingTank;
+                    // mark the blend tank open ended
+                    mixingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
+                    // mark all the blend equipment
+                    for (int i = 0; i < mixingEquipment.Count; i++)
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, -1));
+                }
+                // mixing a batch
+                else
+                {
+                    // mark the blend tank
+                    mixingTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false, totalBatches - neededBatches));
+                    // mark the blend equipment
+                    for (int i = 0; i < mixingEquipment.Count; i++)
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false, totalBatches - neededBatches));
+                }
+            }
+
+            // set up fill and ideal times
+            if (filling)
+            {
+                currentFillTime = finishedWithTransferLine;
+                InitializeIdealTime();
+            }
+            else
+            {
+                currentFillTime = OGFillTime;
+                for (int i = 0; i < totalBatches - neededBatches; i++)
+                    currentFillTime = currentFillTime.Add(transferTime);
+                InitializeIdealTime();
+            }
+
+            schedule = new List<ScheduleEntry>();
         }
 
-        // TODO - fill in function
+        /// <summary>
+        /// Calculates the new fill and ideal times. Recalculates based on when the last batch ended,
+        /// allowing for that batch to be early or late
+        /// </summary>
+        /// <param name="lastbatchend"></param>
         public void RecalculateFillTime()
         {
             // find the fill time for the next batch
-            // also find the ideal times for each recipe
+            currentFillTime = currentFillTime.Add(fillTime);
+            
+            // find the ideal times for each recipe
+            for (int i = 0; i < idealTime.Count; i++)
+                idealTime[i] = currentFillTime.Subtract(new TimeSpan(0, idealmixinglength[i],0));
         }
 
-        // TODO - fill in function
-        public DateTime CanDoInline()
+        /// <summary>
+        /// Calculates the initial ideal times by subtracting the ideal length from the fill time
+        /// </summary>
+        public void InitializeIdealTime()
         {
-            return new DateTime(10, 10, 2020); //delete just so no error
-            // checks if a juice can do inline
-            // first and most obviously check if it has inline recipes
-            // check
+            for (int i = 0; i < recipes.Count; i++)
+                idealTime.Add(currentFillTime.Subtract(new TimeSpan(0, idealmixinglength[i], 0)));
+        }
+
+        // grab from Alisa
+        public void SortSchedule()
+        {
+            
         }
     }
 }

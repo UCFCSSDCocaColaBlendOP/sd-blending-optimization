@@ -294,7 +294,7 @@ namespace WpfApp1
             }
 
             catch (Exception ex)
-            { return null; }
+            { return ""; }
         }
 
         private string get_User(DataGrid dg)
@@ -311,7 +311,7 @@ namespace WpfApp1
             }
 
             catch (Exception ex)
-            { return null; }
+            { return ""; }
         }
 
         private void fill_Recipes()
