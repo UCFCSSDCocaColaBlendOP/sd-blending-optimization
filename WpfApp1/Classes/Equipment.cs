@@ -8,6 +8,7 @@ namespace WpfApp1
 {
     class Equipment
     {
+        public bool down;
         public String name;
         public int type; // for extras, type = functionality, for blend tanks, type = SO
         public List<bool> functionalities;
@@ -15,8 +16,18 @@ namespace WpfApp1
         public List<ScheduleEntry> schedule;
         public Equipment cipGroup;
 
-        public int earlyLimit;
-        public bool canBeLate;
+        public TimeSpan earlyLimit;
+
+        public bool startClean;
+        public int lastJuiceType;
+        public int lastCleaningType;
+        public bool startDirty;
+
+        // set whenever FindTime is called
+        public bool needsCleaned;
+        public TimeSpan cleanLength;
+        public int cleanType;
+        public DateTime cleanTime;
 
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule
@@ -24,111 +35,199 @@ namespace WpfApp1
         /// <param name="name"></param>
         /// <param name="type"></param>
         /// <param name="early"></param>
-        /// <param name="late"></param>
-        public Equipment(String name, int type, int early, bool late)
+        public Equipment(String name, int type, int early)
         {
             this.name = name;
             this.type = type;
             functionalities = new List<bool>();
             SOs = new List<bool>();
             schedule = new List<ScheduleEntry>();
-            this.earlyLimit = early;
-            this.canBeLate = late;
+            this.earlyLimit = new TimeSpan(0, early, 0);
         }
 
-        public DateTime FindTime(DateTime goal, TimeSpan length, int juicetype, DateTime scheduleID)
+        /// <summary>
+        /// Returns the earliest time you can start using a tool. If the earliest time is before goal, returns goal.
+        /// Sets needsCleaned, cleanLength, cleanType, and cleanTime attributes each time
+        /// </summary>
+        /// <param name="goal"></param>
+        /// <param name="juicetype"></param>
+        /// <param name="scheduleID"></param>
+        /// <returns></returns>
+        public DateTime FindTime(DateTime goal, int juicetype, DateTime scheduleID)
         {
-            DateTime early = goal.Subtract(new TimeSpan(0, earlyLimit, 0));
-            DateTime temp;
+            TimeSpan cleaning;
 
+            // a tool is starting clean
+            if (schedule.Count == 0 && startClean)
+            {
+                cleaning = GetCleaning(lastJuiceType, juicetype);
+                bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
+
+                // the old cleaning was enough
+                if (oldcleaningenough)
+                {
+                    needsCleaned = false;
+                    return goal;
+                }
+                // you need to do more cleaning
+                else
+                {
+                    cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
+                    if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
+                        return goal;
+                    else
+                        return cleanTime.Add(cleaning);
+                }
+            }
+            // a tool is starting dirty
+            else if (schedule.Count == 0 && startDirty)
+            {
+                cleaning = GetCleaning(lastJuiceType, juicetype);
+
+                if (needsCleaned)
+                {
+                    cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
+                    if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
+                        return goal;
+                    else
+                        return cleanTime.Add(cleaning);
+                }
+                else
+                    return goal;
+
+            }
+            // a tool is starting and we don't care about cleanliness
+            else if (schedule.Count == 0)
+            {
+                return goal;
+            }
+
+            // otherwise get cleaning between the last schedule entry (which must be a juice and the new juice
+            cleaning = GetCleaning(schedule[schedule.Count - 1].juice.type, juicetype);
+            bool goalLaterThanEnd = DateTime.Compare(goal, schedule[schedule.Count - 1].end) > 0;
+            
+            // you don't need to do a cleaning so you can either return goal or the end of the schedule
+            if (!needsCleaned)
+            {
+                if (goalLaterThanEnd)
+                    return goal;
+                else
+                    return schedule[schedule.Count - 1].end;
+            }
+
+            cleanTime = cipGroup.FindTimePopulated(schedule[schedule.Count - 1].end, cleaning);
+            if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
+                return goal;
+            else
+                return cleanTime.Add(cleaning);
+        }
+
+
+        public TimeSpan GetCleaning(int juicetype1, int juicetype2)
+        {
+            // pull from database
+
+            // set cleanLength and cleanType
+
+            return new TimeSpan(0, 0, 0);
+        }
+
+        public bool CheckCleaning(int last, int needed)
+        {
+            // checks whether last satisfies needed
+            return true;
+        }
+
+        /// <summary>
+        /// Finds the entry in the schedule for the desired batch, null otherwise. If batched, slurry = 1.
+        /// You want the last batch of the slurry, to know when it's ready.
+        /// </summary>
+        /// <param name="juice"></param>
+        /// <param name="slurry"></param>
+        /// <returns></returns>
+        public ScheduleEntry FindEntry(Juice juice, int slurry)
+        {
+            // first you need to check if the juice already has allocated time on the schedule
+
+            // if slurry > 1, we need the entry for the last batch of the slurry
+
+            for (int i = 0; i < schedule.Count; i++)
+            {
+                // find this juice
+                if (schedule[i].juice == juice)
+                {
+                    // find the batch you need
+                    int batch = juice.totalBatches - juice.neededBatches + slurry - 1;
+                    i += batch;
+                    return schedule[i];
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds time in a populated schedule, assumes cleaning is not a concern. Returns the earliest possible time to start. Will always return a time, even a late one.
+        /// </summary>
+        /// <param name="early"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public DateTime FindTimePopulated(DateTime early, TimeSpan length)
+        {
             // empty schedule
             if (schedule.Count == 0)
-            {
-                
-            }
+                return early;
 
-            // spot before schedule is late enough after early to do something
-            if (DateTime.Compare(early.Add(length), schedule[0].start) <= 0)
-            {
-                // spot before schedule is late enough after goal to do something
-                if (DateTime.Compare(goal.Add(length), schedule[0].start) <= 0)
-                {
-                    // thaw room or no cleaning required
-                    if (type == 0 || zeroClean)
-                        return goal;
+            // preschedule
+            if (DateTime.Compare(schedule[0].start.Subtract(length), early) >= 0)
+                return early;
 
-                    // find out if you can clean on time
-                    temp = cipGroup.CIP(scheduleID, goal, cleaning);
-
-                    // you can clean on time before the schedule
-                    if (DateTime.Compare(temp, new DateTime(0, 0, 0)) != 0)
-                        return goal;
-                    // you can't clean on time, but it's okay if you're late
-                    else if (canBeLate)
-                    {
-                        // you found a time before the schedule!
-                        temp = cipGroup.CIP(scheduleID, schedule[0].start.Subtract(length), cleaning);
-                        if (DateTime.Compare(temp, new DateTime(0, 0, 0)) != 0)
-                            return temp;
-                        // otherwise try to find a gap
-                    }
-                    // try to find a gap
-                }
-
-                // at this point we're early
-                if (type == 0 || zeroClean)
-                    return schedule[0].start.Subtract(length);
-
-                // if you hit this place, either you're repeating something you did earlier, which is okay
-                //      OR goal came after schedule[0].start and you're trying to be early
-                temp = cipGroup.CIP(scheduleID, schedule[0].start.Subtract(length), cleaning);
-                if (DateTime.Compare(temp, new DateTime(0, 0, 0)) != 0)
-                    return temp;
-            }
-
-            // try to find a gap between schedule entries
-            DateTime choice = new DateTime(0, 0, 0);
-            
+            // find gap in schedule
             for (int i = 0; i < schedule.Count - 1; i++)
             {
-                // this gap comes entirely before early
+                // too early
                 if (DateTime.Compare(schedule[i + 1].start, early) <= 0)
                     continue;
-                // this gap come entirely after goal
-                if (DateTime.Compare(schedule[i].end, goal.Subtract(cleaning)) > 0)
-                {
-                    // you can't be late and there ain't no more ontime gaps
-                    if (!canBeLate)
-                        return choice;
-
-                    // we're only gonna get later and later, so we don't care about choice anymore
-                    // as soon as we find a big enough gap, we're returning it
-
-                    // we found a big enough gap
-                    if (TimeSpan.Compare(schedule[i+1].start.Subtract(schedule[i].end), length.Add(cleaning)) >= 0)
-                    {
-                        if (type == 0 || zeroClean)
-                            return schedule[i+1].start
-                        // see if we can clean in our gap
-                        temp = cipGroup.CIP(schedule[i].end.Add(cleaning), schedule[i + 1].start.Subtract(length), cleaning);
-                        if (DateTime.Compare(temp, new DateTime(0, 0, 0)) != 0)
-                            return temp;
-                    }
-
-                    continue;
-                }
-
-                // check if our gap is big enough
-                if (TimeSpan.Compare(schedule[i+1].start.Subtract(schedule[i].end), length.Add(cleaning)) >= 0)
-                {
-
-                }
+                if (TimeSpan.Compare(schedule[i + 1].start.Subtract(schedule[i].end), length) >= 0)
+                    return schedule[i + 1].start;
             }
+
+            // postschedule
+            return schedule[schedule.Count - 1].end;
         }
 
-        public DateTime CIP(DateTime start, DateTime end, TimeSpan length)
+        /// <summary>
+        /// takes a recipe and returns the number of functionalities this tool supports,
+        /// which the recipe doesn't need
+        /// </summary>
+        /// <param name="recipe"></param>
+        /// <returns></returns>
+        public int GetOtherFuncs(List<int> recipe)
         {
-            return new DateTime(0, 0, 0);
+            int cnt = 0;
+
+            for (int i = 0; i < recipe.Count; i++)
+                if (functionalities[i] && recipe[i] <= 0)
+                    cnt++;
+
+            return cnt;
+        }
+
+        /// <summary>
+        /// takes a list of SOs still available returns the number of those SOs that are also
+        /// available to this tool
+        /// </summary>
+        /// <param name="sosavail"></param>
+        /// <returns></returns>
+        public int GetSOs(bool[] sosavail)
+        {
+            int cnt = 0;
+
+            for (int i = 0; i < sosavail.Length; i++)
+                if (SOs[i] && sosavail[i])
+                    cnt++;
+
+            return cnt;
         }
     }
 }
