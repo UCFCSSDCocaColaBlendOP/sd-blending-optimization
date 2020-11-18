@@ -62,11 +62,12 @@ namespace WpfApp1
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
             inprogress = new List<Juice>();
+            aseptics = new List<Equipment>(); 
 
             inconceivable = false;
             late = false;
             //ExampleOfSchedule();
-            //ExampleOfSchedule2(); 
+            //ExampleOfSchedule2();
             ProcessCSV(filename);
         }
 
@@ -161,11 +162,47 @@ namespace WpfApp1
             PrintAllJuices();
         }
 
+        // gets the thaw room id from the database
+        // added this function to pull equipment
+        public void getThawRoomID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_ThawRoom_Id]";
+                cmd.Parameters.Add("thaw_name", SqlDbType.NVarChar).Value = "Thaw Room";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                if (dt.Rows.Count > 0) 
+                { 
+                    thawID = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         // TODO - add pull equipment function
         // extras are pieces of equipment with a single functionality, their type is their functionality
         // blendtanks are blendtanks their type is their SO
         private void PullEquipment()
         {
+            getThawRoomID(); 
             // access the database
             // initialize SOcount and functionCount
             //methods used to get the maximum sos and functionalities
@@ -236,6 +273,69 @@ namespace WpfApp1
             getBlendSystem_FuncSos();
             getExtras();
             getExtraSorted();
+            getAseptics(); 
+        }
+        public void getAseptics()
+        {
+            int id_at;
+            String name_at;
+            int id; 
+            //int cip; 
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Aseptics]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    
+                    id_at = Convert.ToInt32(dr["id"]);
+                    name_at = dr.Field<String>("Aseptic Tank");
+                    //cip = Convert.ToInt32(dr["cip_id"]);
+                    Equipment temp = new Equipment(name_at, id_at, 0);
+                    for (int i = 0; i < numSOs + 1; i++)
+                    {
+                        if (i > 0) { 
+                            temp.SOs.Add(true);
+                        }
+                        else
+                        {
+                            temp.SOs.Add(false); 
+                        }
+                    }
+                    //temp.cip_id=cip; 
+                    temp.cleaningProcess = 4;
+                    temp.e_type = id_at;
+                    aseptics.Add(temp);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            /*
+            for(int i=0; i<aseptics.Count; i++)
+            {
+                Console.WriteLine(aseptics[i].name);
+                Console.WriteLine(aseptics[i].type); 
+            }
+            */
         }
 
         //gets the maximum number of functions
@@ -1048,6 +1148,9 @@ namespace WpfApp1
                 if (finished[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < finished[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -2809,6 +2912,7 @@ namespace WpfApp1
             return x.so;
         } 
         
+        
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -2832,6 +2936,45 @@ namespace WpfApp1
                     juice += " (slurry) " + adding;
                 }
                 cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        //  inserting Juice Schedule
+        //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
+        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch,String equipname, DateTime start, DateTime end)
+        {
+                                            
+            //for equip_type that should return the name
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+                cmd.CommandText = "[insert_JuiceSch]"; 
+                if (slurry == true)
+                {
+                    String adding = Convert.ToString(batch);
+                    juice += " (slurry) " + adding;
+                }
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+                cmd.Parameters.Add("juicetype", SqlDbType.BigInt).Value = juice_type;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
 
                 cmd.Connection = conn;
 
