@@ -959,7 +959,7 @@ namespace WpfApp1
             if (thawRoom.schedule.Count != 0)
             {
                 for (int i = 0; i < thawRoom.schedule.Count; i++)
-                    // call alisa's function
+                    insertingEquipSchedule(AddingSoId(thawRoom), thawRoom.name, thawRoom.schedule[i].start, thawRoom.schedule[i].end, thawRoom.schedule[i].juice.name, thawRoom.schedule[i].slurry, thawRoom.schedule[i].batch);
             }
 
             // extras
@@ -968,7 +968,12 @@ namespace WpfApp1
                 if (extras[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < extras[i].schedule.Count; j++)
-                        // call alisa's function
+                    {
+                        if (extras[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(extras[i]), extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[i].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(extras[i]), extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[i].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                    }
                 }
             }
 
@@ -978,7 +983,12 @@ namespace WpfApp1
                 if (systems[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < systems[i].schedule.Count; j++)
-                        // call alisa's function
+                    {
+                        if (systems[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(systems[i]), systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[i].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(systems[i]), systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[i].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                    }
                 }
             }
 
@@ -988,7 +998,12 @@ namespace WpfApp1
                 if (tanks[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < tanks[i].schedule.Count; j++)
-                        // call alisa's function
+                    {
+                        if (tanks[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(tanks[i]), tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[i].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(tanks[i]), tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[i].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                    }
                 }
             }
 
@@ -998,7 +1013,12 @@ namespace WpfApp1
                 if (transferLines[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < transferLines[i].schedule.Count; j++)
-                        // call alisa's function
+                    {
+                        if (transferLines[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(transferLines[i]), transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[i].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(transferLines[i]), transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[i].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                    }
                 }
             }
 
@@ -1008,7 +1028,12 @@ namespace WpfApp1
                 if (aseptics[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < aseptics[i].schedule.Count; j++)
-                        // call alisa's function
+                    {
+                        if (aseptics[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(aseptics[i]), aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[i].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(aseptics[i]), aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[i].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                    }
                 }
             }
         }
@@ -1383,14 +1408,14 @@ namespace WpfApp1
                 }
 
                 if (transferLines[2].needsCleaned)
-                    transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType));
+                    transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType, transferLines[2].cleanName));
 
                 transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
 
                 // aseptic
-                if (aseptics[juice.type].needsCleaned)
-                    aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
+                if (aseptics[juice.line].needsCleaned)
+                    aseptics[juice.line].schedule.Add(new ScheduleEntry(aseptics[juice.line].cleanTime, aseptics[juice.line].cleanTime.Add(aseptics[juice.line].cleanLength), aseptics[juice.line].cleanType, aseptics[juice.line].cleanName));
+                aseptics[juice.line].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
                 return three;
             }
             else
@@ -1441,13 +1466,13 @@ namespace WpfApp1
                 }
 
                 if (choice.needsCleaned)
-                    choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType));
+                    choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType, choice.cleanName));
                 choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 // aseptic
-                if (aseptics[juice.type].needsCleaned)
-                    aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
+                if (aseptics[juice.line].needsCleaned)
+                    aseptics[juice.line].schedule.Add(new ScheduleEntry(aseptics[juice.line].cleanTime, aseptics[juice.line].cleanTime.Add(aseptics[juice.line].cleanLength), aseptics[juice.line].cleanType, aseptics[juice.line].cleanName));
+                aseptics[juice.line].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 return start;
             }
@@ -1603,6 +1628,7 @@ namespace WpfApp1
                 TimeSpan length = TimeSpan.Zero;
                 DateTime cStart = DateTime.MinValue;
                 TimeSpan cLength = TimeSpan.Zero;
+                string cName = "";
                 int cType = -1;
 
                 // choose a system
@@ -1631,12 +1657,14 @@ namespace WpfApp1
                     DateTime tempstart = systems[j].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
                     DateTime tempCStart = DateTime.MinValue;
                     TimeSpan tempCLength = TimeSpan.Zero;
+                    string tempCName = "";
                     int tempCType = -1;
                     if (systems[j].needsCleaned)
                     {
                         tempCStart = systems[j].cleanTime;
                         tempCLength = systems[j].cleanLength;
                         tempCType = systems[j].cleanType;
+                        tempCName = systems[j].cleanName;
                     }
                     int tempsos = systems[j].GetSOs(soChoices);
                     int tempotherfuncs = systems[j].GetOtherFuncs(juice.recipes[recipe]);
@@ -1652,6 +1680,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // temp and current are the same time
                     else if (DateTime.Compare(tempstart, currentStart) == 0)
@@ -1666,6 +1695,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos > sos)
                         {
@@ -1677,6 +1707,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos == sos && TimeSpan.Compare(tempCLength, cLength) < 0)
                         {
@@ -1688,6 +1719,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                     // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
@@ -1701,6 +1733,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // current is later than ideal
                     else
@@ -1718,6 +1751,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                 }
@@ -1736,6 +1770,7 @@ namespace WpfApp1
                 option.systemCleaningStart = cStart;
                 option.systemCleaningLength = cLength;
                 option.systemCleaningType = cType;
+                option.systemCleaningName = cName;
 
                 // update metrics
                 if (!pickedStartTime)
@@ -1809,6 +1844,7 @@ namespace WpfApp1
             DateTime start = DateTime.MinValue;
             DateTime cleanStart = DateTime.MinValue;
             TimeSpan cleanLength = TimeSpan.Zero;
+            string cleanName = "";
             int cleanType = -1;
 
             for (int i = 0; i < tanks.Count; i++)
@@ -1821,6 +1857,7 @@ namespace WpfApp1
                 DateTime tempCleanStart = tanks[i].cleanTime;
                 TimeSpan tempCleanLength = tanks[i].cleanLength;
                 int tempCleanType = tanks[i].cleanType;
+                string tempCleanName = tanks[i].cleanName;
 
                 if (tank == null)
                 {
@@ -1830,6 +1867,7 @@ namespace WpfApp1
                     cleanStart = tempCleanStart;
                     cleanLength = tempCleanLength;
                     cleanType = tempCleanType;
+                    cleanName = tempCleanName;
                 }
                 // current is late
                 else if (DateTime.Compare(start, juice.idealTime[recipe]) > 0)
@@ -1843,6 +1881,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
                 // current and new option are both on time
@@ -1856,6 +1895,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
             }
@@ -1874,6 +1914,7 @@ namespace WpfApp1
             option.tankCleaningStart = cleanStart;
             option.tankCleaningLength = cleanLength;
             option.tankCleaningType = cleanType;
+            option.tankCleaningName = cleanName;
 
             if (!pickedStartTime)
                 option.startBlending = start;
@@ -1893,6 +1934,7 @@ namespace WpfApp1
             DateTime goTime = DateTime.MinValue;
             DateTime clSt = DateTime.MinValue;
             TimeSpan clL = TimeSpan.Zero;
+            string clN = "";
             int cltype = -1;
 
             // try transfer line 1
@@ -1903,6 +1945,7 @@ namespace WpfApp1
                 clSt = transferLines[0].cleanTime;
                 clL = transferLines[0].cleanLength;
                 cltype = transferLines[0].cleanType;
+                clN = transferLines[0].cleanName;
             }
 
             // try transfer line 2
@@ -1915,6 +1958,7 @@ namespace WpfApp1
                     clSt = transferLines[1].cleanTime;
                     clL = transferLines[1].cleanLength;
                     cltype = transferLines[1].cleanType;
+                    clN = transferLines[1].cleanName;
                 }
                 else
                 {
@@ -1922,6 +1966,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[1].cleanTime;
                     TimeSpan tempClL = transferLines[1].cleanLength;
                     int tempCltype = transferLines[1].cleanType;
+                    string tempClN = transferLines[1].cleanName;
 
                     // transfer line 2 is ontime, transfer line 1 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -1931,6 +1976,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                     // they're both on time
                     else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
@@ -1943,6 +1989,7 @@ namespace WpfApp1
                             clSt = tempClSt;
                             clL = tempClL;
                             cltype = tempCltype;
+                            clN = tempClN;
                         }
                     }
                 }
@@ -1958,6 +2005,7 @@ namespace WpfApp1
                     clSt = transferLines[3].cleanTime;
                     clL = transferLines[3].cleanLength;
                     cltype = transferLines[3].cleanType;
+                    clN = transferLines[3].cleanName;
                 }
                 else
                 {
@@ -1965,6 +2013,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[3].cleanTime;
                     TimeSpan tempClL = transferLines[3].cleanLength;
                     int tempCltype = transferLines[3].cleanType;
+                    string tempClN = transferLines[3].cleanName;
 
                     // transfer line 4 is ontime, transfer line 1/2 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -1974,6 +2023,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                     // they're both on time
                     else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
@@ -1986,6 +2036,7 @@ namespace WpfApp1
                             clSt = tempClSt;
                             clL = tempClL;
                             cltype = tempCltype;
+                            clN = tempClN;
                         }
                     }
                 }
@@ -2001,6 +2052,7 @@ namespace WpfApp1
                     clSt = transferLines[2].cleanTime;
                     clL = transferLines[2].cleanLength;
                     cltype = transferLines[2].cleanType;
+                    clN = transferLines[2].cleanName;
                 }
                 else
                 {
@@ -2008,6 +2060,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[2].cleanTime;
                     TimeSpan tempClL = transferLines[2].cleanLength;
                     int tempCltype = transferLines[2].cleanType;
+                    string tempClN = transferLines[2].cleanName;
 
                     // transfer line 2 is ontime, transfer line 1 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -2017,6 +2070,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                 }
             }
@@ -2034,6 +2088,7 @@ namespace WpfApp1
             option.transferCleaningStart = clSt;
             option.transferCleaningLength = clL;
             option.transferCleaningType = cltype;
+            option.transferCleaningName = clN;
 
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
@@ -2200,6 +2255,7 @@ namespace WpfApp1
                 TimeSpan length = TimeSpan.Zero;
                 DateTime cStart = DateTime.MinValue;
                 TimeSpan cLength = TimeSpan.Zero;
+                string cName = "";
                 int cType = -1;
 
                 // choose a system
@@ -2229,11 +2285,13 @@ namespace WpfApp1
                     DateTime tempCStart = DateTime.MinValue;
                     TimeSpan tempCLength = TimeSpan.Zero;
                     int tempCType = -1;
+                    string tempCName = "";
                     if (systems[j].needsCleaned)
                     {
                         tempCStart = systems[j].cleanTime;
                         tempCLength = systems[j].cleanLength;
                         tempCType = systems[j].cleanType;
+                        tempCName = systems[j].cleanName;
                     }
                     int tempsos = systems[j].GetSOs(soChoices);
                     int tempotherfuncs = systems[j].GetOtherFuncs(juice.recipes[recipe]);
@@ -2249,6 +2307,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // temp and current are the same time
                     else if (DateTime.Compare(tempstart, currentStart) == 0)
@@ -2263,6 +2322,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos > sos)
                         {
@@ -2274,6 +2334,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos == sos && TimeSpan.Compare(tempCLength, cLength) < 0)
                         {
@@ -2285,6 +2346,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                     // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
@@ -2298,6 +2360,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // current is later than ideal
                     else
@@ -2315,6 +2378,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                 }
@@ -2335,6 +2399,7 @@ namespace WpfApp1
                 option.systemCleaningStart = cStart;
                 option.systemCleaningLength = cLength;
                 option.systemCleaningType = cType;
+                option.systemCleaningName = cName;
 
                 // update metrics
                 if (!pickedStartTime)
@@ -2409,6 +2474,7 @@ namespace WpfApp1
             DateTime cleanStart = DateTime.MinValue;
             TimeSpan cleanLength = TimeSpan.Zero;
             int cleanType = -1;
+            string cleanName = "";
 
             for (int i = 0; i < tanks.Count; i++)
             {
@@ -2420,6 +2486,7 @@ namespace WpfApp1
                 DateTime tempCleanStart = tanks[i].cleanTime;
                 TimeSpan tempCleanLength = tanks[i].cleanLength;
                 int tempCleanType = tanks[i].cleanType;
+                string tempCleanName = tanks[i].cleanName;
 
                 if (tank == null)
                 {
@@ -2429,6 +2496,7 @@ namespace WpfApp1
                     cleanStart = tempCleanStart;
                     cleanLength = tempCleanLength;
                     cleanType = tempCleanType;
+                    cleanName = tempCleanName;
                 }
                 // current is late
                 else if (DateTime.Compare(start, juice.idealTime[recipe]) > 0)
@@ -2442,6 +2510,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
                 // current and new option are both on time
@@ -2455,6 +2524,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
             }
@@ -2475,6 +2545,7 @@ namespace WpfApp1
             option.tankCleaningStart = cleanStart;
             option.tankCleaningLength = cleanLength;
             option.tankCleaningType = cleanType;
+            option.tankCleaningName = cleanName;
 
             if (!pickedStartTime)
                 option.startBlending = start;
@@ -2505,6 +2576,7 @@ namespace WpfApp1
             option.transferCleaningStart = transferLines[2].cleanTime;
             option.transferCleaningLength = transferLines[2].cleanLength;
             option.transferCleaningType = transferLines[2].cleanType;
+            option.transferCleaningName = transferLines[2].cleanName;
 
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;

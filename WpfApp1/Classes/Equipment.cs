@@ -39,6 +39,7 @@ namespace WpfApp1
         public TimeSpan cleanLength;
         public int cleanType;
         public DateTime cleanTime;
+        public string cleanName;
 
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule

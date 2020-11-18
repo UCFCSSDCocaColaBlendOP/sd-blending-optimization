@@ -205,10 +205,5 @@ namespace WpfApp1
                 idealTime.Add(currentFillTime.Subtract(new TimeSpan(0, idealmixinglength[i], 0)));
         }
 
-        // grab from Alisa
-        public void SortSchedule()
-        {
-            
-        }
     }
 }
