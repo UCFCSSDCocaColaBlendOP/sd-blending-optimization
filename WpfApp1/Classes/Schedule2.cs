@@ -161,11 +161,48 @@ namespace WpfApp1
             PrintAllJuices();
         }
 
+        // gets the thaw room id from the database
+        // added this function to pull equipment
+        public void getThawRoomID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_ThawRoom_Id]";
+                cmd.Parameters.Add("thaw_name", SqlDbType.NVarChar).Value = "Thaw Room";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                if (dt.Rows.Count > 0) 
+                { 
+                    thawID = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            Console.WriteLine(thawID); 
+        }
         // TODO - add pull equipment function
         // extras are pieces of equipment with a single functionality, their type is their functionality
         // blendtanks are blendtanks their type is their SO
         private void PullEquipment()
         {
+            getThawRoomID(); 
             // access the database
             // initialize SOcount and functionCount
             //methods used to get the maximum sos and functionalities
