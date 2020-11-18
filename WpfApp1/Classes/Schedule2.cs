@@ -66,8 +66,7 @@ namespace WpfApp1
 
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
-            //ProcessCSV(filename);
-            //this.juices_line9 = new List<Juice>();
+            ProcessCSV(filename);
         }
 
         //TODO: 0=1,1=2,2=3,3=7
@@ -116,8 +115,8 @@ namespace WpfApp1
                     string line_name = lines[i][8];
                     int line = Int32.Parse(line_name.Substring(line_name.Length - 1, 1));
 
-                    // if it's not line 1,2,3,7, or 8, we can continue to the next line
-                    if (!(line == 1 || line == 2 || line == 3 || line == 7 || line == 8))
+                    // if it's not line 1,2,3,7, we can continue to the next line
+                    if (!(line == 1 || line == 2 || line == 3 || line == 7))
                     {
                         continue;
                     }
@@ -125,9 +124,9 @@ namespace WpfApp1
                     string material = lines[i][2];
 
                     //Processing quantities to check if the juice is at it's ending stage
-                    int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
-                    int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
-                    bool no_batches = quantity_juice <= quantity_juice_2;
+                    //int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
+                    //int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
+                    //bool no_batches = quantity_juice <= quantity_juice_2;
 
 
                     string name = lines[i][3];
@@ -140,18 +139,19 @@ namespace WpfApp1
                     string dateTime = date + " " + seconds;
                     DateTime fillTime = Convert.ToDateTime(dateTime);
 
-                    bool starterFlag = quantity_juice_2 != 0;
+                    //bool starterFlag = quantity_juice_2 != 0;
 
-                    Juice new_juice = new Juice(name, material, line, type, fillTime);
+                    Dictionary<int, int> line_number_pair = new Dictionary<int, int>();
+                    line_number_pair.Add(1, 0);
+                    line_number_pair.Add(2, 1);
+                    line_number_pair.Add(3, 2);
+                    line_number_pair.Add(7, 3);
 
-                    //TODO: delete all line 8 stuff
-                    if (line == 8)
-                    {
-                    }
-                    else
-                    {
-                        inprogress.Add(new_juice);
-                    }
+                    int line_num_use = line_number_pair[line];
+
+                    Juice new_juice = new Juice(name, material, line_num_use, type, fillTime);
+
+                    inprogress.Add(new_juice);
 
                 }
             }
@@ -453,6 +453,7 @@ namespace WpfApp1
             }
             */
         }
+
         private void getBlendSystem_FuncSos()
         {
             try
@@ -2654,7 +2655,60 @@ namespace WpfApp1
             for (int i = 0; i < finished.Count; i++)
                 ScheduleEntry.SortSchedule(finished[i].schedule);
         }
+
+        public int AddingSoId(Equipment x)
+        {
+            Dictionary<String, int> equipment_to_so = new Dictionary<string, int>();
+
+            equipment_to_so.Add("SO1 Mix Tank 1", 1);
+            equipment_to_so.Add("SO1 Mix Tank 2", 1);
+            equipment_to_so.Add("SO1 Mix Tank 3", 1);
+            equipment_to_so.Add("SO1 Mix Tank 4", 1);
+            equipment_to_so.Add("SO2 Mix Tank 1", 2);
+            equipment_to_so.Add("SO2 Mix Tank 2", 2);
+            equipment_to_so.Add("SO2 Mix Tank 3", 2);
+            equipment_to_so.Add("SO2 Mix Tank 4", 2);
+
+            equipment_to_so.Add("SO1 Blend System", 1);
+            equipment_to_so.Add("SO2 Blend System", 2);
+            equipment_to_so.Add("SO2 Chopper", 2);
+            equipment_to_so.Add("SO3 Blend System", 3);
+            equipment_to_so.Add("Tote Unloading", 3);
+            equipment_to_so.Add("RT", 3);
+
+            equipment_to_so.Add("TL 1", 4);
+            equipment_to_so.Add("TL 2", 4);
+            equipment_to_so.Add("TL 3", 4);
+            equipment_to_so.Add("TL 4", 4);
+
+            equipment_to_so.Add("Line 1", 5);
+            equipment_to_so.Add("Line 2", 5);
+            equipment_to_so.Add("Line 3", 5);
+            equipment_to_so.Add("Line 7", 5);
+
+            //----------------------------------
+
+            if (x.name.Equals("Water") || x.name.Equals("Sucrose"))
+            {
+                if (x.SOs[1] == true)
+                {
+                    x.so = 1;
+                }
+                else
+                {
+                    x.so = 2;
+                }
+            }
+            else
+            {
+                x.so = equipment_to_so[x.name];
+            }
+
+            return x.so;
+        }
     }
+
+    
 
     /*
     private void ExampleOfSchedule()
