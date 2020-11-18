@@ -113,9 +113,9 @@ namespace WpfApp1
                 if (fillingInline && fillingSlurry == 1)
                 {
                     // mark the transferline 
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, 1));
                     // mark the blend tank, it ends at finishedwithtransferline
-                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, 1));
                 }
                 // you're part way through a slurry
                 else if (fillingInline)
@@ -124,7 +124,7 @@ namespace WpfApp1
                     slurryBatches = fillingSlurry - 1;
                     tank = fillingTank;
                     // mark the transferline
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, slurryBatches + 1));
                     // mark the blend tank, open ended
                     fillingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                 }
@@ -151,7 +151,7 @@ namespace WpfApp1
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                     // mark all the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, -1));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, slurryBatches + 1));
                 }
                 // mixing a batch
                 else
