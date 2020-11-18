@@ -959,6 +959,9 @@ namespace WpfApp1
             if (thawRoom.schedule.Count != 0)
             {
                 for (int i = 0; i < thawRoom.schedule.Count; i++)
+                {
+
+                }
                     // call alisa's function
             }
 
@@ -968,6 +971,9 @@ namespace WpfApp1
                 if (extras[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < extras[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -978,6 +984,9 @@ namespace WpfApp1
                 if (systems[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < systems[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -988,6 +997,9 @@ namespace WpfApp1
                 if (tanks[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < tanks[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -998,6 +1010,9 @@ namespace WpfApp1
                 if (transferLines[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < transferLines[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -1008,6 +1023,9 @@ namespace WpfApp1
                 if (aseptics[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < aseptics[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
@@ -1023,6 +1041,9 @@ namespace WpfApp1
                 if (finished[i].schedule.Count != 0)
                 {
                     for (int j = 0; j < finished[i].schedule.Count; j++)
+                    {
+
+                    }
                         // call alisa's function
                 }
             }
