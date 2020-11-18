@@ -31,6 +31,7 @@ namespace WpfApp1
         public List<Equipment> extras;          // tools with only one functionality, type == functionality, should be sorted by type
         public List<Equipment> systems;         // tools with multiple functionalities
         public Equipment thawRoom;              // the thaw room
+        public int thawID;
         public List<Equipment> tanks;           // blend tanks/ mix tanks
         public List<Equipment> transferLines;   // transfer lines
         public List<Equipment> aseptics;        // aseptic/pasteurizers
@@ -1307,12 +1308,12 @@ namespace WpfApp1
                 if (transferLines[2].needsCleaned)
                     transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType));
 
-                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
 
                 // aseptic
                 if (aseptics[juice.type].needsCleaned)
                     aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
                 return three;
             }
             else
@@ -1321,10 +1322,10 @@ namespace WpfApp1
                 DateTime start = DateTime.MinValue;
 
                 // try transfer line 1 or two
-                if (!transferLines[tank.type].down)
+                if (!transferLines[tank.type - 1].down)
                 {
-                    choice = transferLines[tank.type];
-                    start = transferLines[tank.type].FindTime(startTrans, juice.type, scheduleID);
+                    choice = transferLines[tank.type - 1];
+                    start = transferLines[tank.type - 1].FindTime(startTrans, juice.type, scheduleID);
                 }
 
                 // try four if necessary
@@ -1364,12 +1365,12 @@ namespace WpfApp1
 
                 if (choice.needsCleaned)
                     choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType));
-                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 // aseptic
                 if (aseptics[juice.type].needsCleaned)
                     aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 return start;
             }
@@ -1384,14 +1385,16 @@ namespace WpfApp1
         public CompareRecipe PrepRecipe(Juice juice, int recipe)
         {
             CompareRecipe option = new CompareRecipe();
+            option.batch = juice.totalBatches - juice.neededBatches + 1;
+            option.slurry = false;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j < numSOs + 1; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -1400,7 +1403,7 @@ namespace WpfApp1
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -1446,7 +1449,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
@@ -1816,7 +1819,7 @@ namespace WpfApp1
             int cltype = -1;
 
             // try transfer line 1
-            if (soChoices[0] && !transferLines[0].down)
+            if (soChoices[1] && !transferLines[0].down)
             {
                 choice = transferLines[0];
                 goTime = transferLines[0].FindTime(tgoal, juice.type, scheduleID);
@@ -1826,7 +1829,7 @@ namespace WpfApp1
             }
 
             // try transfer line 2
-            if (soChoices[1] && !transferLines[0].down)
+            if (soChoices[2] && !transferLines[0].down)
             {
                 if (choice == null)
                 {
@@ -1977,14 +1980,16 @@ namespace WpfApp1
                 juice.recipes[recipe][i] *= slurrySize;
 
             CompareRecipe option = new CompareRecipe();
+            option.slurry = true;
+            option.batch = slurrySize;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j <= numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -1995,7 +2000,7 @@ namespace WpfApp1
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -2041,7 +2046,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
