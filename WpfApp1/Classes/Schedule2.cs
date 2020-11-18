@@ -2655,6 +2655,7 @@ namespace WpfApp1
             return x.so;
         } 
         
+        
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -2678,6 +2679,45 @@ namespace WpfApp1
                     juice += " (slurry) " + adding;
                 }
                 cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        //  inserting Juice Schedule
+        //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
+        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch,String equipname, DateTime start, DateTime end)
+        {
+                                            
+            //for equip_type that should return the name
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+                cmd.CommandText = "[insert_JuiceSch]"; 
+                if (slurry == true)
+                {
+                    String adding = Convert.ToString(batch);
+                    juice += " (slurry) " + adding;
+                }
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+                cmd.Parameters.Add("juicetype", SqlDbType.BigInt).Value = juice_type;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
 
                 cmd.Connection = conn;
 

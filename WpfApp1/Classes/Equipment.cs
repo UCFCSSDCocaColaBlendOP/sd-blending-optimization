@@ -35,6 +35,7 @@ namespace WpfApp1
         public bool startDirty;
 
         // set whenever FindTime is called
+        public String cleanName; 
         public bool needsCleaned;
         public TimeSpan cleanLength;
         public int cleanType;
