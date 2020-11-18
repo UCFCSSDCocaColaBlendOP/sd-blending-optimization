@@ -195,7 +195,6 @@ namespace WpfApp1
             {
                 MessageBox.Show(ex.Message);
             }
-            Console.WriteLine(thawID); 
         }
         // TODO - add pull equipment function
         // extras are pieces of equipment with a single functionality, their type is their functionality
