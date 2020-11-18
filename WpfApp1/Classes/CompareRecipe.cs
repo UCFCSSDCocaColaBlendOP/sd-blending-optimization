@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    class CompareRecipe
+    public class CompareRecipe
     {
         // basic variables
         public DateTime startBlending;

@@ -16,7 +16,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
-using WpfApp1.Classes;
 
 namespace WpfApp1
 {
@@ -43,7 +42,7 @@ namespace WpfApp1
             InitializeComponent();
             this.sch = sch;
 
-            List<Juice> juices = sch.get_inProgress();
+            List<Juice> juices = sch.inprogress;
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
             colJuice.Header = "Juices";
