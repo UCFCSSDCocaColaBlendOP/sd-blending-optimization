@@ -48,6 +48,7 @@ namespace WpfApp1
         public List<Juice> finished;
         public List<Juice> inprogress;
 
+
         /// <summary>
         /// Creates a Schedule object, initializing lists of equipment
         /// </summary>
@@ -64,7 +65,6 @@ namespace WpfApp1
 
             inconceivable = false;
             late = false;
-
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
             ProcessCSV(filename);
@@ -1333,63 +1333,7 @@ namespace WpfApp1
 
             return time;
         } */
-        /*
-        public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice)
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[insert_ProdSch]";
-                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-                cmd.Parameters.Add("id_so", SqlDbType.Int).Value = id_so;
-                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
-                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
-                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
-                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
-
-                cmd.Connection = conn;
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        public void insertingScheduleID()
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[insert_ScheduleID]";
-                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-
-                cmd.Connection = conn;
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        } */
-
-
+        
 
         /// <summary>
         /// will find and schedule time for the juice in the tank to use a transfer line
@@ -2760,6 +2704,7 @@ namespace WpfApp1
             equipment_to_so.Add("SO3 Blend System", 3);
             equipment_to_so.Add("Tote Unloading", 3);
             equipment_to_so.Add("RT", 3);
+            equipment_to_so.Add("Thaw Room", 3);
 
             equipment_to_so.Add("TL 1", 4);
             equipment_to_so.Add("TL 2", 4);
@@ -2790,10 +2735,72 @@ namespace WpfApp1
             }
 
             return x.so;
+        } 
+        
+        public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_ProdSch]";
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+                cmd.Parameters.Add("id_so", SqlDbType.Int).Value = id_so;
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
+
+                if (slurry == true)
+                {
+                    String adding = Convert.ToString(batch);
+                    juice += " (slurry) " + adding;
+                }
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
+
+        public void insertingScheduleID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_ScheduleID]";
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
     }
 
-    
+
 
     /*
     private void ExampleOfSchedule()

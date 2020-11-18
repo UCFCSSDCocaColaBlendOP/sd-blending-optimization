@@ -89,9 +89,29 @@ namespace WpfApp1
             schedule[schedule.Count - 1].end = end;
         }
 
+        // uses insertion sort to sort through the schedule based on the start time
         public static void SortSchedule(List<ScheduleEntry> schedule)
         {
-
+            if (schedule.Count > 1)
+            {
+                ScheduleEntry temp_entry;
+                for (int i = 1; i < schedule.Count; i++)
+                {
+                    for (int j = i; j > 0; j--)
+                    {
+                        if (schedule[j - 1].start > schedule[j].start)
+                        {
+                            temp_entry = schedule[j];
+                            schedule[j] = schedule[j - 1];
+                            schedule[j - 1] = temp_entry;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }
