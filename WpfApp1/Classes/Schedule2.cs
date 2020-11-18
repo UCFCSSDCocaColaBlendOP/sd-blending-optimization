@@ -62,11 +62,12 @@ namespace WpfApp1
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
             inprogress = new List<Juice>();
+            aseptics = new List<Equipment>(); 
 
             inconceivable = false;
             late = false;
             //ExampleOfSchedule();
-            //ExampleOfSchedule2(); 
+            //ExampleOfSchedule2();
             ProcessCSV(filename);
         }
 
@@ -272,6 +273,69 @@ namespace WpfApp1
             getBlendSystem_FuncSos();
             getExtras();
             getExtraSorted();
+            getAseptics(); 
+        }
+        public void getAseptics()
+        {
+            int id_at;
+            String name_at;
+            int id; 
+            //int cip; 
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Aseptics]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    
+                    id_at = Convert.ToInt32(dr["id"]);
+                    name_at = dr.Field<String>("Aseptic Tank");
+                    //cip = Convert.ToInt32(dr["cip_id"]);
+                    Equipment temp = new Equipment(name_at, id_at, 0);
+                    for (int i = 0; i < numSOs + 1; i++)
+                    {
+                        if (i > 0) { 
+                            temp.SOs.Add(true);
+                        }
+                        else
+                        {
+                            temp.SOs.Add(false); 
+                        }
+                    }
+                    //temp.cip_id=cip; 
+                    temp.cleaningProcess = 4;
+                    temp.e_type = id_at;
+                    aseptics.Add(temp);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            /*
+            for(int i=0; i<aseptics.Count; i++)
+            {
+                Console.WriteLine(aseptics[i].name);
+                Console.WriteLine(aseptics[i].type); 
+            }
+            */
         }
 
         //gets the maximum number of functions
