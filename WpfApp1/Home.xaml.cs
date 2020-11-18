@@ -17,7 +17,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
-using WpfApp1.Classes;
 
 namespace WpfApp1
 {
