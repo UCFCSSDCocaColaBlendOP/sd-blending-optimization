@@ -2622,6 +2622,7 @@ namespace WpfApp1
             equipment_to_so.Add("SO3 Blend System", 3);
             equipment_to_so.Add("Tote Unloading", 3);
             equipment_to_so.Add("RT", 3);
+            equipment_to_so.Add("Thaw Room", 3);
 
             equipment_to_so.Add("TL 1", 4);
             equipment_to_so.Add("TL 2", 4);
@@ -2632,7 +2633,6 @@ namespace WpfApp1
             equipment_to_so.Add("Line 2", 5);
             equipment_to_so.Add("Line 3", 5);
             equipment_to_so.Add("Line 7", 5);
-            equipment_to_so.Add("Thaw Room", 3);
 
             //----------------------------------
 
