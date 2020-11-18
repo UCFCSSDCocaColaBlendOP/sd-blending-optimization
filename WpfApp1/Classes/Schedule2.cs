@@ -945,7 +945,87 @@ namespace WpfApp1
             }
 
             GrabJuiceSchedules();
-            // call Alisa's functions to add schedules to database
+            // add to database
+            AddEquipmentToDatabase();
+            AddJuicesToDatabase();
+        }
+
+        /// <summary>
+        /// Add's all the equipment schedules to the database
+        /// </summary>
+        public void AddEquipmentToDatabase()
+        {
+            // thaw room
+            if (thawRoom.schedule.Count != 0)
+            {
+                for (int i = 0; i < thawRoom.schedule.Count; i++)
+                    // call alisa's function
+            }
+
+            // extras
+            for (int i = 0; i < extras.Count; i++)
+            {
+                if (extras[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < extras[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // systems
+            for (int i = 0; i < systems.Count; i++)
+            {
+                if (systems[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < systems[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // tanks
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                if (tanks[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < tanks[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // transfer lines
+            for (int i = 0; i < transferLines.Count; i++)
+            {
+                if (transferLines[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < transferLines[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // aseptics
+            for (int i = 0; i < aseptics.Count; i++)
+            {
+                if (aseptics[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < aseptics[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+        }
+
+        /// <summary>
+        /// add's all the juice schedules to the database
+        /// </summary>
+        public void AddJuicesToDatabase()
+        {
+            for (int i = 0; i < finished.Count; i++)
+            {
+                if (finished[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < finished[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
         }
 
         public void SortByFillTime()
