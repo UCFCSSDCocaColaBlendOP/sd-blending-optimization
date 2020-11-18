@@ -1149,9 +1149,8 @@ namespace WpfApp1
                 {
                     for (int j = 0; j < finished[i].schedule.Count; j++)
                     {
-
+                        insertingJuiceSchedule(finished[i].name, finished[i].type, finished[i].schedule[j].slurry, finished[i].schedule[j].batch, finished[i].schedule[j].tool.name, finished[i].schedule[j].start, finished[i].schedule[j].end);
                     }
-                        // call alisa's function
                 }
             }
         }

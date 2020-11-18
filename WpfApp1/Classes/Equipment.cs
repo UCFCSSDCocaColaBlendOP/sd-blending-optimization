@@ -35,7 +35,6 @@ namespace WpfApp1
         public bool startDirty;
 
         // set whenever FindTime is called
-        public String cleanName; 
         public bool needsCleaned;
         public TimeSpan cleanLength;
         public int cleanType;
@@ -141,8 +140,12 @@ namespace WpfApp1
             // pull from database
 
             // set cleanLength and cleanType
+            cleanLength = TimeSpan.Zero;
+            cleanName = "";
+            cleanType = -1;
+            needsCleaned = false;
 
-            return new TimeSpan(0, 0, 0);
+            return cleanLength;
         }
 
         public bool CheckCleaning(int last, int needed)
