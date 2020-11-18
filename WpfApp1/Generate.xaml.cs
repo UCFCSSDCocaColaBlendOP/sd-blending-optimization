@@ -42,7 +42,7 @@ namespace WpfApp1
             InitializeComponent();
             this.sch = sch;
 
-            List<Juice> juices = sch.inprogress;
+            List<Juice> juices = sch.inprogress;    //TODO:when null, error
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
             colJuice.Header = "Juices";
