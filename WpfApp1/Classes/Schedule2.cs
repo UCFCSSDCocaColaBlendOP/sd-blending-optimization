@@ -31,6 +31,7 @@ namespace WpfApp1
         public List<Equipment> extras;          // tools with only one functionality, type == functionality, should be sorted by type
         public List<Equipment> systems;         // tools with multiple functionalities
         public Equipment thawRoom;              // the thaw room
+        public int thawID;
         public List<Equipment> tanks;           // blend tanks/ mix tanks
         public List<Equipment> transferLines;   // transfer lines
         public List<Equipment> aseptics;        // aseptic/pasteurizers
@@ -46,6 +47,7 @@ namespace WpfApp1
         // lists of juices
         public List<Juice> finished;
         public List<Juice> inprogress;
+
 
         /// <summary>
         /// Creates a Schedule object, initializing lists of equipment
@@ -63,11 +65,9 @@ namespace WpfApp1
 
             inconceivable = false;
             late = false;
-
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
             ProcessCSV(filename);
-            //this.juices_line9 = new List<Juice>();
         }
 
         //TODO: 0=1,1=2,2=3,3=7
@@ -116,8 +116,8 @@ namespace WpfApp1
                     string line_name = lines[i][8];
                     int line = Int32.Parse(line_name.Substring(line_name.Length - 1, 1));
 
-                    // if it's not line 1,2,3,7, or 8, we can continue to the next line
-                    if (!(line == 1 || line == 2 || line == 3 || line == 7 || line == 8))
+                    // if it's not line 1,2,3,7, we can continue to the next line
+                    if (!(line == 1 || line == 2 || line == 3 || line == 7))
                     {
                         continue;
                     }
@@ -125,9 +125,9 @@ namespace WpfApp1
                     string material = lines[i][2];
 
                     //Processing quantities to check if the juice is at it's ending stage
-                    int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
-                    int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
-                    bool no_batches = quantity_juice <= quantity_juice_2;
+                    //int quantity_juice = int.Parse(lines[i][4], NumberStyles.AllowThousands);
+                    //int quantity_juice_2 = int.Parse(lines[i][5], NumberStyles.AllowThousands);
+                    //bool no_batches = quantity_juice <= quantity_juice_2;
 
 
                     string name = lines[i][3];
@@ -140,18 +140,19 @@ namespace WpfApp1
                     string dateTime = date + " " + seconds;
                     DateTime fillTime = Convert.ToDateTime(dateTime);
 
-                    bool starterFlag = quantity_juice_2 != 0;
+                    //bool starterFlag = quantity_juice_2 != 0;
 
-                    Juice new_juice = new Juice(name, material, line, type, fillTime);
+                    Dictionary<int, int> line_number_pair = new Dictionary<int, int>();
+                    line_number_pair.Add(1, 0);
+                    line_number_pair.Add(2, 1);
+                    line_number_pair.Add(3, 2);
+                    line_number_pair.Add(7, 3);
 
-                    //TODO: delete all line 8 stuff
-                    if (line == 8)
-                    {
-                    }
-                    else
-                    {
-                        inprogress.Add(new_juice);
-                    }
+                    int line_num_use = line_number_pair[line];
+
+                    Juice new_juice = new Juice(name, material, line_num_use, type, fillTime);
+
+                    inprogress.Add(new_juice);
 
                 }
             }
@@ -453,6 +454,7 @@ namespace WpfApp1
             }
             */
         }
+
         private void getBlendSystem_FuncSos()
         {
             try
@@ -943,7 +945,87 @@ namespace WpfApp1
             }
 
             GrabJuiceSchedules();
-            // call Alisa's functions to add schedules to database
+            // add to database
+            AddEquipmentToDatabase();
+            AddJuicesToDatabase();
+        }
+
+        /// <summary>
+        /// Add's all the equipment schedules to the database
+        /// </summary>
+        public void AddEquipmentToDatabase()
+        {
+            // thaw room
+            if (thawRoom.schedule.Count != 0)
+            {
+                for (int i = 0; i < thawRoom.schedule.Count; i++)
+                    // call alisa's function
+            }
+
+            // extras
+            for (int i = 0; i < extras.Count; i++)
+            {
+                if (extras[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < extras[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // systems
+            for (int i = 0; i < systems.Count; i++)
+            {
+                if (systems[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < systems[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // tanks
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                if (tanks[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < tanks[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // transfer lines
+            for (int i = 0; i < transferLines.Count; i++)
+            {
+                if (transferLines[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < transferLines[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+
+            // aseptics
+            for (int i = 0; i < aseptics.Count; i++)
+            {
+                if (aseptics[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < aseptics[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
+        }
+
+        /// <summary>
+        /// add's all the juice schedules to the database
+        /// </summary>
+        public void AddJuicesToDatabase()
+        {
+            for (int i = 0; i < finished.Count; i++)
+            {
+                if (finished[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < finished[i].schedule.Count; j++)
+                        // call alisa's function
+                }
+            }
         }
 
         public void SortByFillTime()
@@ -1251,63 +1333,7 @@ namespace WpfApp1
 
             return time;
         } */
-        /*
-        public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice)
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[insert_ProdSch]";
-                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-                cmd.Parameters.Add("id_so", SqlDbType.Int).Value = id_so;
-                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
-                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
-                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
-                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
-
-                cmd.Connection = conn;
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        public void insertingScheduleID()
-        {
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[insert_ScheduleID]";
-                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-
-                cmd.Connection = conn;
-
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        } */
-
-
+        
 
         /// <summary>
         /// will find and schedule time for the juice in the tank to use a transfer line
@@ -1359,12 +1385,12 @@ namespace WpfApp1
                 if (transferLines[2].needsCleaned)
                     transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType));
 
-                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
 
                 // aseptic
                 if (aseptics[juice.type].needsCleaned)
                     aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
                 return three;
             }
             else
@@ -1373,10 +1399,10 @@ namespace WpfApp1
                 DateTime start = DateTime.MinValue;
 
                 // try transfer line 1 or two
-                if (!transferLines[tank.type].down)
+                if (!transferLines[tank.type - 1].down)
                 {
-                    choice = transferLines[tank.type];
-                    start = transferLines[tank.type].FindTime(startTrans, juice.type, scheduleID);
+                    choice = transferLines[tank.type - 1];
+                    start = transferLines[tank.type - 1].FindTime(startTrans, juice.type, scheduleID);
                 }
 
                 // try four if necessary
@@ -1416,12 +1442,12 @@ namespace WpfApp1
 
                 if (choice.needsCleaned)
                     choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType));
-                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 // aseptic
                 if (aseptics[juice.type].needsCleaned)
                     aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 return start;
             }
@@ -1436,14 +1462,16 @@ namespace WpfApp1
         public CompareRecipe PrepRecipe(Juice juice, int recipe)
         {
             CompareRecipe option = new CompareRecipe();
+            option.batch = juice.totalBatches - juice.neededBatches + 1;
+            option.slurry = false;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j < numSOs + 1; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -1452,7 +1480,7 @@ namespace WpfApp1
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -1498,7 +1526,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
@@ -1868,7 +1896,7 @@ namespace WpfApp1
             int cltype = -1;
 
             // try transfer line 1
-            if (soChoices[0] && !transferLines[0].down)
+            if (soChoices[1] && !transferLines[0].down)
             {
                 choice = transferLines[0];
                 goTime = transferLines[0].FindTime(tgoal, juice.type, scheduleID);
@@ -1878,7 +1906,7 @@ namespace WpfApp1
             }
 
             // try transfer line 2
-            if (soChoices[1] && !transferLines[0].down)
+            if (soChoices[2] && !transferLines[0].down)
             {
                 if (choice == null)
                 {
@@ -2029,14 +2057,16 @@ namespace WpfApp1
                 juice.recipes[recipe][i] *= slurrySize;
 
             CompareRecipe option = new CompareRecipe();
+            option.slurry = true;
+            option.batch = slurrySize;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j <= numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -2047,7 +2077,7 @@ namespace WpfApp1
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -2093,7 +2123,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
@@ -2654,7 +2684,123 @@ namespace WpfApp1
             for (int i = 0; i < finished.Count; i++)
                 ScheduleEntry.SortSchedule(finished[i].schedule);
         }
+
+        public int AddingSoId(Equipment x)
+        {
+            Dictionary<String, int> equipment_to_so = new Dictionary<string, int>();
+
+            equipment_to_so.Add("SO1 Mix Tank 1", 1);
+            equipment_to_so.Add("SO1 Mix Tank 2", 1);
+            equipment_to_so.Add("SO1 Mix Tank 3", 1);
+            equipment_to_so.Add("SO1 Mix Tank 4", 1);
+            equipment_to_so.Add("SO2 Mix Tank 1", 2);
+            equipment_to_so.Add("SO2 Mix Tank 2", 2);
+            equipment_to_so.Add("SO2 Mix Tank 3", 2);
+            equipment_to_so.Add("SO2 Mix Tank 4", 2);
+
+            equipment_to_so.Add("SO1 Blend System", 1);
+            equipment_to_so.Add("SO2 Blend System", 2);
+            equipment_to_so.Add("SO2 Chopper", 2);
+            equipment_to_so.Add("SO3 Blend System", 3);
+            equipment_to_so.Add("Tote Unloading", 3);
+            equipment_to_so.Add("RT", 3);
+            equipment_to_so.Add("Thaw Room", 3);
+
+            equipment_to_so.Add("TL 1", 4);
+            equipment_to_so.Add("TL 2", 4);
+            equipment_to_so.Add("TL 3", 4);
+            equipment_to_so.Add("TL 4", 4);
+
+            equipment_to_so.Add("Line 1", 5);
+            equipment_to_so.Add("Line 2", 5);
+            equipment_to_so.Add("Line 3", 5);
+            equipment_to_so.Add("Line 7", 5);
+
+            //----------------------------------
+
+            if (x.name.Equals("Water") || x.name.Equals("Sucrose"))
+            {
+                if (x.SOs[1] == true)
+                {
+                    x.so = 1;
+                }
+                else
+                {
+                    x.so = 2;
+                }
+            }
+            else
+            {
+                x.so = equipment_to_so[x.name];
+            }
+
+            return x.so;
+        } 
+        
+        public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_ProdSch]";
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+                cmd.Parameters.Add("id_so", SqlDbType.Int).Value = id_so;
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
+
+                if (slurry == true)
+                {
+                    String adding = Convert.ToString(batch);
+                    juice += " (slurry) " + adding;
+                }
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        public void insertingScheduleID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[insert_ScheduleID]";
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
     }
+
+
 
     /*
     private void ExampleOfSchedule()
