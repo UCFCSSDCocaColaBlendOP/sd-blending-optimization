@@ -43,6 +43,7 @@ namespace WpfApp1
         // info about the system
         public int numFunctions;
         public int numSOs;
+        public TimeSpan CIPSpan;
 
         // lists of juices
         public List<Juice> finished;
@@ -788,8 +789,13 @@ namespace WpfApp1
             // while there are juices with batches left
             while (inprogress.Count != 0)
             {
+                // the line is doing a CIP
+                if (inprogress[0].type == -1)
+                {
+                    aseptics[inprogress[0].line].schedule.Add(new ScheduleEntry(inprogress[0].currentFillTime, inprogress[0].currentFillTime.Add(CIPSpan), inprogress[0], false, 0));
+                }
                 // if the current batch is mixing at run time
-                if (inprogress[0].mixing)
+                else if (inprogress[0].mixing)
                 {
                     inprogress[0].mixing = false;
 
