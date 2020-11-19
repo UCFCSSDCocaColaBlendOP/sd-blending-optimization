@@ -170,7 +170,7 @@
                     <TextBox x:Name="tb_PostBlend" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="4" HorizontalAlignment="Left" Height="26" Margin="117.977,4.4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
-            <TabItem Header = "Clean Time" BorderBrush="White" Foreground="White">
+            <TabItem Header="CIP" BorderBrush="White" Foreground="White">
                 <Grid Background = "#FF1F1E1E" >
                     <Grid.RowDefinitions >
                         <RowDefinition Height="54*"/>
@@ -193,7 +193,7 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="CIP" BorderBrush="White" Foreground="White">
+            <TabItem Header="Matrix" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="227*"/>

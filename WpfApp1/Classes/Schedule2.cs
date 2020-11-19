@@ -792,7 +792,7 @@ namespace WpfApp1
                 // the line is doing a CIP
                 if (inprogress[0].type == -1)
                 {
-                    aseptics[inprogress[0].line].schedule.Add(new ScheduleEntry(inprogress[0].currentFillTime, inprogress[0].currentFillTime.Add(CIPSpan), inprogress[0], false, 0));
+                    aseptics[inprogress[0].line].schedule.Add(new ScheduleEntry(inprogress[0].OGFillTime, inprogress[0].OGFillTime.Add(CIPSpan), inprogress[0], false, 0));
                 }
                 // if the current batch is mixing at run time
                 else if (inprogress[0].mixing)
