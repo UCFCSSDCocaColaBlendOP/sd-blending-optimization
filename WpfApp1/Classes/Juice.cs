@@ -31,7 +31,6 @@ namespace WpfApp1
         public Equipment mixingTank;
         public DateTime mixingDoneBlending;
         public List<Equipment> mixingEquipment;
-        public List<DateTime> mixingDoneWithEquipment;
 
         // info pulled from the database used in the scheduling process
         public List<List<int>> recipes; // for each recipe there's a list, each list a list of times each functionality is needed for, 0 if not needed
@@ -151,7 +150,7 @@ namespace WpfApp1
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                     // mark all the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, slurryBatches + 1));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingEquipment[i].endMixing, this, true, slurryBatches + 1));
                 }
                 // mixing a batch
                 else
@@ -160,7 +159,7 @@ namespace WpfApp1
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false, totalBatches - neededBatches));
                     // mark the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false, totalBatches - neededBatches));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingEquipment[i].endMixing, this, false, totalBatches - neededBatches));
                 }
             }
 
