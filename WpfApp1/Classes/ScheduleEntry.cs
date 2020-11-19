@@ -18,6 +18,7 @@ namespace WpfApp1
         public Juice juice;
         public bool cleaning;
         public int cleaningType;
+        public string cleaningname;
 
         // for juice schedule
         public Equipment tool;
@@ -57,12 +58,14 @@ namespace WpfApp1
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="type"></param>
-        public ScheduleEntry(DateTime start, DateTime end, int type)
+        /// <param name="name"></param>
+        public ScheduleEntry(DateTime start, DateTime end, int type, string name)
         {
             this.start = start;
             this.end = end;
             this.cleaning = true;
             this.cleaningType = type;
+            this.cleaningname = name;
         }
 
         /// <summary>

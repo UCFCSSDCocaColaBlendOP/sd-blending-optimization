@@ -28,6 +28,7 @@ namespace WpfApp1
         public List<TimeSpan> extraCleaningLengths;
         public List<DateTime> extraCleaningStarts;
         public List<int> extraCleaningTypes;
+        public List<string> extraCleaningNames;
 
         // info about blend system
         public Equipment system;
@@ -36,6 +37,7 @@ namespace WpfApp1
         public DateTime systemCleaningStart;
         public TimeSpan systemCleaningLength;
         public int systemCleaningType;
+        public string systemCleaningName;
 
         // info about mix tank
         public Equipment tank;
@@ -44,6 +46,7 @@ namespace WpfApp1
         public DateTime tankCleaningStart;
         public TimeSpan tankCleaningLength;
         public int tankCleaningType;
+        public string tankCleaningName;
 
         // info about transfer line
         public Equipment transferLine;
@@ -52,6 +55,7 @@ namespace WpfApp1
         public DateTime transferCleaningStart;
         public TimeSpan transferCleaningLength;
         public int transferCleaningType;
+        public string transferCleaningName;
 
 
         // info about aseptic tank/pasteurizer
@@ -61,6 +65,7 @@ namespace WpfApp1
         public DateTime asepticCleaningStart;
         public TimeSpan asepticCleaningLength;
         public int asepticCleaningType;
+        public string asepticCleaningName;
 
         /// <summary>
         /// Creates a CompareRecipe object, conceivable and onTime are initially true
@@ -78,6 +83,7 @@ namespace WpfApp1
             extraCleaningStarts = new List<DateTime>();
             extraCleaningLengths = new List<TimeSpan>();
             extraCleaningTypes = new List<int>();
+            extraCleaningNames = new List<string>();
 
             system = null;
             systemCleaningType = -1;
@@ -107,7 +113,7 @@ namespace WpfApp1
             {
                 // you need to add a cleaning entry
                 if (extraCleaningTypes[i] != -1)
-                    extras[i].schedule.Add(new ScheduleEntry(extraCleaningStarts[i], extraCleaningStarts[i].Add(extraCleaningLengths[i]), extraCleaningTypes[i]));
+                    extras[i].schedule.Add(new ScheduleEntry(extraCleaningStarts[i], extraCleaningStarts[i].Add(extraCleaningLengths[i]), extraCleaningTypes[i], extraCleaningNames[i]));
 
                 extras[i].schedule.Add(new ScheduleEntry(extraTimes[i], extraTimes[i].Add(extraLengths[i]), juice, slurry, batch));
             }
@@ -117,14 +123,14 @@ namespace WpfApp1
             {
                 // cleaning entry
                 if (systemCleaningType != -1)
-                    system.schedule.Add(new ScheduleEntry(systemCleaningStart, systemCleaningStart.Add(systemCleaningLength), systemCleaningType));
+                    system.schedule.Add(new ScheduleEntry(systemCleaningStart, systemCleaningStart.Add(systemCleaningLength), systemCleaningType, systemCleaningName));
 
                 system.schedule.Add(new ScheduleEntry(systemTime, systemTime.Add(systemLength), juice, slurry, batch));
             }
 
             // create entry for mix tank
             if (tankCleaningType != -1)
-                tank.schedule.Add(new ScheduleEntry(tankCleaningStart, tankCleaningStart.Add(tankCleaningLength), tankCleaningType));
+                tank.schedule.Add(new ScheduleEntry(tankCleaningStart, tankCleaningStart.Add(tankCleaningLength), tankCleaningType, tankCleaningName));
 
             // if it's inline in needs to be open ended
             if (!inline)
@@ -134,13 +140,13 @@ namespace WpfApp1
 
             // create entry for transfer line
             if (transferCleaningType != -1)
-                transferLine.schedule.Add(new ScheduleEntry(transferCleaningStart, transferCleaningStart.Add(transferCleaningLength), transferCleaningType));
+                transferLine.schedule.Add(new ScheduleEntry(transferCleaningStart, transferCleaningStart.Add(transferCleaningLength), transferCleaningType, transferCleaningName));
 
             transferLine.schedule.Add(new ScheduleEntry(transferTime, transferTime.Add(transferLength), juice, slurry, batch));
 
             // create entry for aseptic
             if (asepticCleaningType != -1)
-                aseptic.schedule.Add(new ScheduleEntry(asepticCleaningStart, asepticCleaningStart.Add(asepticCleaningLength), asepticCleaningType));
+                aseptic.schedule.Add(new ScheduleEntry(asepticCleaningStart, asepticCleaningStart.Add(asepticCleaningLength), asepticCleaningType, asepticCleaningName));
 
             aseptic.schedule.Add(new ScheduleEntry(asepticTime, asepticTime.Add(asepticLength), juice, slurry, batch));
         }
