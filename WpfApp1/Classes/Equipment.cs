@@ -33,6 +33,7 @@ namespace WpfApp1
         public int lastJuiceType;
         public int lastCleaningType;
         public bool startDirty;
+        public DateTime endMixing;
 
         // set whenever FindTime is called
         public bool needsCleaned;

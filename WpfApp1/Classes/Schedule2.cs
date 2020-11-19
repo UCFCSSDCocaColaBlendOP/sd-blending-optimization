@@ -66,7 +66,7 @@ namespace WpfApp1
 
             //ExampleOfSchedule();
             //ExampleOfSchedule2(); 
-            //ProcessCSV(filename);
+            ProcessCSV(filename);
             //this.juices_line9 = new List<Juice>();
         }
 
