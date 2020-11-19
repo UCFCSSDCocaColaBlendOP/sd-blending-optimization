@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows;
+
 
 namespace WpfApp1
 {
@@ -146,12 +151,244 @@ namespace WpfApp1
             cleanType = -1;
             needsCleaned = false;
 
-            return cleanLength;
+            int process = 0;
+            String cleaning = "";
+            int flag = 0;
+            int cleaningTimes = 0;
+            if (juicetype1 != juicetype2)
+            {
+                try
+                {
+                    SqlConnection conn = new SqlConnection();
+                    conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "[select_Flavor_Process]";
+                    cmd.Parameters.Add("juice1_type", SqlDbType.BigInt).Value = juicetype1;
+                    cmd.Parameters.Add("juice2_type", SqlDbType.BigInt).Value = juicetype2;
+
+                    cmd.Connection = conn;
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count > 0)
+                    {
+                        process = Convert.ToInt32(dt.Rows[0]["process_id"]);
+                        cleaning = Convert.ToString(dt.Rows[0]["process"]);
+                    }
+                    //Console.WriteLine(process);
+                    //Console.WriteLine(cleaning);
+                    if (process != 0)
+                    {
+                        flag = 1;
+                    }
+
+                    conn.Close();
+                }
+
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                if (flag == 1)
+                {
+                    if (this.e_type != 0)
+                    {
+                        if (this.cleaningProcess == 1)
+                        {
+                            cleaningTimes = getEquipCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+
+                            }
+                        }
+                        else if (this.cleaningProcess == 2)
+                        {
+                            cleaningTimes = getMixTanksCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+                        }
+                        else if (this.cleaningProcess == 3)
+                        {
+                            cleaningTimes = getTLCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+                        }
+                        else if (this.cleaningProcess == 4)
+                        {
+                            cleaningTimes = getATCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            return cleanLength; 
+        }
+        private int getMixTanksCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_MTCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
+        }
+        private int getTLCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_TLCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
         }
 
+        private int getEquipCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_EquipCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
+        }
+        private int getATCleaningTimes(int equipType, int process)
+        {
+            // get the cleaning time and return
+            //  set public cip
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_ATCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            return time;
+        }
         public bool CheckCleaning(int last, int needed)
         {
             // checks whether last satisfies needed
+            
             return true;
         }
 
