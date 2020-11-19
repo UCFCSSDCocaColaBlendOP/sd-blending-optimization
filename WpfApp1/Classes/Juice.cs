@@ -82,6 +82,7 @@ namespace WpfApp1
 
             // insert code to pull info from the database using attribute type to find the correct juice
             // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, idealmixinglength, and transferTime
+            transferTime = new TimeSpan(2, 0, 0);
 
             // set inlineposs
             inlineposs = false;
@@ -104,6 +105,7 @@ namespace WpfApp1
 
             // // insert code to pull info from the database using attribute type to find the correct juice
             // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, and transferTime
+            transferTime = new TimeSpan(2, 0, 0);
 
             // deal with the filling juice
             if (filling)
