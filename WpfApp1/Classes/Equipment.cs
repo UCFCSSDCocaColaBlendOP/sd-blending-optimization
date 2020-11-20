@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows;
+
 
 namespace WpfApp1
 {
@@ -40,6 +45,14 @@ namespace WpfApp1
         public TimeSpan cleanLength;
         public int cleanType;
         public DateTime cleanTime;
+        public string cleanName;
+
+        // set on the equipment page of generate schedule
+        public int state; // 0 == nothing, 1 == down, 2 == start clean, 3 == start dirty, 4 == cleaning
+        public int juiceType; // -1 for nothing or down, the juice type of the last juice otherwise
+        public int cleaningType; // -1 for nothing or down or start dirty, the cleaning type otherwise
+        public DateTime time; // DateTime.MinValue for nothing, down, start dirty or start clean, a value for cleaning
+        public string cleaning; // name of cleaning
 
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule
@@ -58,6 +71,37 @@ namespace WpfApp1
         }
 
         /// <summary>
+        /// applies the fields set during generate
+        /// </summary>
+        public void UpdateTool(DateTime scheduleID)
+        {
+            // is down
+            if (state == 1)
+            {
+                down = true;
+            }
+            // starts dirty
+            else if (state == 2)
+            {
+                startDirty = true;
+                lastJuiceType = juiceType;
+            }
+            // starts clean
+            else if (state == 3)
+            {
+                startClean = true;
+                lastJuiceType = juiceType;
+                lastCleaningType = cleaningType;
+            }
+            // is cleaning
+            else if (state == 4)
+            {
+                lastCleaningType = cleaningType;
+                schedule.Add(new ScheduleEntry(scheduleID, time, cleaningType, cleaning));
+            }
+        }
+
+        /// <summary>
         /// Returns the earliest time you can start using a tool. If the earliest time is before goal, returns goal.
         /// Sets needsCleaned, cleanLength, cleanType, and cleanTime attributes each time
         /// </summary>
@@ -70,7 +114,7 @@ namespace WpfApp1
             TimeSpan cleaning;
 
             // a tool is starting clean
-            if (schedule.Count == 0 && startClean)
+            if (schedule.Count == 0 && startClean || schedule.Count == 1 && schedule[0].cleaning)
             {
                 cleaning = GetCleaning(lastJuiceType, juicetype);
                 bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
@@ -84,7 +128,13 @@ namespace WpfApp1
                 // you need to do more cleaning
                 else
                 {
-                    cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
+                    // it's currently cleaning
+                    if (schedule.Count == 1)
+                        cleanTime = cipGroup.FindTimePopulated(schedule[0].end, cleaning);
+                    else
+                        cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
+
+                    //  early or late
                     if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
                         return goal;
                     else
@@ -140,13 +190,249 @@ namespace WpfApp1
             // pull from database
 
             // set cleanLength and cleanType
+            cleanLength = TimeSpan.Zero;
+            cleanName = "";
+            cleanType = -1;
+            needsCleaned = false;
 
-            return new TimeSpan(0, 0, 0);
+            int process = 0;
+            String cleaning = "";
+            int flag = 0;
+            int cleaningTimes = 0;
+            if (juicetype1 != juicetype2)
+            {
+                try
+                {
+                    SqlConnection conn = new SqlConnection();
+                    conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "[select_Flavor_Process]";
+                    cmd.Parameters.Add("juice1_type", SqlDbType.BigInt).Value = juicetype1;
+                    cmd.Parameters.Add("juice2_type", SqlDbType.BigInt).Value = juicetype2;
+
+                    cmd.Connection = conn;
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count > 0)
+                    {
+                        process = Convert.ToInt32(dt.Rows[0]["process_id"]);
+                        cleaning = Convert.ToString(dt.Rows[0]["process"]);
+                    }
+                    //Console.WriteLine(process);
+                    //Console.WriteLine(cleaning);
+                    if (process != 0)
+                    {
+                        flag = 1;
+                    }
+
+                    conn.Close();
+                }
+
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                if (flag == 1)
+                {
+                    if (this.e_type != 0)
+                    {
+                        if (this.cleaningProcess == 1)
+                        {
+                            cleaningTimes = getEquipCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+
+                            }
+                        }
+                        else if (this.cleaningProcess == 2)
+                        {
+                            cleaningTimes = getMixTanksCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+                        }
+                        else if (this.cleaningProcess == 3)
+                        {
+                            cleaningTimes = getTLCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+                        }
+                        else if (this.cleaningProcess == 4)
+                        {
+                            cleaningTimes = getATCleaningTimes(this.e_type, process);
+                            if (cleaningTimes != 0)
+                            {
+                                cleanLength = TimeSpan.FromMinutes(cleaningTimes);
+                                cleanName = cleaning;
+                                cleanType = process;
+                                needsCleaned = true;
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            return cleanLength; 
+        }
+        private int getMixTanksCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_MTCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
+        }
+        private int getTLCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_TLCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
         }
 
+        private int getEquipCleaningTimes(int equipType, int process)
+        {
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_EquipCleaningTime]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return time;
+        }
+        private int getATCleaningTimes(int equipType, int process)
+        {
+            // get the cleaning time and return
+            //  set public cip
+            int time = 0;
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_ATCleaningType]";
+                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
+                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
+                cmd.Connection = conn;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
+                }
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            return time;
+        }
         public bool CheckCleaning(int last, int needed)
         {
             // checks whether last satisfies needed
+            
             return true;
         }
 
