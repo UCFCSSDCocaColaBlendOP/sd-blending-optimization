@@ -392,7 +392,7 @@ namespace WpfApp1
         private void btn_NextToThaw_Click(object sender, RoutedEventArgs e)
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            /*foreach (Juice juice in juices)
+            foreach (Juice juice in juices)
             {
                 if (juice.starter == true)
                 {
@@ -403,7 +403,7 @@ namespace WpfApp1
                 {
                     juice.UpdateStandardJuice();
                 }
-            }*/
+            }
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
             colJuice.Header = "Juices";
