@@ -31,6 +31,7 @@ namespace WpfApp1
         public List<Equipment> extras;          // tools with only one functionality, type == functionality, should be sorted by type
         public List<Equipment> systems;         // tools with multiple functionalities
         public Equipment thawRoom;              // the thaw room
+        public int thawID;
         public List<Equipment> tanks;           // blend tanks/ mix tanks
         public List<Equipment> transferLines;   // transfer lines
         public List<Equipment> aseptics;        // aseptic/pasteurizers
@@ -42,6 +43,7 @@ namespace WpfApp1
         // info about the system
         public int numFunctions;
         public int numSOs;
+        public TimeSpan CIPSpan;
 
         // lists of juices
         public List<Juice> finished;
@@ -61,11 +63,12 @@ namespace WpfApp1
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
             inprogress = new List<Juice>();
+            aseptics = new List<Equipment>(); 
 
             inconceivable = false;
             late = false;
             //ExampleOfSchedule();
-            //ExampleOfSchedule2(); 
+            //ExampleOfSchedule2();
             ProcessCSV(filename);
         }
 
@@ -160,11 +163,47 @@ namespace WpfApp1
             PrintAllJuices();
         }
 
+        // gets the thaw room id from the database
+        // added this function to pull equipment
+        public void getThawRoomID()
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_ThawRoom_Id]";
+                cmd.Parameters.Add("thaw_name", SqlDbType.NVarChar).Value = "Thaw Room";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+
+                if (dt.Rows.Count > 0) 
+                { 
+                    thawID = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         // TODO - add pull equipment function
         // extras are pieces of equipment with a single functionality, their type is their functionality
         // blendtanks are blendtanks their type is their SO
         private void PullEquipment()
         {
+            getThawRoomID(); 
             // access the database
             // initialize SOcount and functionCount
             //methods used to get the maximum sos and functionalities
@@ -235,6 +274,69 @@ namespace WpfApp1
             getBlendSystem_FuncSos();
             getExtras();
             getExtraSorted();
+            getAseptics(); 
+        }
+        public void getAseptics()
+        {
+            int id_at;
+            String name_at;
+            int id; 
+            //int cip; 
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Aseptics]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    
+                    id_at = Convert.ToInt32(dr["id"]);
+                    name_at = dr.Field<String>("Aseptic Tank");
+                    //cip = Convert.ToInt32(dr["cip_id"]);
+                    Equipment temp = new Equipment(name_at, id_at, 0);
+                    for (int i = 0; i < numSOs + 1; i++)
+                    {
+                        if (i > 0) { 
+                            temp.SOs.Add(true);
+                        }
+                        else
+                        {
+                            temp.SOs.Add(false); 
+                        }
+                    }
+                    //temp.cip_id=cip; 
+                    temp.cleaningProcess = 4;
+                    temp.e_type = id_at;
+                    aseptics.Add(temp);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            /*
+            for(int i=0; i<aseptics.Count; i++)
+            {
+                Console.WriteLine(aseptics[i].name);
+                Console.WriteLine(aseptics[i].type); 
+            }
+            */
         }
 
         //gets the maximum number of functions
@@ -687,8 +789,13 @@ namespace WpfApp1
             // while there are juices with batches left
             while (inprogress.Count != 0)
             {
+                // the line is doing a CIP
+                if (inprogress[0].type == -1)
+                {
+                    aseptics[inprogress[0].line].schedule.Add(new ScheduleEntry(inprogress[0].OGFillTime, inprogress[0].OGFillTime.Add(CIPSpan), inprogress[0], false, 0));
+                }
                 // if the current batch is mixing at run time
-                if (inprogress[0].mixing)
+                else if (inprogress[0].mixing)
                 {
                     inprogress[0].mixing = false;
 
@@ -944,10 +1051,114 @@ namespace WpfApp1
             }
 
             GrabJuiceSchedules();
-            // call Alisa's functions to add schedules to database
-            // insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
+            // add to database
+            AddEquipmentToDatabase();
+            AddJuicesToDatabase();
+        }
 
+        /// <summary>
+        /// Add's all the equipment schedules to the database
+        /// </summary>
+        public void AddEquipmentToDatabase()
+        {
+            // thaw room
+            if (thawRoom.schedule.Count != 0)
+            {
+                for (int i = 0; i < thawRoom.schedule.Count; i++)
+                    insertingEquipSchedule(AddingSoId(thawRoom), thawRoom.name, thawRoom.schedule[i].start, thawRoom.schedule[i].end, thawRoom.schedule[i].juice.name, thawRoom.schedule[i].slurry, thawRoom.schedule[i].batch);
+            }
 
+            // extras
+            for (int i = 0; i < extras.Count; i++)
+            {
+                if (extras[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < extras[i].schedule.Count; j++)
+                    {
+                        if (extras[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(extras[i]), extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[i].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(extras[i]), extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[i].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // systems
+            for (int i = 0; i < systems.Count; i++)
+            {
+                if (systems[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < systems[i].schedule.Count; j++)
+                    {
+                        if (systems[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(systems[i]), systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[i].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(systems[i]), systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[i].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // tanks
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                if (tanks[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < tanks[i].schedule.Count; j++)
+                    {
+                        if (tanks[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(tanks[i]), tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[i].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(tanks[i]), tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[i].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // transfer lines
+            for (int i = 0; i < transferLines.Count; i++)
+            {
+                if (transferLines[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < transferLines[i].schedule.Count; j++)
+                    {
+                        if (transferLines[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(transferLines[i]), transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[i].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(transferLines[i]), transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[i].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // aseptics
+            for (int i = 0; i < aseptics.Count; i++)
+            {
+                if (aseptics[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < aseptics[i].schedule.Count; j++)
+                    {
+                        if (aseptics[i].schedule[j].cleaning)
+                            insertingEquipSchedule(AddingSoId(aseptics[i]), aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[i].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(AddingSoId(aseptics[i]), aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[i].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// add's all the juice schedules to the database
+        /// </summary>
+        public void AddJuicesToDatabase()
+        {
+            for (int i = 0; i < finished.Count; i++)
+            {
+                if (finished[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < finished[i].schedule.Count; j++)
+                    {
+                        insertingJuiceSchedule(finished[i].name, finished[i].type, finished[i].schedule[j].slurry, finished[i].schedule[j].batch, finished[i].schedule[j].tool.name, finished[i].schedule[j].start, finished[i].schedule[j].end);
+                    }
+                }
+            }
         }
 
         public void SortByFillTime()
@@ -1305,14 +1516,14 @@ namespace WpfApp1
                 }
 
                 if (transferLines[2].needsCleaned)
-                    transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType));
+                    transferLines[2].schedule.Add(new ScheduleEntry(transferLines[2].cleanTime, transferLines[2].cleanTime.Add(transferLines[2].cleanLength), transferLines[2].cleanType, transferLines[2].cleanName));
 
-                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                transferLines[2].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
 
                 // aseptic
-                if (aseptics[juice.type].needsCleaned)
-                    aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, -1));
+                if (aseptics[juice.line].needsCleaned)
+                    aseptics[juice.line].schedule.Add(new ScheduleEntry(aseptics[juice.line].cleanTime, aseptics[juice.line].cleanTime.Add(aseptics[juice.line].cleanLength), aseptics[juice.line].cleanType, aseptics[juice.line].cleanName));
+                aseptics[juice.line].schedule.Add(new ScheduleEntry(three, three.Add(juice.transferTime), juice, true, batch));
                 return three;
             }
             else
@@ -1321,10 +1532,10 @@ namespace WpfApp1
                 DateTime start = DateTime.MinValue;
 
                 // try transfer line 1 or two
-                if (!transferLines[tank.type].down)
+                if (!transferLines[tank.type - 1].down)
                 {
-                    choice = transferLines[tank.type];
-                    start = transferLines[tank.type].FindTime(startTrans, juice.type, scheduleID);
+                    choice = transferLines[tank.type - 1];
+                    start = transferLines[tank.type - 1].FindTime(startTrans, juice.type, scheduleID);
                 }
 
                 // try four if necessary
@@ -1363,13 +1574,13 @@ namespace WpfApp1
                 }
 
                 if (choice.needsCleaned)
-                    choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType));
-                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                    choice.schedule.Add(new ScheduleEntry(choice.cleanTime, choice.cleanTime.Add(choice.cleanLength), choice.cleanType, choice.cleanName));
+                choice.schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 // aseptic
-                if (aseptics[juice.type].needsCleaned)
-                    aseptics[juice.type].schedule.Add(new ScheduleEntry(aseptics[juice.type].cleanTime, aseptics[juice.type].cleanTime.Add(aseptics[juice.type].cleanLength), aseptics[juice.type].cleanType));
-                aseptics[juice.type].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, true, -1));
+                if (aseptics[juice.line].needsCleaned)
+                    aseptics[juice.line].schedule.Add(new ScheduleEntry(aseptics[juice.line].cleanTime, aseptics[juice.line].cleanTime.Add(aseptics[juice.line].cleanLength), aseptics[juice.line].cleanType, aseptics[juice.line].cleanName));
+                aseptics[juice.line].schedule.Add(new ScheduleEntry(start, start.Add(juice.transferTime), juice, false, batch));
 
                 return start;
             }
@@ -1384,14 +1595,16 @@ namespace WpfApp1
         public CompareRecipe PrepRecipe(Juice juice, int recipe)
         {
             CompareRecipe option = new CompareRecipe();
+            option.batch = juice.totalBatches - juice.neededBatches + 1;
+            option.slurry = false;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j < numSOs + 1; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -1400,7 +1613,7 @@ namespace WpfApp1
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -1446,7 +1659,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
@@ -1523,6 +1736,7 @@ namespace WpfApp1
                 TimeSpan length = TimeSpan.Zero;
                 DateTime cStart = DateTime.MinValue;
                 TimeSpan cLength = TimeSpan.Zero;
+                string cName = "";
                 int cType = -1;
 
                 // choose a system
@@ -1551,12 +1765,14 @@ namespace WpfApp1
                     DateTime tempstart = systems[j].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
                     DateTime tempCStart = DateTime.MinValue;
                     TimeSpan tempCLength = TimeSpan.Zero;
+                    string tempCName = "";
                     int tempCType = -1;
                     if (systems[j].needsCleaned)
                     {
                         tempCStart = systems[j].cleanTime;
                         tempCLength = systems[j].cleanLength;
                         tempCType = systems[j].cleanType;
+                        tempCName = systems[j].cleanName;
                     }
                     int tempsos = systems[j].GetSOs(soChoices);
                     int tempotherfuncs = systems[j].GetOtherFuncs(juice.recipes[recipe]);
@@ -1572,6 +1788,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // temp and current are the same time
                     else if (DateTime.Compare(tempstart, currentStart) == 0)
@@ -1586,6 +1803,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos > sos)
                         {
@@ -1597,6 +1815,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos == sos && TimeSpan.Compare(tempCLength, cLength) < 0)
                         {
@@ -1608,6 +1827,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                     // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
@@ -1621,6 +1841,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // current is later than ideal
                     else
@@ -1638,6 +1859,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                 }
@@ -1656,6 +1878,7 @@ namespace WpfApp1
                 option.systemCleaningStart = cStart;
                 option.systemCleaningLength = cLength;
                 option.systemCleaningType = cType;
+                option.systemCleaningName = cName;
 
                 // update metrics
                 if (!pickedStartTime)
@@ -1729,6 +1952,7 @@ namespace WpfApp1
             DateTime start = DateTime.MinValue;
             DateTime cleanStart = DateTime.MinValue;
             TimeSpan cleanLength = TimeSpan.Zero;
+            string cleanName = "";
             int cleanType = -1;
 
             for (int i = 0; i < tanks.Count; i++)
@@ -1741,6 +1965,7 @@ namespace WpfApp1
                 DateTime tempCleanStart = tanks[i].cleanTime;
                 TimeSpan tempCleanLength = tanks[i].cleanLength;
                 int tempCleanType = tanks[i].cleanType;
+                string tempCleanName = tanks[i].cleanName;
 
                 if (tank == null)
                 {
@@ -1750,6 +1975,7 @@ namespace WpfApp1
                     cleanStart = tempCleanStart;
                     cleanLength = tempCleanLength;
                     cleanType = tempCleanType;
+                    cleanName = tempCleanName;
                 }
                 // current is late
                 else if (DateTime.Compare(start, juice.idealTime[recipe]) > 0)
@@ -1763,6 +1989,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
                 // current and new option are both on time
@@ -1776,6 +2003,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
             }
@@ -1794,6 +2022,7 @@ namespace WpfApp1
             option.tankCleaningStart = cleanStart;
             option.tankCleaningLength = cleanLength;
             option.tankCleaningType = cleanType;
+            option.tankCleaningName = cleanName;
 
             if (!pickedStartTime)
                 option.startBlending = start;
@@ -1813,20 +2042,22 @@ namespace WpfApp1
             DateTime goTime = DateTime.MinValue;
             DateTime clSt = DateTime.MinValue;
             TimeSpan clL = TimeSpan.Zero;
+            string clN = "";
             int cltype = -1;
 
             // try transfer line 1
-            if (soChoices[0] && !transferLines[0].down)
+            if (soChoices[1] && !transferLines[0].down)
             {
                 choice = transferLines[0];
                 goTime = transferLines[0].FindTime(tgoal, juice.type, scheduleID);
                 clSt = transferLines[0].cleanTime;
                 clL = transferLines[0].cleanLength;
                 cltype = transferLines[0].cleanType;
+                clN = transferLines[0].cleanName;
             }
 
             // try transfer line 2
-            if (soChoices[1] && !transferLines[0].down)
+            if (soChoices[2] && !transferLines[0].down)
             {
                 if (choice == null)
                 {
@@ -1835,6 +2066,7 @@ namespace WpfApp1
                     clSt = transferLines[1].cleanTime;
                     clL = transferLines[1].cleanLength;
                     cltype = transferLines[1].cleanType;
+                    clN = transferLines[1].cleanName;
                 }
                 else
                 {
@@ -1842,6 +2074,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[1].cleanTime;
                     TimeSpan tempClL = transferLines[1].cleanLength;
                     int tempCltype = transferLines[1].cleanType;
+                    string tempClN = transferLines[1].cleanName;
 
                     // transfer line 2 is ontime, transfer line 1 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -1851,6 +2084,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                     // they're both on time
                     else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
@@ -1863,6 +2097,7 @@ namespace WpfApp1
                             clSt = tempClSt;
                             clL = tempClL;
                             cltype = tempCltype;
+                            clN = tempClN;
                         }
                     }
                 }
@@ -1878,6 +2113,7 @@ namespace WpfApp1
                     clSt = transferLines[3].cleanTime;
                     clL = transferLines[3].cleanLength;
                     cltype = transferLines[3].cleanType;
+                    clN = transferLines[3].cleanName;
                 }
                 else
                 {
@@ -1885,6 +2121,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[3].cleanTime;
                     TimeSpan tempClL = transferLines[3].cleanLength;
                     int tempCltype = transferLines[3].cleanType;
+                    string tempClN = transferLines[3].cleanName;
 
                     // transfer line 4 is ontime, transfer line 1/2 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -1894,6 +2131,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                     // they're both on time
                     else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
@@ -1906,6 +2144,7 @@ namespace WpfApp1
                             clSt = tempClSt;
                             clL = tempClL;
                             cltype = tempCltype;
+                            clN = tempClN;
                         }
                     }
                 }
@@ -1921,6 +2160,7 @@ namespace WpfApp1
                     clSt = transferLines[2].cleanTime;
                     clL = transferLines[2].cleanLength;
                     cltype = transferLines[2].cleanType;
+                    clN = transferLines[2].cleanName;
                 }
                 else
                 {
@@ -1928,6 +2168,7 @@ namespace WpfApp1
                     DateTime tempClSt = transferLines[2].cleanTime;
                     TimeSpan tempClL = transferLines[2].cleanLength;
                     int tempCltype = transferLines[2].cleanType;
+                    string tempClN = transferLines[2].cleanName;
 
                     // transfer line 2 is ontime, transfer line 1 is not
                     if (DateTime.Compare(tempStart, goTime) < 0)
@@ -1937,6 +2178,7 @@ namespace WpfApp1
                         clSt = tempClSt;
                         clL = tempClL;
                         cltype = tempCltype;
+                        clN = tempClN;
                     }
                 }
             }
@@ -1954,6 +2196,7 @@ namespace WpfApp1
             option.transferCleaningStart = clSt;
             option.transferCleaningLength = clL;
             option.transferCleaningType = cltype;
+            option.transferCleaningName = clN;
 
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
@@ -1975,16 +2218,19 @@ namespace WpfApp1
         {
             for (int i = 0; i < juice.recipes[recipe].Count; i++)
                 juice.recipes[recipe][i] *= slurrySize;
+            juice.idealTime[recipe] = juice.idealTime[recipe].Subtract(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
 
             CompareRecipe option = new CompareRecipe();
+            option.slurry = true;
+            option.batch = slurrySize;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs];
-            for (int j = 0; j < numSOs; j++)
+            bool[] soChoices = new bool[numSOs + 1];
+            for (int j = 1; j <= numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
-            if (juice.recipes[recipe][0] > 0)
+            if (juice.recipes[recipe][thawID] > 0)
             {
                 // if the thaw room is down we can't do this recipe
                 if (thawRoom.down)
@@ -1992,10 +2238,11 @@ namespace WpfApp1
                     option.conceivable = false;
                     for (int z = 0; z < juice.recipes[recipe].Count; z++)
                         juice.recipes[recipe][z] /= slurrySize;
+                    juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                     return option;
                 }
 
-                option.thawLength = new TimeSpan(0, juice.recipes[recipe][0], 0);
+                option.thawLength = new TimeSpan(0, juice.recipes[recipe][thawID], 0);
                 DateTime begin;
 
                 // try to find an existing entry in the thaw room
@@ -2041,7 +2288,7 @@ namespace WpfApp1
                 }
 
                 pickedStartTime = true;
-                checkoffFunc[0] = true;
+                checkoffFunc[thawID] = true;
             }
 
             // if any of the extras are needed, do a first pass through to get the earliest of each one needed
@@ -2118,6 +2365,7 @@ namespace WpfApp1
                 TimeSpan length = TimeSpan.Zero;
                 DateTime cStart = DateTime.MinValue;
                 TimeSpan cLength = TimeSpan.Zero;
+                string cName = "";
                 int cType = -1;
 
                 // choose a system
@@ -2147,11 +2395,13 @@ namespace WpfApp1
                     DateTime tempCStart = DateTime.MinValue;
                     TimeSpan tempCLength = TimeSpan.Zero;
                     int tempCType = -1;
+                    string tempCName = "";
                     if (systems[j].needsCleaned)
                     {
                         tempCStart = systems[j].cleanTime;
                         tempCLength = systems[j].cleanLength;
                         tempCType = systems[j].cleanType;
+                        tempCName = systems[j].cleanName;
                     }
                     int tempsos = systems[j].GetSOs(soChoices);
                     int tempotherfuncs = systems[j].GetOtherFuncs(juice.recipes[recipe]);
@@ -2167,6 +2417,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // temp and current are the same time
                     else if (DateTime.Compare(tempstart, currentStart) == 0)
@@ -2181,6 +2432,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos > sos)
                         {
@@ -2192,6 +2444,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                         else if (otherfuncs == tempotherfuncs && tempsos == sos && TimeSpan.Compare(tempCLength, cLength) < 0)
                         {
@@ -2203,6 +2456,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                     // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
@@ -2216,6 +2470,7 @@ namespace WpfApp1
                         cStart = tempCStart;
                         cLength = tempCLength;
                         cType = tempCType;
+                        cName = tempCName;
                     }
                     // current is later than ideal
                     else
@@ -2233,6 +2488,7 @@ namespace WpfApp1
                             cStart = tempCStart;
                             cLength = tempCLength;
                             cType = tempCType;
+                            cName = tempCName;
                         }
                     }
                 }
@@ -2243,6 +2499,7 @@ namespace WpfApp1
                     option.conceivable = false;
                     for (int z = 0; z < juice.recipes[recipe].Count; z++)
                         juice.recipes[recipe][z] /= slurrySize;
+                    juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                     return option;
                 }
 
@@ -2253,6 +2510,7 @@ namespace WpfApp1
                 option.systemCleaningStart = cStart;
                 option.systemCleaningLength = cLength;
                 option.systemCleaningType = cType;
+                option.systemCleaningName = cName;
 
                 // update metrics
                 if (!pickedStartTime)
@@ -2327,6 +2585,7 @@ namespace WpfApp1
             DateTime cleanStart = DateTime.MinValue;
             TimeSpan cleanLength = TimeSpan.Zero;
             int cleanType = -1;
+            string cleanName = "";
 
             for (int i = 0; i < tanks.Count; i++)
             {
@@ -2338,6 +2597,7 @@ namespace WpfApp1
                 DateTime tempCleanStart = tanks[i].cleanTime;
                 TimeSpan tempCleanLength = tanks[i].cleanLength;
                 int tempCleanType = tanks[i].cleanType;
+                string tempCleanName = tanks[i].cleanName;
 
                 if (tank == null)
                 {
@@ -2347,6 +2607,7 @@ namespace WpfApp1
                     cleanStart = tempCleanStart;
                     cleanLength = tempCleanLength;
                     cleanType = tempCleanType;
+                    cleanName = tempCleanName;
                 }
                 // current is late
                 else if (DateTime.Compare(start, juice.idealTime[recipe]) > 0)
@@ -2360,6 +2621,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
                 // current and new option are both on time
@@ -2373,6 +2635,7 @@ namespace WpfApp1
                         cleanStart = tempCleanStart;
                         cleanLength = tempCleanLength;
                         cleanType = tempCleanType;
+                        cleanName = tempCleanName;
                     }
                 }
             }
@@ -2383,6 +2646,7 @@ namespace WpfApp1
                 option.conceivable = false;
                 for (int z = 0; z < juice.recipes[recipe].Count; z++)
                     juice.recipes[recipe][z] /= slurrySize;
+                juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                 return option;
             }
 
@@ -2393,6 +2657,7 @@ namespace WpfApp1
             option.tankCleaningStart = cleanStart;
             option.tankCleaningLength = cleanLength;
             option.tankCleaningType = cleanType;
+            option.tankCleaningName = cleanName;
 
             if (!pickedStartTime)
                 option.startBlending = start;
@@ -2413,6 +2678,7 @@ namespace WpfApp1
                 option.conceivable = false;
                 for (int z = 0; z < juice.recipes[recipe].Count; z++)
                     juice.recipes[recipe][z] /= slurrySize;
+                juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                 return option;
             }
 
@@ -2423,6 +2689,7 @@ namespace WpfApp1
             option.transferCleaningStart = transferLines[2].cleanTime;
             option.transferCleaningLength = transferLines[2].cleanLength;
             option.transferCleaningType = transferLines[2].cleanType;
+            option.transferCleaningName = transferLines[2].cleanName;
 
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
@@ -2432,6 +2699,7 @@ namespace WpfApp1
 
             for (int z = 0; z < juice.recipes[recipe].Count; z++)
                 juice.recipes[recipe][z] /= slurrySize;
+            juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
 
             return option;
         }
@@ -2655,6 +2923,7 @@ namespace WpfApp1
             return x.so;
         } 
         
+        
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -2678,6 +2947,45 @@ namespace WpfApp1
                     juice += " (slurry) " + adding;
                 }
                 cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+
+                cmd.Connection = conn;
+
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        //  inserting Juice Schedule
+        //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
+        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch,String equipname, DateTime start, DateTime end)
+        {
+                                            
+            //for equip_type that should return the name
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
+                cmd.CommandText = "[insert_JuiceSch]"; 
+                if (slurry == true)
+                {
+                    String adding = Convert.ToString(batch);
+                    juice += " (slurry) " + adding;
+                }
+                cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
+                cmd.Parameters.Add("juicetype", SqlDbType.BigInt).Value = juice_type;
+                cmd.Parameters.Add("start", SqlDbType.DateTime).Value = start;
+                cmd.Parameters.Add("end", SqlDbType.DateTime).Value = end;
+                cmd.Parameters.Add("equipname", SqlDbType.VarChar).Value = equipname;
 
                 cmd.Connection = conn;
 

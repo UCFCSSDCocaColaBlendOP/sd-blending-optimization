@@ -38,6 +38,7 @@ namespace WpfApp1
         private void btn_Generate_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            string filename = "";
             ofd.InitialDirectory = "";
             ofd.Title = "Open Spreadsheet";
             ofd.CheckFileExists = true;
@@ -49,15 +50,13 @@ namespace WpfApp1
             if (ofd.ShowDialog() == true)
             {
                 Mouse.OverrideCursor = Cursors.Wait;
-                String filename = ofd.FileName;
-                Mouse.OverrideCursor = null;
-
+                filename = ofd.FileName;
                 sch = new Schedule2(filename);
-            }
 
-            Generate form = new Generate(sch);
-            form.Show();
-
+                Generate form = new Generate(sch, filename);
+                form.Show();
+                Mouse.OverrideCursor = null;
+            }           
         }
 
         private void btn_Export_Click(object sender, RoutedEventArgs e)

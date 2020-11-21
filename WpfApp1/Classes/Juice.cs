@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows;
+
+using System.Configuration;
 
 namespace WpfApp1
 {
@@ -31,7 +36,6 @@ namespace WpfApp1
         public Equipment mixingTank;
         public DateTime mixingDoneBlending;
         public List<Equipment> mixingEquipment;
-        public List<DateTime> mixingDoneWithEquipment;
 
         // info pulled from the database used in the scheduling process
         public List<List<int>> recipes; // for each recipe there's a list, each list a list of times each functionality is needed for, 0 if not needed
@@ -52,6 +56,11 @@ namespace WpfApp1
         public List<ScheduleEntry> schedule;
         public Equipment tank;
 
+       //added for update juice functions
+        public int num_Functions; 
+        public List<int> recipeID = new List<int>();
+        public List<String> recipename = new List<String>(); 
+        
         /// <summary>
         /// Creates a Juice from the schedule.
         /// </summary>
@@ -81,9 +90,12 @@ namespace WpfApp1
             currentFillTime = OGFillTime;
             schedule = new List<ScheduleEntry>();
 
-            // insert code to pull info from the database using attribute type to find the correct juice
-            // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, idealmixinglength, and transferTime
-
+            getRecipes(); 
+            for(int i=0; i <recipeID.Count; i++)
+            {
+                getFunctionality(recipeID[i]); 
+            }
+            
             // set inlineposs
             inlineposs = false;
             for (int i = 0; i < inlineflags.Count; i++)
@@ -91,7 +103,132 @@ namespace WpfApp1
 
             InitializeIdealTime();
         }
+        private void getNumFunctions()
+        {
+            
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
 
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_FuncMaxId]";
+
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                if (dt.Rows.Count > 0) { 
+                num_Functions = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
+                conn.Close();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        public void getRecipes()
+        {
+
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_juice_rec]";
+                cmd.Parameters.Add("juice_type", SqlDbType.BigInt).Value = this.type;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        this.recipeID.Add(Convert.ToInt32(dr["id"]));
+                        this.recipename.Add(dr.Field<String>("Name"));
+                        this.recipePreTimes.Add(Convert.ToInt32(dr["preBlend"]));
+                        this.recipePostTimes.Add(Convert.ToInt32(dr["postBlend"]));
+                        this.idealmixinglength.Add(Convert.ToInt32(dr["mixingTime"]));
+                        this.inlineflags.Add(Convert.ToBoolean(dr["inline"]));
+                    }
+                }
+
+                conn.Close();
+                transferTime = new TimeSpan(2, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+        public void getFunctionality(int id_rec)
+        {
+            getNumFunctions();
+            int id; 
+            List < int >func = new List<int>(num_Functions+1);
+            for(int z=0; z<func.Count; z++)
+            {
+                func[z] = 0; 
+            }
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_rec_func]";
+                cmd.Parameters.Add("rec_id", SqlDbType.BigInt).Value = id_rec;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        
+                        id=Convert.ToInt32(dr["func_id"]);
+                       
+                        for(int j=0; j < func.Count; j++)
+                        {
+                            if (j == id)
+                            {
+                                func[j] = Convert.ToInt32(dr["time"]); 
+                            }
+                            else if (id > j)
+                            {
+                                break; 
+                            }
+                        }
+                    }
+                }
+                this.recipes.Add(func); 
+                conn.Close();          
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         /// <summary>
         /// Sets up a starter juice by filling in equipment schedules and necessary fields and by pulling from database
         /// </summary>
@@ -105,6 +242,12 @@ namespace WpfApp1
 
             // // insert code to pull info from the database using attribute type to find the correct juice
             // initialize and fill: recipes, recipePreTimes, recipePostTimes, inlineflags, and transferTime
+            getRecipes();
+            for (int i = 0; i < recipeID.Count; i++)
+            {
+                getFunctionality(recipeID[i]);
+            }
+            transferTime = new TimeSpan(2, 0, 0);
 
             // deal with the filling juice
             if (filling)
@@ -113,9 +256,9 @@ namespace WpfApp1
                 if (fillingInline && fillingSlurry == 1)
                 {
                     // mark the transferline 
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, 1));
                     // mark the blend tank, it ends at finishedwithtransferline
-                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTank.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, 1));
                 }
                 // you're part way through a slurry
                 else if (fillingInline)
@@ -124,7 +267,7 @@ namespace WpfApp1
                     slurryBatches = fillingSlurry - 1;
                     tank = fillingTank;
                     // mark the transferline
-                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, -1));
+                    fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, slurryBatches + 1));
                     // mark the blend tank, open ended
                     fillingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                 }
@@ -151,7 +294,7 @@ namespace WpfApp1
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, this));
                     // mark all the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, true, -1));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingEquipment[i].endMixing, this, true, slurryBatches + 1));
                 }
                 // mixing a batch
                 else
@@ -160,7 +303,7 @@ namespace WpfApp1
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false, totalBatches - neededBatches));
                     // mark the blend equipment
                     for (int i = 0; i < mixingEquipment.Count; i++)
-                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingDoneWithEquipment[i], this, false, totalBatches - neededBatches));
+                        mixingEquipment[i].schedule.Add(new ScheduleEntry(scheduleID, mixingEquipment[i].endMixing, this, false, totalBatches - neededBatches));
                 }
             }
 
@@ -205,10 +348,5 @@ namespace WpfApp1
                 idealTime.Add(currentFillTime.Subtract(new TimeSpan(0, idealmixinglength[i], 0)));
         }
 
-        // grab from Alisa
-        public void SortSchedule()
-        {
-            
-        }
     }
 }
