@@ -180,10 +180,10 @@ namespace WpfApp1
         {
             getNumFunctions();
             int id; 
-            List < int >func = new List<int>(num_Functions+1);
-            for(int z=0; z<func.Count; z++)
+            List < int >func = new List<int>();
+            for(int z=0; z<num_Functions+1; z++)
             {
-                func[z] = 0; 
+                func.Add(0); 
             }
             try
             {
@@ -214,7 +214,7 @@ namespace WpfApp1
                             {
                                 func[j] = Convert.ToInt32(dr["time"]); 
                             }
-                            else if (id > j)
+                            else if (j > id)
                             {
                                 break; 
                             }
