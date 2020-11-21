@@ -2218,6 +2218,7 @@ namespace WpfApp1
         {
             for (int i = 0; i < juice.recipes[recipe].Count; i++)
                 juice.recipes[recipe][i] *= slurrySize;
+            juice.idealTime[recipe] = juice.idealTime[recipe].Subtract(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
 
             CompareRecipe option = new CompareRecipe();
             option.slurry = true;
@@ -2237,6 +2238,7 @@ namespace WpfApp1
                     option.conceivable = false;
                     for (int z = 0; z < juice.recipes[recipe].Count; z++)
                         juice.recipes[recipe][z] /= slurrySize;
+                    juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                     return option;
                 }
 
@@ -2497,6 +2499,7 @@ namespace WpfApp1
                     option.conceivable = false;
                     for (int z = 0; z < juice.recipes[recipe].Count; z++)
                         juice.recipes[recipe][z] /= slurrySize;
+                    juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                     return option;
                 }
 
@@ -2643,6 +2646,7 @@ namespace WpfApp1
                 option.conceivable = false;
                 for (int z = 0; z < juice.recipes[recipe].Count; z++)
                     juice.recipes[recipe][z] /= slurrySize;
+                juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                 return option;
             }
 
@@ -2674,6 +2678,7 @@ namespace WpfApp1
                 option.conceivable = false;
                 for (int z = 0; z < juice.recipes[recipe].Count; z++)
                     juice.recipes[recipe][z] /= slurrySize;
+                juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
                 return option;
             }
 
@@ -2694,6 +2699,7 @@ namespace WpfApp1
 
             for (int z = 0; z < juice.recipes[recipe].Count; z++)
                 juice.recipes[recipe][z] /= slurrySize;
+            juice.idealTime[recipe] = juice.idealTime[recipe].Add(new TimeSpan(0, juice.idealmixinglength[recipe] * (slurrySize - 1), 0));
 
             return option;
         }
