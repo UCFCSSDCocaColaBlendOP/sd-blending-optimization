@@ -31,9 +31,9 @@ namespace WpfApp1
         public class EquipList
         {
             public string equip { set; get; }
-            public string state { set; get; }
-            public string juice { set; get; }
-            public string clean { set; get; }
+            public int state { set; get; }
+            public int juice { set; get; }
+            public int clean { set; get; }
             public DateTime time { set; get; }
         }
 
@@ -418,7 +418,14 @@ namespace WpfApp1
             {
                 if (line.schedule.Count == 0)
                 {
-                    dg_Equip.Items.Add(line.name);
+                    dg_Equip.Items.Add(new EquipList
+                    {
+                        equip = line.name,
+                        //state = line.state,
+                        juice = line.lastJuiceType,
+                        clean = line.lastCleaningType,
+                        time = line.cleanTime
+                    });
                 }
             }
 
