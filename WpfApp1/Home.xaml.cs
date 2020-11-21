@@ -31,7 +31,7 @@ namespace WpfApp1
         {
             InitializeComponent();
 
-            // Functions to fill each tab's DataGrid            
+            // Functions to fill each tab's DataGrid     
             refresh();
         }
 

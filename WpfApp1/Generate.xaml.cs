@@ -28,12 +28,19 @@ namespace WpfApp1
         Schedule2 sch;
         List<Juice> juices;
 
+        public class JuicePair
+        {
+            public string name { set; get; }
+            public int type { set; get; }
+        }
+
         public class EquipList
         {
             public string equip { set; get; }
             public int state { set; get; }
             public int juice { set; get; }
             public int clean { set; get; }
+            public string cleanName { set; get; }
             public DateTime time { set; get; }
         }
 
@@ -175,6 +182,18 @@ namespace WpfApp1
             colEquipTime.Binding = new Binding("time");
             dg_Equip_Juice.Columns.Add(colEquipTime);
 
+            foreach (DataGridTextColumn col in dg_Juices.Columns)
+            {
+                col.CanUserSort = false;
+                col.CanUserReorder = false;
+            }
+
+            foreach (DataGridTextColumn col in dg_Equip_Juice.Columns)
+            {
+                col.CanUserSort = false;
+                col.CanUserReorder = false;
+            }
+
             foreach (Juice juice in juices)
             {
                 if (juice.type == -1)
@@ -234,7 +253,7 @@ namespace WpfApp1
                 {
                     continue;
                 }
-                cb.Items.Add(juice.name);
+                cb.Items.Add(new JuicePair() { name = juice.name, type = juice.type });
             }
         }
 
@@ -322,6 +341,34 @@ namespace WpfApp1
             }
         }
 
+        private void fill_Cleaning_Dropdown(ComboBox cb)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_CleanType_List]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cb.ItemsSource = dt.DefaultView;
+                cb.DisplayMemberPath = "CleaningName";
+                cb.SelectedValuePath = "id";
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
         private void tc_Home_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             
@@ -373,6 +420,12 @@ namespace WpfApp1
             colStop.Binding = new Binding("stop");
             dg_Thaw.Columns.Add(colStop);
 
+            foreach (DataGridTextColumn col in dg_Thaw.Columns)
+            {
+                col.CanUserSort = false;
+                col.CanUserReorder = false;
+            }
+
             fill_Thaw_Dropdown(cb_Thaw_Juice);
 
             tc_Home.SelectedIndex = 1;
@@ -402,17 +455,29 @@ namespace WpfApp1
             colJuice.Binding = new Binding("juice");
             dg_Equip.Columns.Add(colJuice);
 
-            DataGridTextColumn colClean = new DataGridTextColumn();
-            colClean.Header = "Cleaning";
-            colClean.Binding = new Binding("clean");
-            dg_Equip.Columns.Add(colClean);
+            DataGridTextColumn colCleanType = new DataGridTextColumn();
+            colCleanType.Header = "Clean Type";
+            colCleanType.Binding = new Binding("clean");
+            dg_Equip.Columns.Add(colCleanType);
+
+            DataGridTextColumn colCleanName = new DataGridTextColumn();
+            colCleanName.Header = "Clean Name";
+            colCleanName.Binding = new Binding("cleanName");
+            dg_Equip.Columns.Add(colCleanName);
 
             DataGridTextColumn colTime = new DataGridTextColumn();
             colTime.Header = "Time";
             colTime.Binding = new Binding("time");
             dg_Equip.Columns.Add(colTime);
 
+            foreach (DataGridTextColumn col in dg_Equip.Columns)
+            {
+                col.CanUserSort = false;
+                col.CanUserReorder = false;
+            }
+
             fill_Thaw_Dropdown(cb_Equipment_Juice);
+            fill_Cleaning_Dropdown(cb_Equipment_Clean);
 
             foreach (Equipment line in sch.transferLines)
             {
@@ -421,9 +486,10 @@ namespace WpfApp1
                     dg_Equip.Items.Add(new EquipList
                     {
                         equip = line.name,
-                        //state = line.state,
-                        juice = line.lastJuiceType,
-                        clean = line.lastCleaningType,
+                        state = line.state,
+                        juice = line.juiceType,
+                        clean = line.cleanType,
+                        cleanName = line.cleaning,
                         time = line.cleanTime
                     });
                 }
@@ -433,7 +499,15 @@ namespace WpfApp1
             {
                 if (aseptic.schedule.Count == 0)
                 {
-                    dg_Equip.Items.Add(aseptic.name);
+                    dg_Equip.Items.Add(new EquipList
+                    {
+                        equip = aseptic.name,
+                        state = aseptic.state,
+                        juice = aseptic.juiceType,
+                        clean = aseptic.cleanType,
+                        cleanName = aseptic.cleaning,
+                        time = aseptic.cleanTime
+                    });
                 }
             }
 
@@ -441,7 +515,15 @@ namespace WpfApp1
             {
                 if (tank.schedule.Count == 0)
                 {
-                    dg_Equip.Items.Add(tank.name);
+                    dg_Equip.Items.Add(new EquipList
+                    {
+                        equip = tank.name,
+                        state = tank.state,
+                        juice = tank.juiceType,
+                        clean = tank.cleanType,
+                        cleanName = tank.cleaning,
+                        time = tank.cleanTime
+                    });
                 }
             }
 
@@ -449,7 +531,15 @@ namespace WpfApp1
             {
                 if (extra.schedule.Count == 0)
                 {
-                    dg_Equip.Items.Add(extra.name);
+                    dg_Equip.Items.Add(new EquipList
+                    {
+                        equip = extra.name,
+                        state = extra.state,
+                        juice = extra.juiceType,
+                        clean = extra.cleanType,
+                        cleanName = extra.cleaning,
+                        time = extra.cleanTime
+                    });
                 }
             }
 
@@ -457,7 +547,15 @@ namespace WpfApp1
             {
                 if (system.schedule.Count == 0)
                 {
-                    dg_Equip.Items.Add(system.name);
+                    dg_Equip.Items.Add(new EquipList
+                    {
+                        equip = system.name,
+                        state = system.state,
+                        juice = system.juiceType,
+                        clean = system.cleanType,
+                        cleanName = system.cleaning,
+                        time = system.cleanTime
+                    });
                 }
             }
 
@@ -472,10 +570,17 @@ namespace WpfApp1
 
         private void restart()
         {
-            //MessageBox.
-            Generate form = new Generate(sch, filename);
-            form.Show();
-            Close();
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to restart schedule generation?", "Restart Schedule", MessageBoxButton.YesNo);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    Generate form = new Generate(sch, filename);
+                    form.Show();
+                    Close();
+                    break;
+                case MessageBoxResult.No:
+                    break;
+            }
         }
 
         private void cb_State_Copy_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -980,21 +1085,22 @@ namespace WpfApp1
                 }
 
                 JuiceList row = (JuiceList)dg_Juices.SelectedItems[0];
-                row.start = (bool)chck_Start_Juice.IsChecked;
-                row.time = Convert.ToDateTime(tb_Juice_Time.Text);
+                Juice curr = juices[dg_Juices.SelectedIndex];
+                curr.starter = row.start = (bool)chck_Start_Juice.IsChecked;
+                curr.OGFillTime = row.time = Convert.ToDateTime(tb_Juice_Time.Text);
                 row.type = Convert.ToInt32(cb_Juice_Type.SelectedValue);
-                row.batchFilled = Convert.ToInt32(tb_Batches_Filled.Text);
-                row.batchTotal = Convert.ToInt32(tb_Batches_Total.Text);
-                row.filling = (bool)chck_Juice_Filling.IsChecked;
-                row.fillingInline = (bool)chck_Inline_Fill.IsChecked;
-                row.fillingBatches = Convert.ToInt32(tb_Batches_Fill.Text);
+                curr.batchesFilled = row.batchFilled = Convert.ToInt32(tb_Batches_Filled.Text);
+                curr.totalBatches = row.batchTotal = Convert.ToInt32(tb_Batches_Total.Text);
+                curr.filling = row.filling = (bool)chck_Juice_Filling.IsChecked;
+                curr.fillingInline = row.fillingInline = (bool)chck_Inline_Fill.IsChecked;
+                curr.fillingSlurry = row.fillingBatches = Convert.ToInt32(tb_Batches_Fill.Text);
                 row.fillingTL = cb_Transfer_Line.Text;
-                row.fillingTLTime = Convert.ToDateTime(tb_TL_Duration.Text);
+                curr.finishedWithTransferLine = row.fillingTLTime = Convert.ToDateTime(tb_TL_Duration.Text);
                 row.fillingBT = cb_Blend_Tank_Fill.Text;
-                row.fillingBTTime = Convert.ToDateTime(tb_TL_Duration.Text);
-                row.mixing = (bool)chck_Juice_Mix.IsChecked;
-                row.mixingInline = (bool)chck_Inline_Mix.IsChecked;
-                row.mixingBatches = Convert.ToInt32(tb_Batches_Mix.Text);
+                curr.mixingDoneBlending = row.fillingBTTime = Convert.ToDateTime(tb_TL_Duration.Text);
+                curr.mixing = row.mixing = (bool)chck_Juice_Mix.IsChecked;
+                curr.mixingInline = row.mixingInline = (bool)chck_Inline_Mix.IsChecked;
+                curr.mixingSlurry = row.mixingBatches = Convert.ToInt32(tb_Batches_Mix.Text);
                 row.mixingBT = cb_Blend_Tank_Mix.Text;
 
                 dg_Juices.Items.Refresh();
@@ -1010,7 +1116,7 @@ namespace WpfApp1
         {
             try
             {
-                if (dg_Juices.SelectedItems.Count == 0)
+                if (dg_Juices.SelectedItems.Count == 0 || String.IsNullOrEmpty(tb_Equip_Duration.Text))
                 {
                     return;
                 }
@@ -1051,6 +1157,13 @@ namespace WpfApp1
 
         private void btn_AddToThaw_Click(object sender, RoutedEventArgs e)
         {
+            if (cb_Thaw_Juice.SelectedIndex == -1 ||
+                String.IsNullOrEmpty(tb_Thaw_Start.Text) ||
+                String.IsNullOrEmpty(tb_Thaw_Stop.Text))
+            {
+                return;
+            }
+
             dg_Thaw.Items.Add(new ThawList
             {
                 juice = cb_Thaw_Juice.Text,
@@ -1080,6 +1193,140 @@ namespace WpfApp1
         private void btn_Submit_Click(object sender, RoutedEventArgs e)
         {
             sch.GenerateNewSchedule();
+        }
+
+        private void cb_Equipment_State_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void btn_Save_Equip_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (dg_Equip.SelectedItems.Count == 0)
+                {
+                    return;
+                }
+
+                EquipList row = (EquipList)dg_Equip.SelectedItems[0];
+                row.state = Convert.ToInt32(cb_Equipment_State.SelectedValue);
+
+                if (row.state == 0 || row.state == 1)
+                {
+                    row.juice = -1;
+                }
+                else
+                {
+                    row.juice = get_Type(cb_Equipment_Juice.Text);
+                }
+
+                if (row.state == 0 || row.state == 1 || row.state == 3)
+                {
+                    row.clean = -1;
+                }
+                else
+                {
+                    row.clean = Convert.ToInt32(cb_Equipment_Clean.SelectedValue);
+                }
+                
+                if (row.state == 0 || row.state == 1 || row.state == 2 || row.state == 3)
+                {
+                    row.time = DateTime.MinValue;
+                }
+                else
+                {
+                    row.time = Convert.ToDateTime(tb_Equipment_Time.Text);
+                }
+
+                if (row.state == 4)
+                {
+                    row.cleanName = cb_Equipment_Clean.Text;
+                }
+
+                dg_Equip.Items.Refresh();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private int get_Equipment_State(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return -1;
+                }
+
+                EquipList row = (EquipList)dg.SelectedItems[0];
+                return Convert.ToInt32(row.state);
+            }
+
+            catch (Exception ex)
+            { return -1; }
+        }
+
+        private int get_Equipment_Juice(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return -1;
+                }
+
+                EquipList row = (EquipList)dg.SelectedItems[0];
+                return Convert.ToInt32(row.juice);
+            }
+
+            catch (Exception ex)
+            { return -1; }
+        }
+
+        private int get_Equipment_Clean(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return -1;
+                }
+
+                EquipList row = (EquipList)dg.SelectedItems[0];
+                return Convert.ToInt32(row.clean);
+            }
+
+            catch (Exception ex)
+            { return -1; }
+        }
+
+        private string get_Equipment_Time(DataGrid dg)
+        {
+            try
+            {
+                if (dg.SelectedItems.Count == 0)
+                {
+                    return "";
+                }
+
+                EquipList row = (EquipList)dg.SelectedItems[0];
+                return row.time.ToString();
+            }
+
+            catch (Exception ex)
+            { return ""; }
+        }
+
+        private void dg_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            cb_Equipment_State.SelectedValue = get_Equipment_State(dg_Equip);
+            cb_Equipment_Juice.SelectedValue = get_Equipment_Juice(dg_Equip);
+            cb_Equipment_Clean.SelectedValue = get_Equipment_Clean(dg_Equip);
+            tb_Equipment_Time.Text = get_Equipment_Time(dg_Equip);
         }
     }
 }
