@@ -19,6 +19,8 @@ namespace WpfApp1
 {
     public class Schedule2
     {
+        public string message;
+
         public bool inconceivable;
         public Juice inconceiver;
         public bool late;
@@ -62,7 +64,6 @@ namespace WpfApp1
             transferLines = new List<Equipment>();
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
-            inprogress = new List<Juice>();
             aseptics = new List<Equipment>(); 
 
             inconceivable = false;
@@ -159,8 +160,19 @@ namespace WpfApp1
                 }
             }
 
+
             PullEquipment();
             PrintAllJuices();
+
+            thawRoom = new Equipment("Thaw Room", thawID, 720);
+            thawRoom.schedule = new List<ScheduleEntry>();
+            thawRoom.functionalities = new List<bool>();
+            for (int i = 0; i < numFunctions; i++)
+                thawRoom.functionalities.Add(false);
+            thawRoom.functionalities[thawID] = true;
+            thawRoom.SOs = new List<bool>();
+            for (int i = 0; i < numSOs; i++)
+                thawRoom.SOs.Add(true);
         }
 
         // gets the thaw room id from the database
@@ -766,7 +778,7 @@ namespace WpfApp1
                 //MessageBox.Show(ex.ToString());
             }
 
-            return -1;
+            return -2;
         }
 
         private void PrintAllJuices()
@@ -897,7 +909,7 @@ namespace WpfApp1
                         {
                             CompareRecipe pick = null;
                             int size = -1;
-                            DateTime goTime = new DateTime(0, 0, 0);
+                            DateTime goTime = DateTime.MinValue;
 
                             // try all the slurry sizes
                             for (int i = 2; i < 5; i++)

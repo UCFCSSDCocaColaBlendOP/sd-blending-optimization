@@ -45,7 +45,6 @@ namespace WpfApp1
         public List<bool> inlineflags; // marks whether or not each recipe is inline
         public bool inlineposs; // or of inlineflags
         public TimeSpan transferTime;
-        public TimeSpan fillTime;
 
         // special fields used in scheduling
         public int neededBatches;
@@ -57,9 +56,9 @@ namespace WpfApp1
         public Equipment tank;
 
        //added for update juice functions
-        public int num_Functions; 
-        public List<int> recipeID = new List<int>();
-        public List<String> recipename = new List<String>(); 
+        public int num_Functions;
+        public List<int> recipeID;
+        public List<string> recipename;
         
         /// <summary>
         /// Creates a Juice from the schedule.
@@ -77,7 +76,27 @@ namespace WpfApp1
             this.line = line;
             this.type = type;
             this.OGFillTime = fill;
+            recipes = new List<List<int>>();
+            recipePreTimes = new List<int>();
+            recipePostTimes = new List<int>();
+            idealmixinglength = new List<int>();
+            inlineflags = new List<bool>();
+            idealTime = new List<DateTime>();
+            recipeID = new List<int>();
+            recipename = new List<string>();
+
            //this.totalBatches = batches;  //TODO: assign somewhere else, from frontend
+        }
+
+        /// <summary>
+        /// for thaw room schedule
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="type"></param>
+        public Juice(string name, int type)
+        {
+            this.name = name;
+            this.type = type;
         }
 
         /// <summary>
@@ -95,6 +114,8 @@ namespace WpfApp1
             {
                 getFunctionality(recipeID[i]); 
             }
+
+            CalculateTransferTime();
             
             // set inlineposs
             inlineposs = false;
@@ -103,6 +124,21 @@ namespace WpfApp1
 
             InitializeIdealTime();
         }
+
+        public void CalculateTransferTime()
+        {
+            // this code needs replaced
+            int gpm;
+            int tankSize = 20000;
+
+            if (line == 0 || line == 1 || line == 2)
+                gpm = 165;
+            else
+                gpm = 65;
+
+            transferTime = new TimeSpan(0, tankSize / gpm, 0);
+        }
+
         private void getNumFunctions()
         {
             
@@ -180,10 +216,10 @@ namespace WpfApp1
         {
             getNumFunctions();
             int id; 
-            List < int >func = new List<int>(num_Functions+1);
-            for(int z=0; z<func.Count; z++)
+            List < int >func = new List<int>();
+            for(int z=0; z<num_Functions+1; z++)
             {
-                func[z] = 0; 
+                func.Add(0); 
             }
             try
             {
@@ -214,7 +250,7 @@ namespace WpfApp1
                             {
                                 func[j] = Convert.ToInt32(dr["time"]); 
                             }
-                            else if (id > j)
+                            else if (j > id)
                             {
                                 break; 
                             }
@@ -229,6 +265,7 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
+
         /// <summary>
         /// Sets up a starter juice by filling in equipment schedules and necessary fields and by pulling from database
         /// </summary>
@@ -332,7 +369,7 @@ namespace WpfApp1
         public void RecalculateFillTime()
         {
             // find the fill time for the next batch
-            currentFillTime = currentFillTime.Add(fillTime);
+            currentFillTime = currentFillTime.Add(transferTime);
             
             // find the ideal times for each recipe
             for (int i = 0; i < idealTime.Count; i++)
