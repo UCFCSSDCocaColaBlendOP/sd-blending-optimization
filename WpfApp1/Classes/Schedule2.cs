@@ -897,7 +897,7 @@ namespace WpfApp1
                         {
                             CompareRecipe pick = null;
                             int size = -1;
-                            DateTime goTime = new DateTime(0, 0, 0);
+                            DateTime goTime = DateTime.MinValue;
 
                             // try all the slurry sizes
                             for (int i = 2; i < 5; i++)
