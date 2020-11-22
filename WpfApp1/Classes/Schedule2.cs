@@ -134,7 +134,7 @@ namespace WpfApp1
 
                     string name = lines[i][3];
 
-                    int type = name.Contains("CIP") ? -1 : getJuiceType(name);
+                    int type = name.Contains("CIP") ? -2 : getJuiceType(name);
                     Console.WriteLine(name + " " + type);
 
                     string date = lines[i][0];
