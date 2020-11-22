@@ -46,7 +46,7 @@ namespace WpfApp1
 
         public class ThawList
         {
-            public string juice { set; get; }
+            public int juice { set; get; }
             public DateTime start { set; get; }
             public DateTime stop { set; get; }
         }
@@ -392,7 +392,7 @@ namespace WpfApp1
         private void btn_NextToThaw_Click(object sender, RoutedEventArgs e)
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            foreach (Juice juice in juices)
+            /*foreach (Juice juice in juices)
             {
                 if (juice.starter == true)
                 {
@@ -403,10 +403,10 @@ namespace WpfApp1
                 {
                     juice.UpdateStandardJuice();
                 }
-            }
+            }*/
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
-            colJuice.Header = "Juices";
+            colJuice.Header = "Juice Type";
             colJuice.Binding = new Binding("juice");
             dg_Thaw.Columns.Add(colJuice);
 
@@ -426,7 +426,7 @@ namespace WpfApp1
                 col.CanUserReorder = false;
             }
 
-            fill_Thaw_Dropdown(cb_Thaw_Juice);
+            fill_Juice_Dropdown(cb_Thaw_Juice);
 
             tc_Home.SelectedIndex = 1;
             Mouse.OverrideCursor = null;
@@ -1166,7 +1166,7 @@ namespace WpfApp1
 
             dg_Thaw.Items.Add(new ThawList
             {
-                juice = cb_Thaw_Juice.Text,
+                juice = Convert.ToInt32(cb_Thaw_Juice.SelectedValue),
                 start = Convert.ToDateTime(tb_Thaw_Start.Text),
                 stop = Convert.ToDateTime(tb_Thaw_Stop.Text)                
             });
