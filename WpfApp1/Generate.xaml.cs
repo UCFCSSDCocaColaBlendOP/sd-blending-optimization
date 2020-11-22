@@ -1193,6 +1193,7 @@ namespace WpfApp1
         private void btn_Submit_Click(object sender, RoutedEventArgs e)
         {
             sch.GenerateNewSchedule();
+            //MessageBox.Show()
         }
 
         private void cb_Equipment_State_SelectionChanged(object sender, SelectionChangedEventArgs e)

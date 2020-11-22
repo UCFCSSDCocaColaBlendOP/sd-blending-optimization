@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="Blending Optimization System - View Schedules" Height="586.4" Width="1008.2" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Blending Optimization System - View Schedules" Height="656.4" Width="1164.2" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid Background="#FF1F1E1E" Margin="-4,0,-2,-6.2">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
@@ -22,14 +22,84 @@
             <ColumnDefinition Width="18*"/>
         </Grid.ColumnDefinitions>
         <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
-        <DataGrid x:Name="dg_Schedules" BorderBrush="White" BorderThickness="1,1,1,1" Background="#FF132226" Margin="1.2,25,18,10.2" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="4"/>
-        <ComboBox x:Name="cb_Type" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.4,57.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165">
+        <ComboBox x:Name="cb_Type" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.8,57.4,0,0" Grid.Row="1" VerticalAlignment="Top" Width="182" SelectionChanged="cb_Type_SelectionChanged">
             <ComboBoxItem Content="By Juice"/>
             <ComboBoxItem Content="By Equipment"/>
         </ComboBox>
-        <ComboBox x:Name="cb_SchID" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.4,10.2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165"/>
+        <ComboBox x:Name="cb_SchID" Grid.Column="2" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Margin="150.8,10.4,0,0" Grid.Row="1" VerticalAlignment="Top" Width="182" SelectionChanged="cb_SchID_SelectionChanged"/>
         <Label x:Name="label_SchID" Content="Schedule ID:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="2" HorizontalAlignment="Left" Margin="25.4,8.2,0,0" VerticalAlignment="Top" Height="30" Width="120" Grid.Row="1"/>
         <Label x:Name="label_Type" Content="View Type:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="2" HorizontalAlignment="Left" Margin="25.4,55.2,0,0" VerticalAlignment="Top" Height="30" Width="120" Grid.Row="1"/>
+        <TabControl x:Name="tc_Home" Margin="1,3,0.2,9.8" BorderThickness="1,1,1,1" FontFamily="Segoe UI Semibold" FontSize="20" Background="#FF132226" Foreground="White" BorderBrush="White" Grid.Row="2" Grid.ColumnSpan="3" Grid.Column="1">
+            <TabControl.Resources>
+                <Style TargetType="{x:Type TabItem}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type TabItem}">
+                                <Border x:Name="Border" BorderThickness="1,1,1,0" BorderBrush="Gainsboro" CornerRadius="4,4,0,0" Margin="0,0,2,0">
+                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="10,2"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#FFDD4A4A"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter TargetName="Border" Property="Background" Value="#FF132226"/>
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsSelected" Value="False"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="Border" Property="Background" Value="#FFD76868"/>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="SO-1" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_SO1_Equip" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_SO1_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                    <DataGrid x:Name="dg_SO1_Juice" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_SO1_Juice" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="SO-2" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_SO2_Equip" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_SO2_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                    <DataGrid x:Name="dg_SO2_Juice" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_SO2_Juice" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Shared" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Shared_Equip" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_Shared_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                    <DataGrid x:Name="dg_Shared_Juice" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_Shared_Juice" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Transfer Line" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_TL_Equip" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_TL_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                    <DataGrid x:Name="dg_TL_Juice" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_TL_Juice" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Aseptic" BorderBrush="White" Foreground="White">
+                <Grid Background="#FF1F1E1E">
+                    <DataGrid x:Name="dg_Aseptic_Equip" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_Aseptic_Equip" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                    <DataGrid x:Name="dg_Aseptic_Juice" Background="#FF132226" FontSize="16" FontFamily="Segoe UI" IsReadOnly="True" CanUserAddRows="False" Margin="0,33,-0.4,0.8"/>
+                    <ComboBox x:Name="cb_Aseptic_Juice" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Width="217"/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
 
     </Grid>
 </mah:MetroWindow>
