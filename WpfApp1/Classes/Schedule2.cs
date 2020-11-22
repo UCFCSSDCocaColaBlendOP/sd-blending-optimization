@@ -62,7 +62,6 @@ namespace WpfApp1
             transferLines = new List<Equipment>();
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
-            inprogress = new List<Juice>();
             aseptics = new List<Equipment>(); 
 
             inconceivable = false;
@@ -134,7 +133,7 @@ namespace WpfApp1
 
                     string name = lines[i][3];
 
-                    int type = name.Contains("CIP") ? -2 : getJuiceType(name);
+                    int type = name.Contains("CIP") ? -1 : getJuiceType(name);
                     Console.WriteLine(name + " " + type);
 
                     string date = lines[i][0];
@@ -766,7 +765,7 @@ namespace WpfApp1
                 //MessageBox.Show(ex.ToString());
             }
 
-            return -1;
+            return -2;
         }
 
         private void PrintAllJuices()

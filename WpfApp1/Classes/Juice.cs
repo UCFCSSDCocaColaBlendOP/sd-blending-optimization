@@ -89,6 +89,17 @@ namespace WpfApp1
         }
 
         /// <summary>
+        /// for thaw room schedule
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="type"></param>
+        public Juice(string name, int type)
+        {
+            this.name = name;
+            this.type = type;
+        }
+
+        /// <summary>
         /// Sets up a standard juice (ie not a starter) by pulling data and setting needed variables
         /// </summary>
         public void UpdateStandardJuice()
