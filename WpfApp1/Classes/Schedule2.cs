@@ -2295,7 +2295,7 @@ namespace WpfApp1
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
 
-            if (DateTime.Compare(option.transferTime.Subtract(option.tankLength).Add(juice.transferTime), option.startBlending) > 0)
+            if (DateTime.Compare(option.transferTime.Subtract(option.tankLength).Add(juice.transferTime), option.startBlending) > 0 || option.lateMaker == null)
                 option.lateMaker = option.transferLine;
 
             return option;
