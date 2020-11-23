@@ -47,6 +47,14 @@ namespace WpfApp1
         public DateTime cleanTime;
         public string cleanName;
 
+        // taken in during equipment page of generate schedule
+        public int state;
+        public int prevJuiceType;
+        public int prevCleaningType;
+        public string prevCleanName;
+        public DateTime endTime;
+
+
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule
         /// </summary>
@@ -61,6 +69,36 @@ namespace WpfApp1
             SOs = new List<bool>();
             schedule = new List<ScheduleEntry>();
             this.earlyLimit = new TimeSpan(0, early, 0);
+            lastJuiceType = -1;
+            state = 0;
+            prevJuiceType = 0;
+            prevCleaningType = 0;
+            prevCleanName = "";
+            endTime = DateTime.MinValue;
+        }
+
+        public void UpdateTool(DateTime scheduleID)
+        {
+            if (state == 1)
+                down = true;
+            else if (state == 2)
+            {
+                lastCleaningType = prevCleaningType;
+                lastJuiceType = prevJuiceType;
+                startClean = true;
+            }
+            else if (state == 3)
+            {
+                startDirty = true;
+                lastJuiceType = prevJuiceType;
+            }
+            else if (state == 4)
+            {
+                lastCleaningType = prevCleaningType;
+                lastJuiceType = prevJuiceType;
+                schedule.Add(new ScheduleEntry(scheduleID, endTime, prevCleaningType, prevCleanName));
+                cipGroup.schedule.Add(new ScheduleEntry(scheduleID, endTime, prevCleaningType, prevCleanName));
+            }
         }
 
         /// <summary>
@@ -91,6 +129,28 @@ namespace WpfApp1
                 else
                 {
                     cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
+                    if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
+                        return goal;
+                    else
+                        return cleanTime.Add(cleaning);
+                }
+            }
+            else if (schedule.Count == 1 && schedule[0].cleaning)
+            {
+                cleaning = GetCleaning(lastJuiceType, juicetype);
+                bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
+
+                if (oldcleaningenough)
+                {
+                    needsCleaned = false;
+                    if (DateTime.Compare(schedule[0].end, goal) > 0)
+                        return schedule[0].end;
+                    else
+                        return goal;
+                }
+                else
+                {
+                    cleanTime = cipGroup.FindTimePopulated(schedule[0].end, cleaning);
                     if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
                         return goal;
                     else

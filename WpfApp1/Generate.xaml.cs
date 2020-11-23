@@ -493,10 +493,10 @@ namespace WpfApp1
                     {
                         equip = line.name,
                         state = line.state,
-                        juice = line.juiceType,
-                        clean = line.cleanType,
-                        cleanName = line.cleaning,
-                        time = line.cleanTime
+                        juice = line.prevJuiceType,
+                        clean = line.prevCleaningType,
+                        cleanName = line.prevCleanName,
+                        time = line.endTime
                     });
                 }
             }
@@ -509,10 +509,10 @@ namespace WpfApp1
                     {
                         equip = aseptic.name,
                         state = aseptic.state,
-                        juice = aseptic.juiceType,
-                        clean = aseptic.cleanType,
-                        cleanName = aseptic.cleaning,
-                        time = aseptic.cleanTime
+                        juice = aseptic.prevJuiceType,
+                        clean = aseptic.prevCleaningType,
+                        cleanName = aseptic.prevCleanName,
+                        time = aseptic.endTime
                     });
                 }
             }
@@ -525,10 +525,10 @@ namespace WpfApp1
                     {
                         equip = tank.name,
                         state = tank.state,
-                        juice = tank.juiceType,
-                        clean = tank.cleanType,
-                        cleanName = tank.cleaning,
-                        time = tank.cleanTime
+                        juice = tank.prevJuiceType,
+                        clean = tank.prevCleaningType,
+                        cleanName = tank.prevCleanName,
+                        time = tank.endTime
                     });
                 }
             }
@@ -541,10 +541,10 @@ namespace WpfApp1
                     {
                         equip = extra.name,
                         state = extra.state,
-                        juice = extra.juiceType,
-                        clean = extra.cleanType,
-                        cleanName = extra.cleaning,
-                        time = extra.cleanTime
+                        juice = extra.prevJuiceType,
+                        clean = extra.prevCleaningType,
+                        cleanName = extra.prevCleanName,
+                        time = extra.endTime
                     });
                 }
             }
@@ -557,10 +557,10 @@ namespace WpfApp1
                     {
                         equip = system.name,
                         state = system.state,
-                        juice = system.juiceType,
-                        clean = system.cleanType,
-                        cleanName = system.cleaning,
-                        time = system.cleanTime
+                        juice = system.prevJuiceType,
+                        clean = system.prevCleaningType,
+                        cleanName = system.prevCleanName,
+                        time = system.endTime
                     });
                 }
             }

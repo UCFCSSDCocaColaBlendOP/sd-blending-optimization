@@ -113,7 +113,10 @@ namespace WpfApp1
             {
                 // you need to add a cleaning entry
                 if (extraCleaningTypes[i] != -1)
+                {
                     extras[i].schedule.Add(new ScheduleEntry(extraCleaningStarts[i], extraCleaningStarts[i].Add(extraCleaningLengths[i]), extraCleaningTypes[i], extraCleaningNames[i]));
+                    extras[i].cipGroup.schedule.Add(new ScheduleEntry(extraCleaningStarts[i], extraCleaningStarts[i].Add(extraCleaningLengths[i]), extras[i]));
+                }
 
                 extras[i].schedule.Add(new ScheduleEntry(extraTimes[i], extraTimes[i].Add(extraLengths[i]), juice, slurry, batch));
             }
@@ -123,14 +126,20 @@ namespace WpfApp1
             {
                 // cleaning entry
                 if (systemCleaningType != -1)
+                {
                     system.schedule.Add(new ScheduleEntry(systemCleaningStart, systemCleaningStart.Add(systemCleaningLength), systemCleaningType, systemCleaningName));
+                    system.cipGroup.schedule.Add(new ScheduleEntry(systemCleaningStart, systemCleaningStart.Add(systemCleaningLength), system));
+                }
 
                 system.schedule.Add(new ScheduleEntry(systemTime, systemTime.Add(systemLength), juice, slurry, batch));
             }
 
             // create entry for mix tank
             if (tankCleaningType != -1)
+            {
                 tank.schedule.Add(new ScheduleEntry(tankCleaningStart, tankCleaningStart.Add(tankCleaningLength), tankCleaningType, tankCleaningName));
+                tank.cipGroup.schedule.Add(new ScheduleEntry(tankCleaningStart, tankCleaningStart.Add(tankCleaningLength), tank));
+            }
 
             // if it's inline in needs to be open ended
             if (!inline)
@@ -140,13 +149,19 @@ namespace WpfApp1
 
             // create entry for transfer line
             if (transferCleaningType != -1)
+            {
                 transferLine.schedule.Add(new ScheduleEntry(transferCleaningStart, transferCleaningStart.Add(transferCleaningLength), transferCleaningType, transferCleaningName));
+                transferLine.cipGroup.schedule.Add(new ScheduleEntry(transferCleaningStart, transferCleaningStart.Add(transferCleaningLength), transferLine));
+            }
 
             transferLine.schedule.Add(new ScheduleEntry(transferTime, transferTime.Add(transferLength), juice, slurry, batch));
 
             // create entry for aseptic
             if (asepticCleaningType != -1)
+            {
                 aseptic.schedule.Add(new ScheduleEntry(asepticCleaningStart, asepticCleaningStart.Add(asepticCleaningLength), asepticCleaningType, asepticCleaningName));
+                aseptic.cipGroup.schedule.Add(new ScheduleEntry(asepticCleaningStart, asepticCleaningStart.Add(asepticCleaningLength), aseptic));
+            }
 
             aseptic.schedule.Add(new ScheduleEntry(asepticTime, asepticTime.Add(asepticLength), juice, slurry, batch));
         }
