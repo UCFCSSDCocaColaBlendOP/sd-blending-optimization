@@ -708,9 +708,9 @@ namespace WpfApp1
                         Equipment temp = new Equipment(name_func, x, 0);
                         temp.SOs = systems[i].SOs;
                         temp.cleaningProcess = 1;
+                        temp.cipGroup = systems[i].cipGroup;
                         extras.Add(temp);
                         blendmachine = systems[i];
-
                         systems.Remove(blendmachine);
                         if (i != 0)
                         {
@@ -773,6 +773,7 @@ namespace WpfApp1
                                     if (count == y)
                                     {
                                         e.SOs.Add(true);
+                                        e.name = e.name + "(SO" + y +")"; 
                                     }
                                     else
                                     {
