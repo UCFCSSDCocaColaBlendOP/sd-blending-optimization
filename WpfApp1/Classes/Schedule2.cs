@@ -2987,6 +2987,12 @@ namespace WpfApp1
             equipment_to_so.Add("RT", 3);
             equipment_to_so.Add("Thaw Room", 3);
 
+            equipment_to_so.Add("Liquid Sucrose(SO1)", 1);
+            equipment_to_so.Add("Liquid Sucrose(SO2)", 2);
+            equipment_to_so.Add("Water(SO1)", 1);
+            equipment_to_so.Add("Water(SO2)", 2);
+
+
             equipment_to_so.Add("TL 1", 4);
             equipment_to_so.Add("TL 2", 4);
             equipment_to_so.Add("TL 3", 4);
