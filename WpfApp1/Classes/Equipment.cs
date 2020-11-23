@@ -47,13 +47,6 @@ namespace WpfApp1
         public DateTime cleanTime;
         public string cleanName;
 
-        // set on the equipment page of generate schedule
-        public int state; // 0 == nothing, 1 == down, 2 == start clean, 3 == start dirty, 4 == cleaning
-        public int juiceType; // -1 for nothing or down, the juice type of the last juice otherwise
-        public int cleaningType; // -1 for nothing or down or start dirty, the cleaning type otherwise
-        public DateTime time; // DateTime.MinValue for nothing, down, start dirty or start clean, a value for cleaning
-        public string cleaning; // name of cleaning
-
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule
         /// </summary>
@@ -71,37 +64,6 @@ namespace WpfApp1
         }
 
         /// <summary>
-        /// applies the fields set during generate
-        /// </summary>
-        public void UpdateTool(DateTime scheduleID)
-        {
-            // is down
-            if (state == 1)
-            {
-                down = true;
-            }
-            // starts dirty
-            else if (state == 2)
-            {
-                startDirty = true;
-                lastJuiceType = juiceType;
-            }
-            // starts clean
-            else if (state == 3)
-            {
-                startClean = true;
-                lastJuiceType = juiceType;
-                lastCleaningType = cleaningType;
-            }
-            // is cleaning
-            else if (state == 4)
-            {
-                lastCleaningType = cleaningType;
-                schedule.Add(new ScheduleEntry(scheduleID, time, cleaningType, cleaning));
-            }
-        }
-
-        /// <summary>
         /// Returns the earliest time you can start using a tool. If the earliest time is before goal, returns goal.
         /// Sets needsCleaned, cleanLength, cleanType, and cleanTime attributes each time
         /// </summary>
@@ -114,7 +76,7 @@ namespace WpfApp1
             TimeSpan cleaning;
 
             // a tool is starting clean
-            if (schedule.Count == 0 && startClean || schedule.Count == 1 && schedule[0].cleaning)
+            if (schedule.Count == 0 && startClean)
             {
                 cleaning = GetCleaning(lastJuiceType, juicetype);
                 bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
@@ -128,13 +90,7 @@ namespace WpfApp1
                 // you need to do more cleaning
                 else
                 {
-                    // it's currently cleaning
-                    if (schedule.Count == 1)
-                        cleanTime = cipGroup.FindTimePopulated(schedule[0].end, cleaning);
-                    else
-                        cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
-
-                    //  early or late
+                    cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
                     if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
                         return goal;
                     else
