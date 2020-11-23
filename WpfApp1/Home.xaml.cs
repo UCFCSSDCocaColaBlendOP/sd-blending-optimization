@@ -286,26 +286,31 @@ namespace WpfApp1
 
         private void refresh()
         {
+            // SO1
             fill_SO_Equip(1, cb_SO1_Equip);
             cb_SO1_Equip.SelectedIndex = 0;
             if (cb_SO1_Equip.SelectedValue != null)
                 fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
 
+            // SO2
             fill_SO_Equip(2, cb_SO2_Equip);
             cb_SO2_Equip.SelectedIndex = 0;
             if (cb_SO2_Equip.SelectedValue != null)
                 fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
 
+            // Shared
             fill_SO_Equip(3, cb_Shared_Equip);
             cb_Shared_Equip.SelectedIndex = 0;
             if (cb_Shared_Equip.SelectedValue != null)
                 fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
 
+            // Transfer Line
             fill_SO_Equip(4, cb_TL_Equip);
             cb_TL_Equip.SelectedIndex = 0;
             if (cb_TL_Equip.SelectedValue != null)
                 fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
 
+            // Aseptic
             fill_SO_Equip(5, cb_Aseptic_Equip);
             cb_Aseptic_Equip.SelectedIndex = 0;
             if (cb_Aseptic_Equip.SelectedValue != null)
