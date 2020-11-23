@@ -183,5 +183,34 @@ namespace WpfApp1
                 cb_Aseptic_Equip.Visibility = Visibility.Visible;
             }
         }
+
+        private void fill_Data_Equip(int so_ID, string equip, DataGrid dg, DateTime sch_ID)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_SO_Data]";
+                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
+                cmd.Parameters.Add("equip", SqlDbType.VarChar).Value = equip;
+                cmd.Parameters.Add("sch_ID", SqlDbType.VarChar).Value = equip;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                dg.ItemsSource = dt.DefaultView;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
     }
 }

@@ -46,6 +46,7 @@ namespace WpfApp1
 
         public class ThawList
         {
+            public string name { set; get; }
             public int juice { set; get; }
             public DateTime start { set; get; }
             public DateTime stop { set; get; }
@@ -404,6 +405,11 @@ namespace WpfApp1
                     juice.UpdateStandardJuice();
                 }
             }
+
+            DataGridTextColumn colName = new DataGridTextColumn();
+            colName.Header = "Juices";
+            colName.Binding = new Binding("name");
+            dg_Thaw.Columns.Add(colName);
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
             colJuice.Header = "Juice Type";
@@ -1166,6 +1172,7 @@ namespace WpfApp1
 
             dg_Thaw.Items.Add(new ThawList
             {
+                name = cb_Thaw_Juice.Text,
                 juice = Convert.ToInt32(cb_Thaw_Juice.SelectedValue),
                 start = Convert.ToDateTime(tb_Thaw_Start.Text),
                 stop = Convert.ToDateTime(tb_Thaw_Stop.Text)                
@@ -1193,7 +1200,7 @@ namespace WpfApp1
         private void btn_Submit_Click(object sender, RoutedEventArgs e)
         {
             sch.GenerateNewSchedule();
-            //MessageBox.Show()
+            MessageBox.Show(sch.message, "Status");
         }
 
         private void cb_Equipment_State_SelectionChanged(object sender, SelectionChangedEventArgs e)
