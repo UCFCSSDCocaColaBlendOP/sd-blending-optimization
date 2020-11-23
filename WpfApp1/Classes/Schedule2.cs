@@ -820,6 +820,7 @@ namespace WpfApp1
                     {
                         late = true;
                         lateJuice = inprogress[0];
+                        message = "Late because of " + lateTool.name + " for " + lateJuice.name;
                         return;
                     }
                     // if the transfer line is down, that's an error and we need to stop
@@ -827,6 +828,7 @@ namespace WpfApp1
                     {
                         inconceivable = true;
                         inconceiver = inprogress[0];
+                        message = "Inconceivable because of " + inconceiver.name;
                         return;
                     }
 
@@ -863,6 +865,7 @@ namespace WpfApp1
                         {
                             late = true;
                             lateJuice = inprogress[0];
+                            message = "Late because of " + lateTool.name + " for " + lateJuice.name;
                             return;
                         }
                         // if the transfer line is down, that's an error and we need to stop
@@ -870,6 +873,7 @@ namespace WpfApp1
                         {
                             inconceivable = true;
                             inconceiver = inprogress[0];
+                            message = "Inconceivable because of " + lateJuice.name;
                             return;
                         }
 
@@ -1029,6 +1033,7 @@ namespace WpfApp1
                         {
                             inconceivable = true;
                             inconceiver = inprogress[0];
+                            message = "Inconceivable because of " + lateJuice.name;
                             return;
                         }
 
@@ -1038,6 +1043,7 @@ namespace WpfApp1
                             late = true;
                             lateJuice = inprogress[0];
                             lateTool = choice.lateMaker;
+                            message = "Late because of " + lateTool.name + " for " + lateJuice.name;
                             return;
                         }
 
@@ -1061,6 +1067,8 @@ namespace WpfApp1
                     }
                 }
             }
+
+            message = "i don't know man";
 
             GrabJuiceSchedules();
             // add to database
