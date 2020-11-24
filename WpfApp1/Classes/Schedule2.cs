@@ -748,6 +748,7 @@ namespace WpfApp1
                         temp.SOs = systems[i].SOs;
                         temp.cleaningProcess = 1;
                         temp.cipGroup = systems[i].cipGroup;
+                        temp.so_type = systems[i].so_type; 
                         extras.Add(temp);
                         blendmachine = systems[i];
                         systems.Remove(blendmachine);
