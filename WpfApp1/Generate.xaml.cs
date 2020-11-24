@@ -445,6 +445,12 @@ namespace WpfApp1
 
         private void btn_NextToEquip_Click(object sender, RoutedEventArgs e)
         {
+            
+            foreach (ThawList entry in dg_Thaw.Items)
+            {
+                sch.thawRoom.schedule.Add(new ScheduleEntry(entry.start, entry.stop, entry.name, entry.juice));
+            }
+
             Mouse.OverrideCursor = Cursors.Wait;
             DataGridTextColumn colEquip = new DataGridTextColumn();
             colEquip.Header = "Equipment";

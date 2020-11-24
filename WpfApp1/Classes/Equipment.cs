@@ -17,13 +17,15 @@ namespace WpfApp1
         public String name;
 
         public int so;
-        
+
         //1 = SO 1
         //2 = SO 2
         //3 = SO 3
         //4 = TL
         //5 = Aseptic
 
+        public bool tl;
+        public bool aseptic;
         public int cleaningProcess;
         public int e_type; 
         public int type; // for extras, type = functionality, for blend tanks, type = SO
@@ -75,6 +77,7 @@ namespace WpfApp1
             prevCleaningType = 0;
             prevCleanName = "";
             endTime = DateTime.MinValue;
+            cleanType = -1;
         }
 
         public void UpdateTool(DateTime scheduleID)
@@ -468,7 +471,7 @@ namespace WpfApp1
             for (int i = 0; i < schedule.Count; i++)
             {
                 // find this juice
-                if (schedule[i].juice == juice)
+                if (schedule[i].juice.type == juice.type && schedule[i].userGen)
                 {
                     // find the batch you need
                     int batch = juice.totalBatches - juice.neededBatches + slurry - 1;
@@ -493,7 +496,14 @@ namespace WpfApp1
                 return early;
 
             // preschedule
-            if (DateTime.Compare(schedule[0].start.Subtract(length), early) >= 0)
+            if (DateTime.Compare(schedule[0].start, DateTime.MinValue) == 0)
+            {
+                if (DateTime.Compare(schedule[0].end, early) < 0)
+                    return early;
+                else
+                    return schedule[0].end;
+            }
+            else if (DateTime.Compare(schedule[0].start.Subtract(length), early) >= 0)
                 return early;
 
             // find gap in schedule

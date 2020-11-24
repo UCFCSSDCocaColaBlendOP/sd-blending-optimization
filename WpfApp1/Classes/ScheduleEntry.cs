@@ -19,6 +19,7 @@ namespace WpfApp1
         public bool cleaning;
         public int cleaningType;
         public string cleaningname;
+        public bool userGen;
 
         // for juice schedule
         public Equipment tool;
@@ -38,6 +39,22 @@ namespace WpfApp1
             this.juice = juice;
             this.slurry = slurry;
             this.batch = batch;
+        }
+
+        /// <summary>
+        /// for adding entries to the thaw room schedule
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="name"></param>
+        /// <param name="juiceType"></param>
+        public ScheduleEntry(DateTime start, DateTime end, string name, int juiceType)
+        {
+            userGen = true;
+            this.start = start;
+            this.end = end;
+            this.juice = new Juice(name, juiceType);
+            slurry = false;
         }
 
         /// <summary>
@@ -66,6 +83,7 @@ namespace WpfApp1
             this.cleaning = true;
             this.cleaningType = type;
             this.cleaningname = name;
+            this.slurry = false;
         }
 
         /// <summary>
