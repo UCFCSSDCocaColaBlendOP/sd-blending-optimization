@@ -1091,7 +1091,7 @@ namespace WpfApp1
                 }
 
                 JuiceList row = (JuiceList)dg_Juices.SelectedItems[0];
-                Juice curr = juices[dg_Juices.SelectedIndex - 1];
+                Juice curr = juices[dg_Juices.SelectedIndex];
                 curr.starter = row.start = (bool)chck_Start_Juice.IsChecked;
                 curr.OGFillTime = row.time = Convert.ToDateTime(tb_Juice_Time.Text);
                 curr.type = row.type = Convert.ToInt32(cb_Juice_Type.SelectedValue);
