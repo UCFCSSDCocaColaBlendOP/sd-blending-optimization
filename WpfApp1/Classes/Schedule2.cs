@@ -71,6 +71,7 @@ namespace WpfApp1
             //ExampleOfSchedule();
             //ExampleOfSchedule2();
             ProcessCSV(filename);
+            insertingScheduleID(); 
         }
 
         //TODO: 0=1,1=2,2=3,3=7
