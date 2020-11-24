@@ -1854,7 +1854,7 @@ namespace WpfApp1
                     TimeSpan templength = new TimeSpan(0, 0, 0);
                     for (int k = 0; k < numFunctions; k++)
                         if (!checkoffFunc[k] && juice.recipes[recipe][k] > 0)
-                            templength.Add(new TimeSpan(0, juice.recipes[recipe][k], 0));
+                            templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][k], 0));
 
                     // then start comparing this blendsystem to the last one to make a choice
                     DateTime tempstart = systems[j].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
@@ -2030,11 +2030,11 @@ namespace WpfApp1
             {
                 if (set)
                 {
-                    if (TimeSpan.Compare(longest, option.tankLength) < 0)
-                        longest = option.tankLength;
+                    if (TimeSpan.Compare(longest, option.systemLength) < 0)
+                        longest = option.systemLength;
                 }
                 else
-                    longest = option.tankLength;
+                    longest = option.systemLength;
             }
 
             mixtanktime = mixtanktime.Add(longest);
@@ -2293,6 +2293,16 @@ namespace WpfApp1
             option.transferCleaningType = cltype;
             option.transferCleaningName = clN;
 
+            // aseptics
+            option.aseptic = aseptics[juice.line];
+            option.asepticTime = option.transferTime;
+            option.asepticLength = option.transferLength;
+            option.aseptic.FindTime(option.asepticTime, juice.type, scheduleID);
+            option.asepticCleaningLength = option.aseptic.cleanLength;
+            option.asepticCleaningName = option.aseptic.cleanName;
+            option.asepticCleaningType = option.aseptic.cleanType;
+            option.asepticCleaningStart = option.aseptic.cleanTime;
+
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
 
@@ -2483,7 +2493,7 @@ namespace WpfApp1
                     TimeSpan templength = new TimeSpan(0, 0, 0);
                     for (int k = 0; k < numFunctions; k++)
                         if (!checkoffFunc[k] && juice.recipes[recipe][k] > 0)
-                            templength.Add(new TimeSpan(0, juice.recipes[recipe][k], 0));
+                            templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][k], 0));
 
                     // then start comparing this blendsystem to the last one to make a choice
                     DateTime tempstart = systems[j].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
@@ -2662,11 +2672,11 @@ namespace WpfApp1
             {
                 if (set)
                 {
-                    if (TimeSpan.Compare(longest, option.tankLength) < 0)
-                        longest = option.tankLength;
+                    if (TimeSpan.Compare(longest, option.systemLength) < 0)
+                        longest = option.systemLength;
                 }
                 else
-                    longest = option.tankLength;
+                    longest = option.systemLength;
             }
 
             mixtanktime = mixtanktime.Add(longest);
@@ -2785,6 +2795,16 @@ namespace WpfApp1
             option.transferCleaningLength = transferLines[2].cleanLength;
             option.transferCleaningType = transferLines[2].cleanType;
             option.transferCleaningName = transferLines[2].cleanName;
+
+            // aseptics
+            option.aseptic = aseptics[juice.line];
+            option.asepticTime = option.transferTime;
+            option.asepticLength = option.transferLength;
+            option.aseptic.FindTime(option.asepticTime, juice.type, scheduleID);
+            option.asepticCleaningLength = option.aseptic.cleanLength;
+            option.asepticCleaningName = option.aseptic.cleanName;
+            option.asepticCleaningType = option.aseptic.cleanType;
+            option.asepticCleaningStart = option.aseptic.cleanTime;
 
             // decide if it's onTime
             option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
