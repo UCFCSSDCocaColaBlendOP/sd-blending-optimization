@@ -1204,9 +1204,9 @@ namespace WpfApp1
                     for (int j = 0; j < extras[i].schedule.Count; j++)
                     {
                         if (extras[i].schedule[j].cleaning)
-                            insertingEquipSchedule(extras[i].so, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
                         else
-                            insertingEquipSchedule(extras[i].so, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
                     }
                 }
             }
@@ -1219,9 +1219,9 @@ namespace WpfApp1
                     for (int j = 0; j < systems[i].schedule.Count; j++)
                     {
                         if (systems[i].schedule[j].cleaning)
-                            insertingEquipSchedule(systems[i].so, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
                         else
-                            insertingEquipSchedule(systems[i].so, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
                     }
                 }
             }
@@ -1234,9 +1234,9 @@ namespace WpfApp1
                     for (int j = 0; j < tanks[i].schedule.Count; j++)
                     {
                         if (tanks[i].schedule[j].cleaning)
-                            insertingEquipSchedule(tanks[i].so, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
                         else
-                            insertingEquipSchedule(tanks[i].so, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
                     }
                 }
             }
@@ -1249,12 +1249,12 @@ namespace WpfApp1
                     for (int j = 0; j < transferLines[i].schedule.Count; j++)
                     {
                         if (transferLines[i].schedule[j].cleaning)
-                            insertingEquipSchedule(transferLines[i].so, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
                         else
-                            insertingEquipSchedule(transferLines[i].so, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
                     }
                 }
-            }
+            }z
 
             // aseptics
             for (int i = 0; i < aseptics.Count; i++)
@@ -1264,9 +1264,9 @@ namespace WpfApp1
                     for (int j = 0; j < aseptics[i].schedule.Count; j++)
                     {
                         if (aseptics[i].schedule[j].cleaning)
-                            insertingEquipSchedule(aseptics[i].so, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
                         else
-                            insertingEquipSchedule(aseptics[i].so, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
                     }
                 }
             }
