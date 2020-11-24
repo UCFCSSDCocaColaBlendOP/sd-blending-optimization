@@ -107,7 +107,7 @@ namespace WpfApp1
             }
 
             int num_rows = lines.Count;
-
+            List<Juice> cips = new List<Juice>();
             inprogress = new List<Juice>();
 
             //Get all the info for each "F_LINE" to make each juice needed
@@ -136,7 +136,7 @@ namespace WpfApp1
                     string name = lines[i][3];
 
                     int type = name.Contains("CIP") ? -1 : getJuiceType(name);
-                    Console.WriteLine(name + " " + type);
+                    //Console.WriteLine(name + " " + type);
 
                     string date = lines[i][0];
                     string seconds = lines[i][1];
@@ -155,14 +155,21 @@ namespace WpfApp1
 
                     Juice new_juice = new Juice(name, material, line_num_use, type, fillTime);
 
-                    inprogress.Add(new_juice);
-
+                    if(name.Contains("CIP")) {
+                        cips.Add(new_juice);
+                    } else {
+                        inprogress.Add(new_juice);
+                    }
                 }
             }
 
+            for (int c = 0; c < cips.Count; c++)
+            {
+                inprogress.Add(cips[c]);
+            }
 
-            PullEquipment();
             PrintAllJuices();
+            PullEquipment();
 
             thawRoom = new Equipment("Thaw Room", thawID, 720);
             thawRoom.schedule = new List<ScheduleEntry>();
@@ -174,6 +181,15 @@ namespace WpfApp1
             for (int i = 0; i < numSOs; i++)
                 thawRoom.SOs.Add(true);
         }
+        private void PrintAllJuices()
+        {
+            Console.WriteLine("Juices in lne 1,2,3,7:");
+            for (int i = 0; i < inprogress.Count; i++)
+            {
+                Console.WriteLine("Name: " + inprogress[i].name + "\ttime: " + inprogress[i].OGFillTime.ToString());
+            }
+        }
+
 
         // gets the thaw room id from the database
         // added this function to pull equipment
@@ -855,17 +871,6 @@ namespace WpfApp1
 
             return -2;
         }
-
-        private void PrintAllJuices()
-        {
-            Console.WriteLine("Juices in lne 1,2,3,7:");
-            for (int i = 0; i < inprogress.Count; i++)
-            {
-                Console.WriteLine("Name: " + inprogress[i].name);
-            }
-
-        }
-
 
         // TODO :: comment, add errors, add calls to functions that add to database
         public void GenerateNewSchedule()
