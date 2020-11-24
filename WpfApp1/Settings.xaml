@@ -170,7 +170,7 @@
                     <TextBox x:Name="tb_PostBlend" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="4" HorizontalAlignment="Left" Height="26" Margin="117.977,4.4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="CIP" BorderBrush="White" Foreground="White">
+            <TabItem Header="CIP" BorderBrush="White" Foreground="White" Visibility="Collapsed">
                 <Grid Background = "#FF1F1E1E" >
                     <Grid.RowDefinitions >
                         <RowDefinition Height="54*"/>
@@ -250,7 +250,6 @@
             </TabItem>
         </TabControl>
         <Image x:Name="logo" OpacityMask="White" Height="75" Margin="10.2,5.2,0,0" Grid.Row="1" VerticalAlignment="Top" Source="logo.png" Grid.Column="1" Stretch="Fill" HorizontalAlignment="Left" Width="328"/>
-        <Button x:Name="btn_Refresh" Content="Refresh" Height="31" Margin="0,0,4.6,0" FontFamily="Segoe UI Semibold" FontSize="14" VerticalAlignment="Top" Background="#FFDD4A4A" Foreground="White" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Right" Width="117" Click="btn_Refresh_Click"/>
 
     </Grid>
 </mah:MetroWindow>
