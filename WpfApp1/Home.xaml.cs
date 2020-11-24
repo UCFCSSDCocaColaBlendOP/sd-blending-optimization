@@ -31,48 +31,123 @@ namespace WpfApp1
         {
             InitializeComponent();
 
+            string username = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            /*DataTable user = userActive(username);
+
+            if (user == null || user.Rows.Count == 0)
+            {
+                MessageBox.Show(username + " is not an active user. Please contact an administrator for assistance.");
+                Close();
+                return;
+            }
+
+            if (Convert.ToBoolean(user.Rows[0]["Admin"]) == true)
+            {
+                btn_Settings.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                btn_Settings.Visibility = Visibility.Hidden;
+            }
+            */
+
             // Functions to fill each tab's DataGrid     
             refresh();
         }
 
+        private DataTable userActive(string username)
+        {
+            try
+            {
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_Active_User]";
+                cmd.Parameters.Add("username", SqlDbType.VarChar).Value = username;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                return dt;
+            }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+                return null;
+            }
+        }
+
         private void btn_Generate_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            string filename = "";
-            ofd.InitialDirectory = "";
-            ofd.Title = "Open Spreadsheet";
-            ofd.CheckFileExists = true;
-            ofd.CheckPathExists = true;
-            ofd.RestoreDirectory = true;
-            ofd.Filter = "CSV files (*.csv)|*.csv";
-            ofd.FilterIndex = 2;
-
-            if (ofd.ShowDialog() == true)
+            if (Application.Current.Windows.OfType<Generate>().Any())
             {
-                Mouse.OverrideCursor = Cursors.Wait;
-                filename = ofd.FileName;
-                sch = new Schedule2(filename);
+                Window win = Application.Current.Windows.OfType<Generate>().FirstOrDefault();
+                win.Activate();
+            }
 
-                Generate form = new Generate(sch, filename);
-                form.Show();
-                Mouse.OverrideCursor = null;
-            }           
+            else
+            {
+                OpenFileDialog ofd = new OpenFileDialog();
+                string filename = "";
+                ofd.InitialDirectory = "";
+                ofd.Title = "Open Spreadsheet";
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+                ofd.RestoreDirectory = true;
+                ofd.Filter = "CSV files (*.csv)|*.csv";
+                ofd.FilterIndex = 2;
+
+                if (ofd.ShowDialog() == true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    filename = ofd.FileName;
+                    sch = new Schedule2(filename);
+
+                    Generate form = new Generate(sch, filename);
+                    form.Show();
+                    Mouse.OverrideCursor = null;
+                }
+            }
         }
 
         private void btn_Export_Click(object sender, RoutedEventArgs e)
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-            Viewing form = new Viewing();
-            form.Show();
-            Mouse.OverrideCursor = null;
+            if (Application.Current.Windows.OfType<Viewing>().Any())
+            {
+                Window win = Application.Current.Windows.OfType<Viewing>().FirstOrDefault();
+                win.Activate();
+            }
+
+            else
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+                Viewing form = new Viewing();
+                form.Show();
+                Mouse.OverrideCursor = null;
+            }
         }
 
         private void btn_Settings_Click(object sender, RoutedEventArgs e)
         {
-            Mouse.OverrideCursor = Cursors.Wait;
-            Settings form = new Settings();
-            form.Show();
-            Mouse.OverrideCursor = null;
+            if (Application.Current.Windows.OfType<Settings>().Any())
+            {
+                Window win = Application.Current.Windows.OfType<Settings>().FirstOrDefault();
+                win.Activate();
+            }
+
+            else
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+                Settings form = new Settings();
+                form.Show();
+                Mouse.OverrideCursor = null;
+            }
         }
 
         private void fill_SO_Equip(int so_ID, ComboBox cb)
@@ -286,26 +361,31 @@ namespace WpfApp1
 
         private void refresh()
         {
+            // SO1
             fill_SO_Equip(1, cb_SO1_Equip);
             cb_SO1_Equip.SelectedIndex = 0;
             if (cb_SO1_Equip.SelectedValue != null)
                 fill_SO1(1, cb_SO1_Equip.SelectedValue.ToString());
 
+            // SO2
             fill_SO_Equip(2, cb_SO2_Equip);
             cb_SO2_Equip.SelectedIndex = 0;
             if (cb_SO2_Equip.SelectedValue != null)
                 fill_SO2(2, cb_SO2_Equip.SelectedValue.ToString());
 
+            // Shared
             fill_SO_Equip(3, cb_Shared_Equip);
             cb_Shared_Equip.SelectedIndex = 0;
             if (cb_Shared_Equip.SelectedValue != null)
                 fill_Shared(3, cb_Shared_Equip.SelectedValue.ToString());
 
+            // Transfer Line
             fill_SO_Equip(4, cb_TL_Equip);
             cb_TL_Equip.SelectedIndex = 0;
             if (cb_TL_Equip.SelectedValue != null)
                 fill_TL(4, cb_TL_Equip.SelectedValue.ToString());
 
+            // Aseptic
             fill_SO_Equip(5, cb_Aseptic_Equip);
             cb_Aseptic_Equip.SelectedIndex = 0;
             if (cb_Aseptic_Equip.SelectedValue != null)
