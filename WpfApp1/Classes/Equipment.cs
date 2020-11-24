@@ -23,7 +23,7 @@ namespace WpfApp1
         //3 = SO 3
         //4 = TL
         //5 = Aseptic
-
+        public int so_type; 
         public bool tl;
         public bool aseptic;
         public int cleaningProcess;

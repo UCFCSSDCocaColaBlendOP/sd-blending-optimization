@@ -406,6 +406,7 @@ namespace WpfApp1
                     }
                     temp.cleaningProcess = 4;
                     temp.e_type = id_at;
+                    temp.so_type = 5; 
                     aseptics.Add(temp);
                 }
                 conn.Close();
@@ -535,6 +536,7 @@ namespace WpfApp1
                         }
 
                     }
+                    temp.so_type = 4; 
                     temp.cleaningProcess = 3;
                     temp.e_type = id_tl;
                     transferLines.Add(temp);
@@ -636,6 +638,7 @@ namespace WpfApp1
                         }
 
                     }
+                    temp.so_type = id_so; 
                     temp.cleaningProcess = 2;
                     temp.e_type = 1;
                    
@@ -665,6 +668,8 @@ namespace WpfApp1
                 int id_equip;
                 int id_func;
                 int id_so;
+                int count = 0;
+                int checking = 0; 
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -692,6 +697,7 @@ namespace WpfApp1
                         {
                             systems[i].functionalities[id_func] = true;
                             systems[i].SOs[id_so] = true;
+
                         }
                     }
                 }
@@ -719,12 +725,30 @@ namespace WpfApp1
                             break;
                         }
                     }
+                    for(int k=0; k<systems[i].SOs.Count; k++)
+                    {
+                        if (systems[i].SOs[k] == true)
+                        {
+                            count++;
+                            checking = k; 
+                        }
+                            
+                    }
+                    if (count >= 2)
+                    {
+                        systems[i].so_type = 3; 
+                    }
+                    else
+                    {
+                        systems[i].so_type = checking; 
+                    }
                     if (flag == 1)
                     {
                         Equipment temp = new Equipment(name_func, x, 0);
                         temp.SOs = systems[i].SOs;
                         temp.cleaningProcess = 1;
                         temp.cipGroup = systems[i].cipGroup;
+                        temp.so_type = systems[i].so_type; 
                         extras.Add(temp);
                         blendmachine = systems[i];
                         systems.Remove(blendmachine);
@@ -734,6 +758,7 @@ namespace WpfApp1
                         }
 
                         //blendSystems.RemoveAt(i); 
+                       
                     }
 
                 }
@@ -789,7 +814,9 @@ namespace WpfApp1
                                     if (count == y)
                                     {
                                         e.SOs.Add(true);
-                                        e.name = e.name + "(SO" + y +")"; 
+                                        e.name = e.name + "(SO" + y +")";
+                                        e.so_type = y; 
+
                                     }
                                     else
                                     {
