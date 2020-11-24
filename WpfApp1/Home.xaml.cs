@@ -36,7 +36,7 @@ namespace WpfApp1
 
             if (user == null || user.Rows.Count == 0)
             {
-                MessageBox.Show(username + " is not an active user. Please contact an administrator for assistance.");
+                MessageBox.Show(username + " is not an active user. Please contact an administrator for assistance.", "Login Failed");
                 Close();
                 return;
             }
