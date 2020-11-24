@@ -1092,21 +1092,21 @@ namespace WpfApp1
 
                 JuiceList row = (JuiceList)dg_Juices.SelectedItems[0];
                 Juice curr = juices[dg_Juices.SelectedIndex];
-                curr.starter = row.start = (bool)chck_Start_Juice.IsChecked;
-                curr.OGFillTime = row.time = Convert.ToDateTime(tb_Juice_Time.Text);
+                row.start = (bool)chck_Start_Juice.IsChecked;
+                row.time = Convert.ToDateTime(tb_Juice_Time.Text);
                 row.type = Convert.ToInt32(cb_Juice_Type.SelectedValue);
-                curr.batchesFilled = row.batchFilled = Convert.ToInt32(tb_Batches_Filled.Text);
-                curr.totalBatches = row.batchTotal = Convert.ToInt32(tb_Batches_Total.Text);
-                curr.filling = row.filling = (bool)chck_Juice_Filling.IsChecked;
-                curr.fillingInline = row.fillingInline = (bool)chck_Inline_Fill.IsChecked;
-                curr.fillingSlurry = row.fillingBatches = Convert.ToInt32(tb_Batches_Fill.Text);
+                row.batchFilled = Convert.ToInt32(tb_Batches_Filled.Text);
+                row.batchTotal = Convert.ToInt32(tb_Batches_Total.Text);
+                row.filling = (bool)chck_Juice_Filling.IsChecked;
+                row.fillingInline = (bool)chck_Inline_Fill.IsChecked;
+                row.fillingBatches = Convert.ToInt32(tb_Batches_Fill.Text);
                 row.fillingTL = cb_Transfer_Line.Text;
-                curr.finishedWithTransferLine = row.fillingTLTime = Convert.ToDateTime(tb_TL_Duration.Text);
+                row.fillingTLTime = Convert.ToDateTime(tb_TL_Duration.Text);
                 row.fillingBT = cb_Blend_Tank_Fill.Text;
-                curr.mixingDoneBlending = row.fillingBTTime = Convert.ToDateTime(tb_TL_Duration.Text);
-                curr.mixing = row.mixing = (bool)chck_Juice_Mix.IsChecked;
-                curr.mixingInline = row.mixingInline = (bool)chck_Inline_Mix.IsChecked;
-                curr.mixingSlurry = row.mixingBatches = Convert.ToInt32(tb_Batches_Mix.Text);
+                row.fillingBTTime = Convert.ToDateTime(tb_TL_Duration.Text);
+                row.mixing = (bool)chck_Juice_Mix.IsChecked;
+                row.mixingInline = (bool)chck_Inline_Mix.IsChecked;
+                row.mixingBatches = Convert.ToInt32(tb_Batches_Mix.Text);
                 row.mixingBT = cb_Blend_Tank_Mix.Text;
 
                 dg_Juices.Items.Refresh();
