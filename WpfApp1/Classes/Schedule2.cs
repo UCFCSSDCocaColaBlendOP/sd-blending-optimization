@@ -1255,7 +1255,7 @@ namespace WpfApp1
                             insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
                     }
                 }
-            }z
+            }
 
             // aseptics
             for (int i = 0; i < aseptics.Count; i++)
