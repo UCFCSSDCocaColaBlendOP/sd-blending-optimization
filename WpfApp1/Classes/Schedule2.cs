@@ -64,14 +64,13 @@ namespace WpfApp1
             transferLines = new List<Equipment>();
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
-            aseptics = new List<Equipment>(); 
+            aseptics = new List<Equipment>();
 
             inconceivable = false;
             late = false;
             //ExampleOfSchedule();
             //ExampleOfSchedule2();
-            ProcessCSV(filename);
-            insertingScheduleID(); 
+            ProcessCSV(filename); 
         }
 
         //TODO: 0=1,1=2,2=3,3=7
@@ -156,9 +155,12 @@ namespace WpfApp1
 
                     Juice new_juice = new Juice(name, material, line_num_use, type, fillTime);
 
-                    if(name.Contains("CIP")) {
+                    if (name.Contains("CIP"))
+                    {
                         cips.Add(new_juice);
-                    } else {
+                    }
+                    else
+                    {
                         inprogress.Add(new_juice);
                     }
                 }
@@ -197,7 +199,7 @@ namespace WpfApp1
         public void getCipGroups()
         {
             int id;
-            String name; 
+            String name;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -221,7 +223,7 @@ namespace WpfApp1
                     id = Convert.ToInt32(dr["id_CIP"]);
                     name = dr.Field<String>("CIP");
                     Equipment temp = new Equipment(name, id, 0);
-                    cipGroups.Add(temp); 
+                    cipGroups.Add(temp);
                 }
 
                 conn.Close();
@@ -232,7 +234,7 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
-    
+
         public void getThawRoomID()
         {
             try
@@ -254,8 +256,8 @@ namespace WpfApp1
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
 
-                if (dt.Rows.Count > 0) 
-                { 
+                if (dt.Rows.Count > 0)
+                {
                     thawID = Convert.ToInt32(dt.Rows[0]["id"]);
                 }
                 conn.Close();
@@ -271,8 +273,8 @@ namespace WpfApp1
         // blendtanks are blendtanks their type is their SO
         private void PullEquipment()
         {
-            getCipGroups(); 
-            getThawRoomID(); 
+            getCipGroups();
+            getThawRoomID();
             // access the database
             // initialize SOcount and functionCount
             //methods used to get the maximum sos and functionalities
@@ -292,8 +294,8 @@ namespace WpfApp1
             {
                 int equip_type;
                 String equip_name;
-                int cip; 
-                
+                int cip;
+
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -314,7 +316,7 @@ namespace WpfApp1
                 {
                     equip_type = Convert.ToInt32(dr["id"]);
                     equip_name = dr.Field<String>("Equipment");
-                    cip = Convert.ToInt32(dr["cip_id"]); 
+                    cip = Convert.ToInt32(dr["cip_id"]);
                     Equipment temp = new Equipment(equip_name, equip_type, 0);
 
                     //set all the number of functions in the list
@@ -329,15 +331,15 @@ namespace WpfApp1
                     {
                         temp.SOs.Add(false);
                     }
-                    for(int k=0; k<cipGroups.Count; k++)
+                    for (int k = 0; k < cipGroups.Count; k++)
                     {
                         if (cip == cipGroups[k].type)
                         {
-                            temp.cipGroup = cipGroups[k]; 
+                            temp.cipGroup = cipGroups[k];
                         }
-                       
+
                     }
-                    
+
                     //temp.cip_id=cip; 
                     temp.cleaningProcess = 1;
                     temp.e_type = equip_type;
@@ -353,14 +355,14 @@ namespace WpfApp1
             getBlendSystem_FuncSos();
             getExtras();
             getExtraSorted();
-            getAseptics(); 
+            getAseptics();
         }
         public void getAseptics()
         {
             int id_at;
             String name_at;
-            int id; 
-            int cip; 
+            int id;
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -381,19 +383,20 @@ namespace WpfApp1
                 SqlDataReader rd = cmd.ExecuteReader();
                 foreach (DataRow dr in dt.Rows)
                 {
-                    
+
                     id_at = Convert.ToInt32(dr["id"]);
                     name_at = dr.Field<String>("Aseptic Tank");
                     cip = Convert.ToInt32(dr["id_cip"]);
                     Equipment temp = new Equipment(name_at, id_at, 0);
                     for (int i = 0; i < numSOs + 1; i++)
                     {
-                        if (i > 0) { 
+                        if (i > 0)
+                        {
                             temp.SOs.Add(true);
                         }
                         else
                         {
-                            temp.SOs.Add(false); 
+                            temp.SOs.Add(false);
                         }
                     }
                     //temp.cip_id=cip; 
@@ -407,7 +410,7 @@ namespace WpfApp1
                     }
                     temp.cleaningProcess = 4;
                     temp.e_type = id_at;
-                    temp.so_type = 5; 
+                    temp.so_type = 5;
                     aseptics.Add(temp);
                 }
                 conn.Close();
@@ -500,7 +503,7 @@ namespace WpfApp1
         {
             int id_tl;
             String name_tl;
-            int cip; 
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -537,7 +540,7 @@ namespace WpfApp1
                         }
 
                     }
-                    temp.so_type = 4; 
+                    temp.so_type = 4;
                     temp.cleaningProcess = 3;
                     temp.e_type = id_tl;
                     transferLines.Add(temp);
@@ -606,7 +609,7 @@ namespace WpfApp1
         {
             int id_so;
             String name_mt;
-            int cip; 
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -629,7 +632,7 @@ namespace WpfApp1
                 {
                     id_so = Convert.ToInt32(dr["id_SO"]);
                     name_mt = dr.Field<String>("Mix Tank");
-                    cip = Convert.ToInt32(dr["id_CIP"]); 
+                    cip = Convert.ToInt32(dr["id_CIP"]);
                     Equipment temp = new Equipment(name_mt, id_so, 0);
                     for (int k = 0; k < cipGroups.Count; k++)
                     {
@@ -639,10 +642,10 @@ namespace WpfApp1
                         }
 
                     }
-                    temp.so_type = id_so; 
+                    temp.so_type = id_so;
                     temp.cleaningProcess = 2;
                     temp.e_type = 1;
-                   
+
                     tanks.Add(temp);
                 }
                 conn.Close();
@@ -670,7 +673,7 @@ namespace WpfApp1
                 int id_func;
                 int id_so;
                 int count = 0;
-                int checking = 0; 
+                int checking = 0;
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -726,22 +729,22 @@ namespace WpfApp1
                             break;
                         }
                     }
-                    for(int k=0; k<systems[i].SOs.Count; k++)
+                    for (int k = 0; k < systems[i].SOs.Count; k++)
                     {
                         if (systems[i].SOs[k] == true)
                         {
                             count++;
-                            checking = k; 
+                            checking = k;
                         }
-                            
+
                     }
                     if (count >= 2)
                     {
-                        systems[i].so_type = 3; 
+                        systems[i].so_type = 3;
                     }
                     else
                     {
-                        systems[i].so_type = checking; 
+                        systems[i].so_type = checking;
                     }
                     if (flag == 1)
                     {
@@ -749,7 +752,7 @@ namespace WpfApp1
                         temp.SOs = systems[i].SOs;
                         temp.cleaningProcess = 1;
                         temp.cipGroup = systems[i].cipGroup;
-                        temp.so_type = systems[i].so_type; 
+                        temp.so_type = systems[i].so_type;
                         extras.Add(temp);
                         blendmachine = systems[i];
                         systems.Remove(blendmachine);
@@ -759,7 +762,7 @@ namespace WpfApp1
                         }
 
                         //blendSystems.RemoveAt(i); 
-                       
+
                     }
 
                 }
@@ -815,8 +818,8 @@ namespace WpfApp1
                                     if (count == y)
                                     {
                                         e.SOs.Add(true);
-                                        e.name = e.name + "(SO" + y +")";
-                                        e.so_type = y; 
+                                        e.name = e.name + "(SO" + y + ")";
+                                        e.so_type = y;
 
                                     }
                                     else
@@ -824,7 +827,7 @@ namespace WpfApp1
                                         e.SOs.Add(false);
                                     }
                                 }
-                                e.cipGroup = null; 
+                                e.cipGroup = null;
                                 e.cleaningProcess = 1;
                                 e.e_type = 0;
                                 extras.Add(e);
@@ -1183,6 +1186,7 @@ namespace WpfApp1
             // add to database
             AddEquipmentToDatabase();
             AddJuicesToDatabase();
+            insertingScheduleID();
         }
 
         /// <summary>
@@ -1595,7 +1599,7 @@ namespace WpfApp1
 
             return time;
         } */
-        
+
 
         /// <summary>
         /// will find and schedule time for the juice in the tank to use a transfer line
@@ -3076,9 +3080,9 @@ namespace WpfApp1
             }
 
             return x.so;
-        } 
-        
-        
+        }
+
+
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -3117,9 +3121,9 @@ namespace WpfApp1
 
         //  inserting Juice Schedule
         //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
-        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch,String equipname, DateTime start, DateTime end)
+        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch, String equipname, DateTime start, DateTime end)
         {
-                                            
+
             //for equip_type that should return the name
             try
             {
@@ -3130,7 +3134,7 @@ namespace WpfApp1
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-                cmd.CommandText = "[insert_JuiceSch]"; 
+                cmd.CommandText = "[insert_JuiceSch]";
                 if (slurry == true)
                 {
                     String adding = Convert.ToString(batch);
@@ -3178,10 +3182,7 @@ namespace WpfApp1
                 MessageBox.Show(ex.ToString());
             }
         }
-
     }
-
-
 
     /*
     private void ExampleOfSchedule()
