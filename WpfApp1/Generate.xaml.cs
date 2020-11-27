@@ -87,6 +87,7 @@ namespace WpfApp1
             this.sch = sch;
 
             juices = sch.inprogress;    //TODO:when null, error
+            tb_SchID.Text = sch.scheduleID.ToString();
 
             DataGridTextColumn colJuice = new DataGridTextColumn();
             colJuice.Header = "Juices";
@@ -393,6 +394,8 @@ namespace WpfApp1
         private void btn_NextToThaw_Click(object sender, RoutedEventArgs e)
         {
             Mouse.OverrideCursor = Cursors.Wait;
+            sch.scheduleID = Convert.ToDateTime(tb_SchID.Text);
+
             foreach (Juice juice in juices)
             {
                 if (juice.starter == true)
