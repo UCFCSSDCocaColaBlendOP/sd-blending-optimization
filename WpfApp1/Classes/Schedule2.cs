@@ -71,7 +71,6 @@ namespace WpfApp1
             //ExampleOfSchedule();
             //ExampleOfSchedule2();
             ProcessCSV(filename);
-            insertingScheduleID(); 
         }
 
         //TODO: 0=1,1=2,2=3,3=7
@@ -1183,6 +1182,7 @@ namespace WpfApp1
             // add to database
             AddEquipmentToDatabase();
             AddJuicesToDatabase();
+            insertingScheduleID(); 
         }
 
         /// <summary>
@@ -2413,6 +2413,7 @@ namespace WpfApp1
                     // can we do it ontime?
                     if (DateTime.Compare(begin, juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0))) <= 0)
                     {
+                        option.onTime = true;
                         option.thawTime = begin;
                         option.startBlending = juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0));
                     }
