@@ -294,7 +294,7 @@ namespace WpfApp1
             {
                 int equip_type;
                 String equip_name;
-                int cip;
+                int cip=0;
 
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
@@ -311,39 +311,51 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    equip_type = Convert.ToInt32(dr["id"]);
-                    equip_name = dr.Field<String>("Equipment");
-                    cip = Convert.ToInt32(dr["cip_id"]);
-                    Equipment temp = new Equipment(equip_name, equip_type, 0);
-
-                    //set all the number of functions in the list
-                    //set all to false
-                    //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
-                    for (int i = 0; i < numFunctions + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        temp.functionalities.Add(false);
-                    }
-
-                    for (int j = 0; j < numSOs + 1; j++)
-                    {
-                        temp.SOs.Add(false);
-                    }
-                    for (int k = 0; k < cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
+                        equip_type = Convert.ToInt32(dr["id"]);
+                        equip_name = dr.Field<String>("Equipment");
+                        if(dr["cip_id"] != DBNull.Value)
                         {
-                            temp.cipGroup = cipGroups[k];
+                            cip = Convert.ToInt32(dr["cip_id"]);
+                        }
+                       
+                        Equipment temp = new Equipment(equip_name, equip_type, 0);
+
+                        //set all the number of functions in the list
+                        //set all to false
+                        //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
+                        for (int i = 0; i < numFunctions + 1; i++)
+                        {
+                            temp.functionalities.Add(false);
                         }
 
-                    }
+                        for (int j = 0; j < numSOs + 1; j++)
+                        {
+                            temp.SOs.Add(false);
+                        }
+                        if (cip > 0)
+                        {
+                            for (int k = 0; k < cipGroups.Count; k++)
+                            {
+                                if (cip == cipGroups[k].type)
+                                {
+                                    temp.cipGroup = cipGroups[k];
+                                }
 
-                    //temp.cip_id=cip; 
-                    temp.cleaningProcess = 1;
-                    temp.e_type = equip_type;
-                    systems.Add(temp);
+                            }
+                        }
+                        else
+                        {
+                            temp.cipGroup = null; 
+                        }
+                        //temp.cip_id=cip; 
+                        temp.cleaningProcess = 1;
+                        temp.e_type = equip_type;
+                        systems.Add(temp);
+                    }
                 }
                 conn.Close();
             }
@@ -381,37 +393,40 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-
-                    id_at = Convert.ToInt32(dr["id"]);
-                    name_at = dr.Field<String>("Aseptic Tank");
-                    cip = Convert.ToInt32(dr["id_cip"]);
-                    Equipment temp = new Equipment(name_at, id_at, 0);
-                    for (int i = 0; i < numSOs + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (i > 0)
-                        {
-                            temp.SOs.Add(true);
-                        }
-                        else
-                        {
-                            temp.SOs.Add(false);
-                        }
-                    }
-                    //temp.cip_id=cip; 
-                    for (int k = 0; k < cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
-                        {
-                            temp.cipGroup = cipGroups[k];
-                        }
 
+                        id_at = Convert.ToInt32(dr["id"]);
+                        name_at = dr.Field<String>("Aseptic Tank");
+                        cip = Convert.ToInt32(dr["id_cip"]);
+                        Equipment temp = new Equipment(name_at, id_at, 0);
+                        for (int i = 0; i < numSOs + 1; i++)
+                        {
+                            if (i > 0)
+                            {
+                                temp.SOs.Add(true);
+                            }
+                            else
+                            {
+                                temp.SOs.Add(false);
+                            }
+                        }
+                        //temp.cip_id=cip; 
+                        for (int k = 0; k < cipGroups.Count; k++)
+                        {
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
+
+                        }
+                        temp.cleaningProcess = 4;
+                        temp.e_type = id_at;
+                        temp.so_type = 5;
+                        aseptics.Add(temp);
                     }
-                    temp.cleaningProcess = 4;
-                    temp.e_type = id_at;
-                    temp.so_type = 5;
-                    aseptics.Add(temp);
                 }
                 conn.Close();
 
@@ -452,8 +467,10 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
+                if (dt.Rows.Count > 0)
+                {
+                    numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
                 conn.Close();
 
             }
@@ -488,8 +505,10 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                s = Convert.ToInt32(dt.Rows[0]["id"]);
+                if (dt.Rows.Count > 0)
+                {
+                    s = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
                 conn.Close();
 
             }
@@ -522,28 +541,31 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_tl = Convert.ToInt32(dr["id"]);
-                    name_tl = dr.Field<String>("Transfer Lines");
-                    cip = Convert.ToInt32(dr["id_CIP"]);
-                    Equipment temp = new Equipment(name_tl, id_tl, 0);
-                    for (int i = 0; i < numSOs + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        temp.SOs.Add(false);
-                    }
-                    for (int k = 0; k < cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
+                        id_tl = Convert.ToInt32(dr["id"]);
+                        name_tl = dr.Field<String>("Transfer Lines");
+                        cip = Convert.ToInt32(dr["id_CIP"]);
+                        Equipment temp = new Equipment(name_tl, id_tl, 0);
+                        for (int i = 0; i < numSOs + 1; i++)
                         {
-                            temp.cipGroup = cipGroups[k];
+                            temp.SOs.Add(false);
                         }
+                        for (int k = 0; k < cipGroups.Count; k++)
+                        {
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
 
+                        }
+                        temp.so_type = 4;
+                        temp.cleaningProcess = 3;
+                        temp.e_type = id_tl;
+                        transferLines.Add(temp);
                     }
-                    temp.so_type = 4;
-                    temp.cleaningProcess = 3;
-                    temp.e_type = id_tl;
-                    transferLines.Add(temp);
                 }
                 conn.Close();
 
@@ -575,17 +597,19 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_tl = Convert.ToInt32(dr["id_TL"]);
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    for (int i = 0; i < transferLines.Count; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (transferLines[i].type == id_tl)
+                        id_tl = Convert.ToInt32(dr["id_TL"]);
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        for (int i = 0; i < transferLines.Count; i++)
                         {
-                            transferLines[i].SOs[id_so] = true;
-                            break;
+                            if (transferLines[i].type == id_tl)
+                            {
+                                transferLines[i].SOs[id_so] = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -628,25 +652,28 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    name_mt = dr.Field<String>("Mix Tank");
-                    cip = Convert.ToInt32(dr["id_CIP"]);
-                    Equipment temp = new Equipment(name_mt, id_so, 0);
-                    for (int k = 0; k < cipGroups.Count; k++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (cip == cipGroups[k].type)
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        name_mt = dr.Field<String>("Mix Tank");
+                        cip = Convert.ToInt32(dr["id_CIP"]);
+                        Equipment temp = new Equipment(name_mt, id_so, 0);
+                        for (int k = 0; k < cipGroups.Count; k++)
                         {
-                            temp.cipGroup = cipGroups[k];
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
+
                         }
+                        temp.so_type = id_so;
+                        temp.cleaningProcess = 2;
+                        temp.e_type = 1;
 
+                        tanks.Add(temp);
                     }
-                    temp.so_type = id_so;
-                    temp.cleaningProcess = 2;
-                    temp.e_type = 1;
-
-                    tanks.Add(temp);
                 }
                 conn.Close();
 
@@ -689,19 +716,21 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_equip = Convert.ToInt32(dr["id_Equip"]);
-                    id_func = Convert.ToInt32(dr["id_Func"]);
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    for (int i = 0; i < systems.Count; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (systems[i].type == id_equip)
+                        id_equip = Convert.ToInt32(dr["id_Equip"]);
+                        id_func = Convert.ToInt32(dr["id_Func"]);
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        for (int i = 0; i < systems.Count; i++)
                         {
-                            systems[i].functionalities[id_func] = true;
-                            systems[i].SOs[id_so] = true;
+                            if (systems[i].type == id_equip)
+                            {
+                                systems[i].functionalities[id_func] = true;
+                                systems[i].SOs[id_so] = true;
 
+                            }
                         }
                     }
                 }
