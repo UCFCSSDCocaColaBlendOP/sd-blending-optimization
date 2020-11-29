@@ -708,6 +708,7 @@ namespace WpfApp1
                 Equipment blendmachine;
                 for (int i = 0; i < systems.Count; i++)
                 {
+                    count = 0; 
                     if (flag == 1 && i == 1)
                     {
                         i = 0;
