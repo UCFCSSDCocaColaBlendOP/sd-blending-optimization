@@ -173,7 +173,8 @@ namespace WpfApp1
 
             PrintAllJuices();
             PullEquipment();
-
+            numFunctions = numFunctions + 1;
+            numSOs = numSOs + 1; 
             thawRoom = new Equipment("Thaw Room", thawID, 720);
             thawRoom.schedule = new List<ScheduleEntry>();
             thawRoom.functionalities = new List<bool>();
@@ -183,6 +184,7 @@ namespace WpfApp1
             thawRoom.SOs = new List<bool>();
             for (int i = 0; i < numSOs; i++)
                 thawRoom.SOs.Add(true);
+            thawRoom.SOs[0] = false; 
         }
         private void PrintAllJuices()
         {
@@ -1762,8 +1764,8 @@ namespace WpfApp1
             option.slurry = false;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs + 1];
-            for (int j = 1; j < numSOs + 1; j++)
+            bool[] soChoices = new bool[numSOs];
+            for (int j = 1; j < numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
@@ -2398,8 +2400,8 @@ namespace WpfApp1
             option.batch = slurrySize;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs + 1];
-            for (int j = 1; j <= numSOs; j++)
+            bool[] soChoices = new bool[numSOs];
+            for (int j = 1; j < numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
