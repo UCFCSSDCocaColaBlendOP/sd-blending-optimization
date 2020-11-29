@@ -64,12 +64,13 @@ namespace WpfApp1
             transferLines = new List<Equipment>();
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
-            aseptics = new List<Equipment>(); 
+            aseptics = new List<Equipment>();
 
             inconceivable = false;
             late = false;
             //ExampleOfSchedule();
             //ExampleOfSchedule2();
+
             ProcessCSV(filename);
         }
 
@@ -155,9 +156,12 @@ namespace WpfApp1
 
                     Juice new_juice = new Juice(name, material, line_num_use, type, fillTime);
 
-                    if(name.Contains("CIP")) {
+                    if (name.Contains("CIP"))
+                    {
                         cips.Add(new_juice);
-                    } else {
+                    }
+                    else
+                    {
                         inprogress.Add(new_juice);
                     }
                 }
@@ -170,7 +174,8 @@ namespace WpfApp1
 
             PrintAllJuices();
             PullEquipment();
-
+            numFunctions = numFunctions + 1;
+            numSOs = numSOs + 1; 
             thawRoom = new Equipment("Thaw Room", thawID, 720);
             thawRoom.schedule = new List<ScheduleEntry>();
             thawRoom.functionalities = new List<bool>();
@@ -180,6 +185,7 @@ namespace WpfApp1
             thawRoom.SOs = new List<bool>();
             for (int i = 0; i < numSOs; i++)
                 thawRoom.SOs.Add(true);
+            thawRoom.SOs[0] = false; 
         }
         private void PrintAllJuices()
         {
@@ -196,7 +202,7 @@ namespace WpfApp1
         public void getCipGroups()
         {
             int id;
-            String name; 
+            String name;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -220,7 +226,7 @@ namespace WpfApp1
                     id = Convert.ToInt32(dr["id_CIP"]);
                     name = dr.Field<String>("CIP");
                     Equipment temp = new Equipment(name, id, 0);
-                    cipGroups.Add(temp); 
+                    cipGroups.Add(temp);
                 }
 
                 conn.Close();
@@ -231,7 +237,7 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
-    
+
         public void getThawRoomID()
         {
             try
@@ -253,8 +259,8 @@ namespace WpfApp1
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
 
-                if (dt.Rows.Count > 0) 
-                { 
+                if (dt.Rows.Count > 0)
+                {
                     thawID = Convert.ToInt32(dt.Rows[0]["id"]);
                 }
                 conn.Close();
@@ -270,8 +276,8 @@ namespace WpfApp1
         // blendtanks are blendtanks their type is their SO
         private void PullEquipment()
         {
-            getCipGroups(); 
-            getThawRoomID(); 
+            getCipGroups();
+            getThawRoomID();
             // access the database
             // initialize SOcount and functionCount
             //methods used to get the maximum sos and functionalities
@@ -291,8 +297,8 @@ namespace WpfApp1
             {
                 int equip_type;
                 String equip_name;
-                int cip; 
-                
+                int cip=0;
+
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -308,39 +314,51 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    equip_type = Convert.ToInt32(dr["id"]);
-                    equip_name = dr.Field<String>("Equipment");
-                    cip = Convert.ToInt32(dr["cip_id"]); 
-                    Equipment temp = new Equipment(equip_name, equip_type, 0);
-
-                    //set all the number of functions in the list
-                    //set all to false
-                    //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
-                    for (int i = 0; i < numFunctions + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        temp.functionalities.Add(false);
-                    }
-
-                    for (int j = 0; j < numSOs + 1; j++)
-                    {
-                        temp.SOs.Add(false);
-                    }
-                    for(int k=0; k<cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
+                        equip_type = Convert.ToInt32(dr["id"]);
+                        equip_name = dr.Field<String>("Equipment");
+                        if(dr["cip_id"] != DBNull.Value)
                         {
-                            temp.cipGroup = cipGroups[k]; 
+                            cip = Convert.ToInt32(dr["cip_id"]);
                         }
                        
+                        Equipment temp = new Equipment(equip_name, equip_type, 0);
+
+                        //set all the number of functions in the list
+                        //set all to false
+                        //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
+                        for (int i = 0; i < numFunctions + 1; i++)
+                        {
+                            temp.functionalities.Add(false);
+                        }
+
+                        for (int j = 0; j < numSOs + 1; j++)
+                        {
+                            temp.SOs.Add(false);
+                        }
+                        if (cip > 0)
+                        {
+                            for (int k = 0; k < cipGroups.Count; k++)
+                            {
+                                if (cip == cipGroups[k].type)
+                                {
+                                    temp.cipGroup = cipGroups[k];
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            temp.cipGroup = null; 
+                        }
+                        //temp.cip_id=cip; 
+                        temp.cleaningProcess = 1;
+                        temp.e_type = equip_type;
+                        systems.Add(temp);
                     }
-                    
-                    //temp.cip_id=cip; 
-                    temp.cleaningProcess = 1;
-                    temp.e_type = equip_type;
-                    systems.Add(temp);
                 }
                 conn.Close();
             }
@@ -352,14 +370,14 @@ namespace WpfApp1
             getBlendSystem_FuncSos();
             getExtras();
             getExtraSorted();
-            getAseptics(); 
+            getAseptics();
         }
         public void getAseptics()
         {
             int id_at;
             String name_at;
-            int id; 
-            int cip; 
+            int id;
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -378,36 +396,40 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    
-                    id_at = Convert.ToInt32(dr["id"]);
-                    name_at = dr.Field<String>("Aseptic Tank");
-                    cip = Convert.ToInt32(dr["id_cip"]);
-                    Equipment temp = new Equipment(name_at, id_at, 0);
-                    for (int i = 0; i < numSOs + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (i > 0) { 
-                            temp.SOs.Add(true);
-                        }
-                        else
-                        {
-                            temp.SOs.Add(false); 
-                        }
-                    }
-                    //temp.cip_id=cip; 
-                    for (int k = 0; k < cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
-                        {
-                            temp.cipGroup = cipGroups[k];
-                        }
 
+                        id_at = Convert.ToInt32(dr["id"]);
+                        name_at = dr.Field<String>("Aseptic Tank");
+                        cip = Convert.ToInt32(dr["id_cip"]);
+                        Equipment temp = new Equipment(name_at, id_at, 0);
+                        for (int i = 0; i < numSOs + 1; i++)
+                        {
+                            if (i > 0)
+                            {
+                                temp.SOs.Add(true);
+                            }
+                            else
+                            {
+                                temp.SOs.Add(false);
+                            }
+                        }
+                        //temp.cip_id=cip; 
+                        for (int k = 0; k < cipGroups.Count; k++)
+                        {
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
+
+                        }
+                        temp.cleaningProcess = 4;
+                        temp.e_type = id_at;
+                        temp.so_type = 5;
+                        aseptics.Add(temp);
                     }
-                    temp.cleaningProcess = 4;
-                    temp.e_type = id_at;
-                    temp.so_type = 5; 
-                    aseptics.Add(temp);
                 }
                 conn.Close();
 
@@ -448,8 +470,10 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
+                if (dt.Rows.Count > 0)
+                {
+                    numofFunctions = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
                 conn.Close();
 
             }
@@ -484,8 +508,10 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                s = Convert.ToInt32(dt.Rows[0]["id"]);
+                if (dt.Rows.Count > 0)
+                {
+                    s = Convert.ToInt32(dt.Rows[0]["id"]);
+                }
                 conn.Close();
 
             }
@@ -499,7 +525,7 @@ namespace WpfApp1
         {
             int id_tl;
             String name_tl;
-            int cip; 
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -518,28 +544,31 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_tl = Convert.ToInt32(dr["id"]);
-                    name_tl = dr.Field<String>("Transfer Lines");
-                    cip = Convert.ToInt32(dr["id_CIP"]);
-                    Equipment temp = new Equipment(name_tl, id_tl, 0);
-                    for (int i = 0; i < numSOs + 1; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        temp.SOs.Add(false);
-                    }
-                    for (int k = 0; k < cipGroups.Count; k++)
-                    {
-                        if (cip == cipGroups[k].type)
+                        id_tl = Convert.ToInt32(dr["id"]);
+                        name_tl = dr.Field<String>("Transfer Lines");
+                        cip = Convert.ToInt32(dr["id_CIP"]);
+                        Equipment temp = new Equipment(name_tl, id_tl, 0);
+                        for (int i = 0; i < numSOs + 1; i++)
                         {
-                            temp.cipGroup = cipGroups[k];
+                            temp.SOs.Add(false);
                         }
+                        for (int k = 0; k < cipGroups.Count; k++)
+                        {
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
 
+                        }
+                        temp.so_type = 4;
+                        temp.cleaningProcess = 3;
+                        temp.e_type = id_tl;
+                        transferLines.Add(temp);
                     }
-                    temp.so_type = 4; 
-                    temp.cleaningProcess = 3;
-                    temp.e_type = id_tl;
-                    transferLines.Add(temp);
                 }
                 conn.Close();
 
@@ -571,17 +600,19 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_tl = Convert.ToInt32(dr["id_TL"]);
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    for (int i = 0; i < transferLines.Count; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (transferLines[i].type == id_tl)
+                        id_tl = Convert.ToInt32(dr["id_TL"]);
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        for (int i = 0; i < transferLines.Count; i++)
                         {
-                            transferLines[i].SOs[id_so] = true;
-                            break;
+                            if (transferLines[i].type == id_tl)
+                            {
+                                transferLines[i].SOs[id_so] = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -605,7 +636,7 @@ namespace WpfApp1
         {
             int id_so;
             String name_mt;
-            int cip; 
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -624,25 +655,28 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    name_mt = dr.Field<String>("Mix Tank");
-                    cip = Convert.ToInt32(dr["id_CIP"]); 
-                    Equipment temp = new Equipment(name_mt, id_so, 0);
-                    for (int k = 0; k < cipGroups.Count; k++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (cip == cipGroups[k].type)
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        name_mt = dr.Field<String>("Mix Tank");
+                        cip = Convert.ToInt32(dr["id_CIP"]);
+                        Equipment temp = new Equipment(name_mt, id_so, 0);
+                        for (int k = 0; k < cipGroups.Count; k++)
                         {
-                            temp.cipGroup = cipGroups[k];
-                        }
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
 
+                        }
+                        temp.so_type = id_so;
+                        temp.cleaningProcess = 2;
+                        temp.e_type = 1;
+
+                        tanks.Add(temp);
                     }
-                    temp.so_type = id_so; 
-                    temp.cleaningProcess = 2;
-                    temp.e_type = 1;
-                   
-                    tanks.Add(temp);
                 }
                 conn.Close();
 
@@ -669,7 +703,7 @@ namespace WpfApp1
                 int id_func;
                 int id_so;
                 int count = 0;
-                int checking = 0; 
+                int checking = 0;
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
@@ -685,25 +719,28 @@ namespace WpfApp1
 
                 da.Fill(dt);
                 SqlDataReader rd = cmd.ExecuteReader();
-
-                foreach (DataRow dr in dt.Rows)
+                if (dt.Rows.Count > 0)
                 {
-                    id_equip = Convert.ToInt32(dr["id_Equip"]);
-                    id_func = Convert.ToInt32(dr["id_Func"]);
-                    id_so = Convert.ToInt32(dr["id_SO"]);
-                    for (int i = 0; i < systems.Count; i++)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        if (systems[i].type == id_equip)
+                        id_equip = Convert.ToInt32(dr["id_Equip"]);
+                        id_func = Convert.ToInt32(dr["id_Func"]);
+                        id_so = Convert.ToInt32(dr["id_SO"]);
+                        for (int i = 0; i < systems.Count; i++)
                         {
-                            systems[i].functionalities[id_func] = true;
-                            systems[i].SOs[id_so] = true;
+                            if (systems[i].type == id_equip)
+                            {
+                                systems[i].functionalities[id_func] = true;
+                                systems[i].SOs[id_so] = true;
 
+                            }
                         }
                     }
                 }
                 Equipment blendmachine;
                 for (int i = 0; i < systems.Count; i++)
                 {
+                    count = 0; 
                     if (flag == 1 && i == 1)
                     {
                         i = 0;
@@ -725,22 +762,22 @@ namespace WpfApp1
                             break;
                         }
                     }
-                    for(int k=0; k<systems[i].SOs.Count; k++)
+                    for (int k = 0; k < systems[i].SOs.Count; k++)
                     {
                         if (systems[i].SOs[k] == true)
                         {
                             count++;
-                            checking = k; 
+                            checking = k;
                         }
-                            
+
                     }
                     if (count >= 2)
                     {
-                        systems[i].so_type = 3; 
+                        systems[i].so_type = 3;
                     }
                     else
                     {
-                        systems[i].so_type = checking; 
+                        systems[i].so_type = checking;
                     }
                     if (flag == 1)
                     {
@@ -748,7 +785,7 @@ namespace WpfApp1
                         temp.SOs = systems[i].SOs;
                         temp.cleaningProcess = 1;
                         temp.cipGroup = systems[i].cipGroup;
-                        temp.so_type = systems[i].so_type; 
+                        temp.so_type = systems[i].so_type;
                         extras.Add(temp);
                         blendmachine = systems[i];
                         systems.Remove(blendmachine);
@@ -758,7 +795,7 @@ namespace WpfApp1
                         }
 
                         //blendSystems.RemoveAt(i); 
-                       
+
                     }
 
                 }
@@ -814,8 +851,8 @@ namespace WpfApp1
                                     if (count == y)
                                     {
                                         e.SOs.Add(true);
-                                        e.name = e.name + "(SO" + y +")";
-                                        e.so_type = y; 
+                                        e.name = e.name + "(SO" + y + ")";
+                                        e.so_type = y;
 
                                     }
                                     else
@@ -823,7 +860,7 @@ namespace WpfApp1
                                         e.SOs.Add(false);
                                     }
                                 }
-                                e.cipGroup = null; 
+                                e.cipGroup = null;
                                 e.cleaningProcess = 1;
                                 e.e_type = 0;
                                 extras.Add(e);
@@ -1182,7 +1219,7 @@ namespace WpfApp1
             // add to database
             AddEquipmentToDatabase();
             AddJuicesToDatabase();
-            insertingScheduleID(); 
+            insertingScheduleID();
         }
 
         /// <summary>
@@ -1595,7 +1632,7 @@ namespace WpfApp1
 
             return time;
         } */
-        
+
 
         /// <summary>
         /// will find and schedule time for the juice in the tank to use a transfer line
@@ -1728,8 +1765,8 @@ namespace WpfApp1
             option.slurry = false;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs + 1];
-            for (int j = 1; j < numSOs + 1; j++)
+            bool[] soChoices = new bool[numSOs];
+            for (int j = 1; j < numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
@@ -2364,8 +2401,8 @@ namespace WpfApp1
             option.batch = slurrySize;
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
-            bool[] soChoices = new bool[numSOs + 1];
-            for (int j = 1; j <= numSOs; j++)
+            bool[] soChoices = new bool[numSOs];
+            for (int j = 1; j < numSOs; j++)
                 soChoices[j] = true;
 
             // if the thaw room is needed
@@ -3077,9 +3114,9 @@ namespace WpfApp1
             }
 
             return x.so;
-        } 
-        
-        
+        }
+
+
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -3118,9 +3155,9 @@ namespace WpfApp1
 
         //  inserting Juice Schedule
         //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
-        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch,String equipname, DateTime start, DateTime end)
+        public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch, String equipname, DateTime start, DateTime end)
         {
-                                            
+
             //for equip_type that should return the name
             try
             {
@@ -3131,7 +3168,7 @@ namespace WpfApp1
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("scheduleID", SqlDbType.DateTime).Value = scheduleID;
-                cmd.CommandText = "[insert_JuiceSch]"; 
+                cmd.CommandText = "[insert_JuiceSch]";
                 if (slurry == true)
                 {
                     String adding = Convert.ToString(batch);
@@ -3179,10 +3216,7 @@ namespace WpfApp1
                 MessageBox.Show(ex.ToString());
             }
         }
-
     }
-
-
 
     /*
     private void ExampleOfSchedule()

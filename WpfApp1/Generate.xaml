@@ -108,6 +108,8 @@
                     <Button x:Name="btn_AddEquip" Content="Add" Margin="0,103,11.4,0" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" Grid.Row="5" Height="37" VerticalAlignment="Top" HorizontalAlignment="Right" Width="95" Grid.Column="1" Click="btn_AddEquip_Click"/>
                     <Label x:Name="line1" Content="" HorizontalAlignment="Left" Height="2" Margin="242,92,0,0" Grid.Row="5" VerticalAlignment="Top" Width="709" Grid.ColumnSpan="2" BorderBrush="White" Background="White"/>
                     <Label x:Name="line1_Copy" Content="" HorizontalAlignment="Left" Height="2" Margin="242,3.8,0,0" Grid.Row="4" VerticalAlignment="Top" Width="709" Grid.ColumnSpan="2" BorderBrush="White" Background="White"/>
+                    <Label x:Name="label_SchID" Content="Schedule ID" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" HorizontalAlignment="Left" Margin="242,59,0,0" VerticalAlignment="Top" Height="30" Width="144"/>
+                    <TextBox x:Name="tb_SchID" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" HorizontalAlignment="Left" Height="28" Margin="386,59,0,0" VerticalAlignment="Top" Width="170"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Thaw Room" BorderBrush="White" Foreground="White" Visibility="Visible" Margin="0.2,-50,0.4,34.6">
