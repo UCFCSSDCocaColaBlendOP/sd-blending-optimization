@@ -1204,6 +1204,7 @@ namespace WpfApp1
         {
             sch.GenerateNewSchedule();
             MessageBox.Show(sch.message, "Status");
+            Close();
         }
 
         private void cb_Equipment_State_SelectionChanged(object sender, SelectionChangedEventArgs e)
