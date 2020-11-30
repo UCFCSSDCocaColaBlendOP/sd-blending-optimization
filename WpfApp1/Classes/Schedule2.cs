@@ -1847,7 +1847,7 @@ namespace WpfApp1
                 checkoffFunc[thawID] = true;
             }
 
-            // if any of the extras are needed, do a first pass through to get the earliest of each one needed
+            // if any of the extras are needed
             for (int j = 0; j < juice.recipes[recipe].Count; j++)
             {
                 if (juice.recipes[recipe][j] == 0 || checkoffFunc[j])
