@@ -1212,7 +1212,7 @@ namespace WpfApp1
                 }
             }
 
-            message = "i don't know man";
+            message = "Schedule Generated. See Homepage or View Schedules.";
 
             GrabJuiceSchedules();
             // add to database
@@ -2069,6 +2069,9 @@ namespace WpfApp1
                     if (soChoices[k] && !option.system.SOs[k])
                         soChoices[k] = false;
             }
+
+            if (!pickedStartTime)
+                option.startBlending = juice.idealTime[recipe];
 
             // assign a mix tank
             // need to calculate the span of time we need the mix tank for by finding the tool with the longest timespan
