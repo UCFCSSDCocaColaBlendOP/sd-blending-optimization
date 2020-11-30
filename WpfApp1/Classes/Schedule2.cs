@@ -1002,10 +1002,10 @@ namespace WpfApp1
                     if (inprogress[0].inline)
                     {
                         // you only need to acquire a transfer line
-                        DateTime done = AcquireTransferLineAndAseptic(true, inprogress[0], inprogress[0].currentFillTime.Subtract(inprogress[0].transferTime), inprogress[0].tank);
+                        DateTime done = AcquireTransferLineAndAseptic(true, inprogress[0], inprogress[0].currentFillTime, inprogress[0].tank);
 
                         // if the transfer line is late, that's an error and we need to stop
-                        if (DateTime.Compare(done.Add(inprogress[0].transferTime), inprogress[0].currentFillTime) > 0)
+                        if (DateTime.Compare(done, inprogress[0].currentFillTime) > 0)
                         {
                             late = true;
                             lateJuice = inprogress[0];
@@ -2237,7 +2237,7 @@ namespace WpfApp1
             int cltype = -1;
 
             // try transfer line 1
-            if (soChoices[1] && !transferLines[0].down && slurrySize != 1)
+            if (soChoices[1] && !transferLines[0].down && slurrySize == 1)
             {
                 choice = transferLines[0];
                 goTime = transferLines[0].FindTime(tgoal, juice.type, scheduleID);
@@ -2248,7 +2248,7 @@ namespace WpfApp1
             }
 
             // try transfer line 2
-            if (soChoices[2] && !transferLines[0].down && slurrySize != 1)
+            if (soChoices[2] && !transferLines[1].down && slurrySize == 1)
             {
                 if (choice == null)
                 {
@@ -2295,7 +2295,7 @@ namespace WpfApp1
             }
 
             // try transfer line 4
-            if (!transferLines[3].down && slurrySize != 1)
+            if (!transferLines[3].down && slurrySize == 1)
             {
                 if (choice == null)
                 {
@@ -2403,7 +2403,8 @@ namespace WpfApp1
             option.asepticCleaningStart = option.aseptic.cleanTime;
 
             // decide if it's onTime
-            option.onTime = DateTime.Compare(juice.currentFillTime, option.transferTime) <= 0;
+            if (DateTime.Compare(juice.currentFillTime, option.transferTime) < 0)
+                option.onTime = false;
 
             if (DateTime.Compare(option.transferTime.Subtract(option.tankLength).Add(juice.transferTime), option.startBlending) > 0 || option.lateMaker == null)
                 option.lateMaker = option.transferLine;
