@@ -168,6 +168,8 @@
                     <TextBox x:Name="tb_PreBlend" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="2" HorizontalAlignment="Left" Height="26" Margin="102.4,4.4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="2" Grid.ColumnSpan="2"/>
                     <Label x:Name="label_PostBlend" Content="Post-Blend:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="4" HorizontalAlignment="Left" Margin="11.977,0.4,0,0" VerticalAlignment="Top" Height="30" Width="94" Grid.Row="2"/>
                     <TextBox x:Name="tb_PostBlend" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="4" HorizontalAlignment="Left" Height="26" Margin="117.977,4.4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="2" Grid.ColumnSpan="2"/>
+                    <Label x:Name="label_MixTime" Content="Mix Time:" Foreground="White" FontFamily="Segoe UI Semibold" FontSize="16" Grid.Column="4" HorizontalAlignment="Left" Margin="11.977,5.6,0,0" VerticalAlignment="Top" Height="30" Width="94" Grid.Row="3"/>
+                    <TextBox x:Name="tb_MixTime" IsEnabled="False" Padding="0" Background="#FF132226" Foreground="White" BorderBrush="White" FontFamily="Segoe UI Semibold" FontSize="14" Grid.Column="4" HorizontalAlignment="Left" Height="26" Margin="117.977,9.6,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" Grid.Row="3" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="CIP" BorderBrush="White" Foreground="White" Visibility="Collapsed">

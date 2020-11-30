@@ -819,6 +819,7 @@ namespace WpfApp1
             chck_Inline.IsEnabled = true;
             tb_PreBlend.IsEnabled = true;
             tb_PostBlend.IsEnabled = true;
+            tb_MixTime.IsEnabled = true;
             cb_Function_Recipe.IsEnabled = true;
             tb_Time_Recipe.IsEnabled = true;
             btn_Set_Time.IsEnabled = true;
@@ -843,6 +844,8 @@ namespace WpfApp1
             tb_PreBlend.Text = "0";
             tb_PostBlend.IsEnabled = true;
             tb_PostBlend.Text = "0";
+            tb_MixTime.IsEnabled = true;
+            tb_MixTime.Text = "0";
 
             btn_Edit_Recipe.Visibility = Visibility.Hidden;
             btn_Add_Recipe.Visibility = Visibility.Hidden;
@@ -886,6 +889,7 @@ namespace WpfApp1
                 chck_Inline.IsChecked = Convert.ToBoolean(dt.Rows[0]["Inline"]);
                 tb_PreBlend.Text = Convert.ToString(dt.Rows[0]["Pre-Blend"]);
                 tb_PostBlend.Text = Convert.ToString(dt.Rows[0]["Post-Blend"]);
+                tb_MixTime.Text = Convert.ToString(dt.Rows[0]["Mix Time"]);
             }
 
             catch (Exception ex)
@@ -933,6 +937,7 @@ namespace WpfApp1
             chck_Inline.IsEnabled = false;
             tb_PreBlend.IsEnabled = false;
             tb_PostBlend.IsEnabled = false;
+            tb_MixTime.IsEnabled = false;
             cb_Function_Recipe.IsEnabled = false;
             tb_Time_Recipe.IsEnabled = false;
             btn_Set_Time.IsEnabled = false;
@@ -949,7 +954,8 @@ namespace WpfApp1
             if (String.IsNullOrEmpty(tb_Name_Recipe.Text) || 
                 cb_Juice_Recipe.SelectedIndex == -1 ||
                 String.IsNullOrEmpty(tb_PreBlend.Text) ||
-                String.IsNullOrEmpty(tb_PostBlend.Text))
+                String.IsNullOrEmpty(tb_PostBlend.Text) ||
+                String.IsNullOrEmpty(tb_MixTime.Text))
             {
                 return;
             }
@@ -969,6 +975,7 @@ namespace WpfApp1
                 cmd.Parameters.Add("inline", SqlDbType.Bit).Value = chck_Inline.IsChecked;
                 cmd.Parameters.Add("preBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PreBlend.Text);
                 cmd.Parameters.Add("postBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PostBlend.Text);
+                cmd.Parameters.Add("mixTime", SqlDbType.BigInt).Value = Convert.ToInt32(tb_MixTime.Text);
                 cmd.Connection = conn;
 
                 cmd.ExecuteNonQuery();
@@ -994,6 +1001,8 @@ namespace WpfApp1
             tb_PreBlend.Text = "";
             tb_PostBlend.IsEnabled = false;
             tb_PostBlend.Text = "";
+            tb_MixTime.IsEnabled = false;
+            tb_MixTime.Text = "";
 
             cb_Function_Recipe.IsEnabled = false;
             tb_Time_Recipe.IsEnabled = false;
@@ -1012,7 +1021,8 @@ namespace WpfApp1
             if (String.IsNullOrEmpty(tb_Name_Recipe.Text) ||
                 cb_Juice_Recipe.SelectedIndex == -1 ||
                 String.IsNullOrEmpty(tb_PreBlend.Text) ||
-                String.IsNullOrEmpty(tb_PostBlend.Text))
+                String.IsNullOrEmpty(tb_PostBlend.Text) ||
+                String.IsNullOrEmpty(tb_MixTime.Text))
             {
                 return;
             }
@@ -1031,6 +1041,7 @@ namespace WpfApp1
                 cmd.Parameters.Add("inline", SqlDbType.Bit).Value = chck_Inline.IsChecked;
                 cmd.Parameters.Add("preBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PreBlend.Text);
                 cmd.Parameters.Add("postBlend", SqlDbType.BigInt).Value = Convert.ToInt32(tb_PostBlend.Text);
+                cmd.Parameters.Add("mixTime", SqlDbType.BigInt).Value = Convert.ToInt32(tb_MixTime.Text);
                 cmd.Connection = conn;
 
                 cmd.ExecuteNonQuery();
@@ -1056,6 +1067,8 @@ namespace WpfApp1
             tb_PreBlend.Text = "";
             tb_PostBlend.IsEnabled = false;
             tb_PostBlend.Text = "";
+            tb_MixTime.IsEnabled = false;
+            tb_MixTime.Text = "";
 
             cb_Function_Recipe.IsEnabled = false;
             tb_Time_Recipe.IsEnabled = false;
