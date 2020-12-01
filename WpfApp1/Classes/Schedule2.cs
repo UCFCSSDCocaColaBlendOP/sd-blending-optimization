@@ -67,6 +67,8 @@ namespace WpfApp1
             cipGroups = new List<Equipment>();
             finished = new List<Juice>();
             aseptics = new List<Equipment>();
+            waters = new List<Equipment>();
+            sucroses = new List<Equipment>();
 
             inconceivable = false;
             late = false;
@@ -844,30 +846,60 @@ namespace WpfApp1
                             name_func = dr.Field<String>("Functionality");
                             id_func = Convert.ToInt32(dr["id"]);
                             sum = numSOs;
-                            while (numSOs + 1 != count)
+                            if (name_func == "Water")
                             {
-                                Equipment e = new Equipment(name_func, id_func, 0);
-                                for (int y = 0; y < sum + 1; y++)
+                                while (numSOs + 1 != count)
                                 {
-                                    if (count == y)
+                                    Equipment e = new Equipment(name_func, id_func, 0);
+                                    for (int y = 0; y < sum + 1; y++)
                                     {
-                                        e.SOs.Add(true);
-                                        e.name = e.name + "(SO" + y + ")";
-                                        e.so_type = y;
+                                        if (count == y)
+                                        {
+                                            e.SOs.Add(true);
+                                            e.name = e.name + "(SO" + y + ")";
+                                            e.so_type = y;
 
+                                        }
+                                        else
+                                        {
+                                            e.SOs.Add(false);
+                                        }
                                     }
-                                    else
-                                    {
-                                        e.SOs.Add(false);
-                                    }
+                                    e.cipGroup = null;
+                                    e.cleaningProcess = 1;
+                                    e.e_type = 0;
+                                    waters.Add(e);
+                                    count++;
                                 }
-                                e.cipGroup = null;
-                                e.cleaningProcess = 1;
-                                e.e_type = 0;
-                                extras.Add(e);
-                                count++;
+                                count = 1;
                             }
-                            count = 1;
+                            else if (name_func == "Liquid Sucrose")
+                            {
+                                while (numSOs + 1 != count)
+                                {
+                                    Equipment e = new Equipment(name_func, id_func, 0);
+                                    for (int y = 0; y < sum + 1; y++)
+                                    {
+                                        if (count == y)
+                                        {
+                                            e.SOs.Add(true);
+                                            e.name = e.name + "(SO" + y + ")";
+                                            e.so_type = y;
+
+                                        }
+                                        else
+                                        {
+                                            e.SOs.Add(false);
+                                        }
+                                    }
+                                    e.cipGroup = null;
+                                    e.cleaningProcess = 1;
+                                    e.e_type = 0;
+                                    sucroses.Add(e);
+                                    count++;
+                                }
+                                count = 1;
+                            }
                         }
                     }
                 }
