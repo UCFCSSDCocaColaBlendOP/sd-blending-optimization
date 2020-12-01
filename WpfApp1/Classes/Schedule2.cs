@@ -37,6 +37,8 @@ namespace WpfApp1
         public List<Equipment> tanks;           // blend tanks/ mix tanks
         public List<Equipment> transferLines;   // transfer lines
         public List<Equipment> aseptics;        // aseptic/pasteurizers
+        public List<Equipment> waters;
+        public List<Equipment> sucroses;
 
         // each piece of equipment belongs to a cip group, only one piece of equipment in the group
         // can CIP at a time

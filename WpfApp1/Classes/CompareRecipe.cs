@@ -30,6 +30,14 @@ namespace WpfApp1
         public List<int> extraCleaningTypes;
         public List<string> extraCleaningNames;
 
+        // water and liquid sucrose
+        public Equipment water;
+        public DateTime waterTime;
+        public TimeSpan waterLength;
+        public Equipment sucrose;
+        public DateTime sucroseTime;
+        public TimeSpan sucroseLength;
+
         // info about blend system
         public Equipment system;
         public DateTime systemTime;
@@ -120,6 +128,12 @@ namespace WpfApp1
 
                 extras[i].schedule.Add(new ScheduleEntry(extraTimes[i], extraTimes[i].Add(extraLengths[i]), juice, slurry, batch));
             }
+
+            // create entries for water and sucrose
+            if (water != null)
+                water.schedule.Add(new ScheduleEntry(waterTime, waterTime.Add(waterLength), juice, slurry, batch));
+            if (sucrose != null)
+                sucrose.schedule.Add(new ScheduleEntry(sucroseTime, sucroseTime.Add(sucroseLength), juice, slurry, batch));
 
             // create entry for blend system
             if (system != null)
