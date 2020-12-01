@@ -2229,6 +2229,22 @@ namespace WpfApp1
                 option.lateMaker = tank;
             }
 
+            // pick a water line
+            if (juice.recipes[recipe][waters[0].type] > 0)
+            {
+                option.water = waters[option.tank.type - 1];
+                option.waterTime = option.water.FindTime(option.tankTime.Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
+                option.waterLength = new TimeSpan(0, juice.recipes[recipe][waters[0].type], 0);
+            }
+            
+            // pick a sucrose line
+            if (juice.recipes[recipe][sucroses[0].type] > 0)
+            {
+                option.sucrose = sucroses[option.tank.type - 1];
+                option.sucroseTime = option.sucrose.FindTime(option.tankTime.Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
+                option.sucroseLength = new TimeSpan(0, juice.recipes[recipe][sucroses[0].type], 0);
+            }
+
             // assign a transfer line
             DateTime tgoal = option.tankTime.Add(option.tankLength).Subtract(juice.transferTime);
             Equipment choice = null;
