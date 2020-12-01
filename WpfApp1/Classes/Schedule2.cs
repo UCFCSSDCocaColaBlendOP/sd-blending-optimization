@@ -1051,7 +1051,7 @@ namespace WpfApp1
                         {
                             inconceivable = true;
                             inconceiver = inprogress[0];
-                            message = "Inconceivable because of " + lateJuice.name;
+                            message = "Inconceivable because of " + inconceiver.name;
                             return;
                         }
 
@@ -1096,7 +1096,7 @@ namespace WpfApp1
                             // try all the slurry sizes
                             for (int i = 2; i < 5 && i <= inprogress[0].neededBatches; i++)
                             {
-                                bool canDo = false;
+                                bool breaker = false;
 
                                 // try all the inline recipes
                                 for (int j = 0; j < inprogress[0].recipes.Count; j++)
@@ -1107,9 +1107,10 @@ namespace WpfApp1
                                     // get info about recipe
                                     CompareRecipe test = PrepRecipe(inprogress[0], j, i);
                                     if (!test.conceivable || !test.onTime)
-                                        continue;
-
-                                    canDo = true;
+                                    {
+                                        breaker = true;
+                                        break;
+                                    }
 
                                     if (pick == null || size < i || DateTime.Compare(goTime, test.startBlending) < 0)
                                     {
@@ -1119,8 +1120,7 @@ namespace WpfApp1
                                     }
                                 }
 
-                                // if three isn't possible 4 definitely won't be
-                                if (!canDo)
+                                if (breaker)
                                     break;
                             }
 
@@ -1211,7 +1211,7 @@ namespace WpfApp1
                         {
                             inconceivable = true;
                             inconceiver = inprogress[0];
-                            message = "Inconceivable because of " + lateJuice.name;
+                            message = "Inconceivable because of " + inconceiver.name;
                             return;
                         }
 
@@ -1815,6 +1815,8 @@ namespace WpfApp1
             }
             bool pickedStartTime = false; // has option.startBlending been set
             bool[] checkoffFunc = new bool[numFunctions];
+            checkoffFunc[waters[0].type] = true;
+            checkoffFunc[sucroses[0].type] = true;
             bool[] soChoices = new bool[numSOs];
             for (int j = 1; j < numSOs; j++)
                 soChoices[j] = true;
@@ -1845,14 +1847,13 @@ namespace WpfApp1
                     // check to see if the thaw room is ready in time
                     if (DateTime.Compare(begin, juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0))) <= 0)
                     {
-                        option.startBlending = juice.idealTime[recipe];
+                        option.startBlending = juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0));
                     }
                     // otherwise note
                     else
                     {
                         option.lateMaker = thawRoom;
-                        option.onTime = false;
-                        option.startBlending = begin.Add(option.thawLength);
+                        option.startBlending = begin;
                     }
                 }
                 // no entry exists, try to make one
@@ -1871,7 +1872,6 @@ namespace WpfApp1
                     else
                     {
                         option.lateMaker = thawRoom;
-                        option.onTime = false;
                         option.thawTime = begin;
                         option.startBlending = begin.Add(option.thawLength);
                     }
@@ -1934,7 +1934,6 @@ namespace WpfApp1
                     // note lateness
                     if (DateTime.Compare(option.startBlending, juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0))) > 0)
                     {
-                        option.onTime = false;
                         option.lateMaker = extras[idx];
                     }
                 }
@@ -1950,135 +1949,96 @@ namespace WpfApp1
             {
                 int pick = -1;
                 DateTime currentStart = DateTime.MinValue;
-                int sos = 0;
-                int otherfuncs = 0;
                 TimeSpan length = TimeSpan.Zero;
                 DateTime cStart = DateTime.MinValue;
                 TimeSpan cLength = TimeSpan.Zero;
                 string cName = "";
                 int cType = -1;
 
-                // choose a system
-                for (int j = 0; j < systems.Count; j++)
+                if (!systems[1].down && soChoices[2])
                 {
-                    // first check if it can connect to the sos
-                    bool flag = false;
-                    for (int k = 0; k < numSOs; k++)
-                        if (soChoices[k] && systems[j].SOs[k])
-                            flag = true;
-                    if (!flag)
-                        continue;
-
-                    // then check if it has the functionalities the recipe needs
-                    for (int k = 1; k < numFunctions; k++)
-                        if (!checkoffFunc[k] && juice.recipes[recipe][k] > 0 && !systems[j].functionalities[k])
-                            continue;
-
-                    // then figure out how long it needs on that system
-                    TimeSpan templength = new TimeSpan(0, 0, 0);
-                    for (int k = 0; k < numFunctions; k++)
-                        if (!checkoffFunc[k] && juice.recipes[recipe][k] > 0)
-                            templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][k], 0));
-
-                    // then start comparing this blendsystem to the last one to make a choice
-                    DateTime tempstart = systems[j].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
-                    DateTime tempCStart = DateTime.MinValue;
-                    TimeSpan tempCLength = TimeSpan.Zero;
-                    string tempCName = "";
-                    int tempCType = -1;
-                    if (systems[j].needsCleaned)
+                    // does it have all you need?
+                    bool flag = true;
+                    for (int i = 0; i < numFunctions; i++)
+                        if (juice.recipes[recipe][i] > 0 && !checkoffFunc[i] && !systems[1].functionalities[i])
+                            flag = false;
+                    
+                    if (flag)
                     {
-                        tempCStart = systems[j].cleanTime;
-                        tempCLength = systems[j].cleanLength;
-                        tempCType = systems[j].cleanType;
-                        tempCName = systems[j].cleanName;
-                    }
-                    int tempsos = systems[j].GetSOs(soChoices);
-                    int tempotherfuncs = systems[j].GetOtherFuncs(juice.recipes[recipe]);
+                        pick = 1;
 
-                    // there is no current
-                    if (pick == -1)
-                    {
-                        pick = j;
-                        currentStart = tempstart;
-                        sos = tempsos;
-                        otherfuncs = tempotherfuncs;
+                        TimeSpan templength = new TimeSpan(0, 0, 0);
+                        for (int i = 0; i < numFunctions; i++)
+                            if (!checkoffFunc[i] && juice.recipes[recipe][i] > 0)
+                                templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][i], 0));
                         length = templength;
-                        cStart = tempCStart;
-                        cLength = tempCLength;
-                        cType = tempCType;
-                        cName = tempCName;
+
+                        currentStart = systems[1].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
+                        cStart = systems[1].cleanTime;
+                        cLength = systems[1].cleanLength;
+                        cName = systems[1].cleanName;
+                        cType = systems[1].cleanType;
                     }
-                    // temp and current are the same time
-                    else if (DateTime.Compare(tempstart, currentStart) == 0)
+                }
+
+                if (!systems[0].down && soChoices[1])
+                {
+                    // does it have all you need?
+                    bool flag = true;
+                    for (int i = 0; i < numFunctions; i++)
+                        if (juice.recipes[recipe][i] > 0 && !checkoffFunc[i] && !systems[0].functionalities[i])
+                            flag = false;
+
+                    if (flag)
                     {
-                        if (otherfuncs > tempotherfuncs)
+                        TimeSpan templength = new TimeSpan(0, 0, 0);
+                        for (int i = 0; i < numFunctions; i++)
+                            if (!checkoffFunc[i] && juice.recipes[recipe][i] > 0)
+                                templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][i], 0));
+
+                        DateTime tempStart = systems[0].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
+                        TimeSpan tempCleanLen = systems[0].cleanLength;
+                        
+                        if (pick == -1 || DateTime.Compare(currentStart, tempStart) > 0)
                         {
-                            pick = j;
-                            currentStart = tempstart;
-                            sos = tempsos;
-                            otherfuncs = tempotherfuncs;
+                            pick = 0;
                             length = templength;
-                            cStart = tempCStart;
-                            cLength = tempCLength;
-                            cType = tempCType;
-                            cName = tempCName;
-                        }
-                        else if (otherfuncs == tempotherfuncs && tempsos > sos)
-                        {
-                            pick = j;
-                            currentStart = tempstart;
-                            sos = tempsos;
-                            otherfuncs = tempotherfuncs;
-                            length = templength;
-                            cStart = tempCStart;
-                            cLength = tempCLength;
-                            cType = tempCType;
-                            cName = tempCName;
-                        }
-                        else if (otherfuncs == tempotherfuncs && tempsos == sos && TimeSpan.Compare(tempCLength, cLength) < 0)
-                        {
-                            pick = j;
-                            currentStart = tempstart;
-                            sos = tempsos;
-                            otherfuncs = tempotherfuncs;
-                            length = templength;
-                            cStart = tempCStart;
-                            cLength = tempCLength;
-                            cType = tempCType;
-                            cName = tempCName;
+                            currentStart = tempStart;
+                            cStart = systems[0].cleanTime;
+                            cLength = systems[0].cleanLength;
+                            cName = systems[0].cleanName;
+                            cType = systems[0].cleanType;
                         }
                     }
-                    // temp is at the ideal time, current is not, if current was also at the ideal time, it would have been caught in the last check
-                    else if (DateTime.Compare(tempstart, juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0))) == 0)
+                }
+
+                if (!systems[2].down)
+                {
+                    // does it have all you need?
+                    bool flag = true;
+                    for (int i = 0; i < numFunctions; i++)
+                        if (juice.recipes[recipe][i] > 0 && !checkoffFunc[i] && !systems[2].functionalities[i])
+                            flag = false;
+
+                    if (flag)
                     {
-                        pick = j;
-                        currentStart = tempstart;
-                        sos = tempsos;
-                        otherfuncs = tempotherfuncs;
-                        length = templength;
-                        cStart = tempCStart;
-                        cLength = tempCLength;
-                        cType = tempCType;
-                        cName = tempCName;
-                    }
-                    // current is later than ideal
-                    else
-                    {
-                        // temp is later than current
-                        if (DateTime.Compare(tempstart, currentStart) > 0)
-                            continue;
-                        else
+                        TimeSpan templength = new TimeSpan(0, 0, 0);
+                        for (int i = 0; i < numFunctions; i++)
+                            if (!checkoffFunc[i] && juice.recipes[recipe][i] > 0)
+                                templength = templength.Add(new TimeSpan(0, juice.recipes[recipe][i], 0));
+
+                        DateTime tempStart = systems[2].FindTime(juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0)), juice.type, scheduleID);
+                        TimeSpan tempCleanLen = systems[2].cleanLength;
+
+                        if (pick == -1 || DateTime.Compare(currentStart, tempStart) > 0)
                         {
-                            pick = j;
-                            currentStart = tempstart;
-                            sos = tempsos;
-                            otherfuncs = tempotherfuncs;
+                            pick = 2;
                             length = templength;
-                            cStart = tempCStart;
-                            cLength = tempCLength;
-                            cType = tempCType;
-                            cName = tempCName;
+                            currentStart = tempStart;
+                            cStart = systems[2].cleanTime;
+                            cLength = systems[2].cleanLength;
+                            cName = systems[2].cleanName;
+                            cType = systems[2].cleanType;
                         }
                     }
                 }
@@ -2109,7 +2069,6 @@ namespace WpfApp1
                     pickedStartTime = true;
                     if (DateTime.Compare(currentStart, juice.idealTime[recipe].Add(new TimeSpan(0, juice.recipePreTimes[recipe], 0))) > 0)
                     {
-                        option.onTime = false;
                         option.lateMaker = option.system;
                     }
                 }
@@ -2117,7 +2076,6 @@ namespace WpfApp1
                 else if (DateTime.Compare(currentStart, option.startBlending) > 0)
                 {
                     option.startBlending = currentStart;
-                    option.onTime = false;
                     option.lateMaker = option.system;
                 }
 
@@ -2287,7 +2245,7 @@ namespace WpfApp1
             int cltype = -1;
 
             // try transfer line 1
-            if (soChoices[1] && !transferLines[0].down && slurrySize == 1)
+            if (option.tank.type == 1 && !transferLines[0].down && slurrySize == 1)
             {
                 choice = transferLines[0];
                 goTime = transferLines[0].FindTime(tgoal, juice.type, scheduleID);
@@ -2298,50 +2256,14 @@ namespace WpfApp1
             }
 
             // try transfer line 2
-            if (soChoices[2] && !transferLines[1].down && slurrySize == 1)
+            if (option.tank.type == 2 && !transferLines[1].down && slurrySize == 1)
             {
-                if (choice == null)
-                {
-                    choice = transferLines[1];
-                    goTime = transferLines[1].FindTime(tgoal, juice.type, scheduleID);
-                    clSt = transferLines[1].cleanTime;
-                    clL = transferLines[1].cleanLength;
-                    cltype = transferLines[1].cleanType;
-                    clN = transferLines[1].cleanName;
-                }
-                else
-                {
-                    DateTime tempStart = transferLines[1].FindTime(tgoal, juice.type, scheduleID);
-                    DateTime tempClSt = transferLines[1].cleanTime;
-                    TimeSpan tempClL = transferLines[1].cleanLength;
-                    int tempCltype = transferLines[1].cleanType;
-                    string tempClN = transferLines[1].cleanName;
-
-                    // transfer line 2 is ontime, transfer line 1 is not
-                    if (DateTime.Compare(tempStart, goTime) < 0)
-                    {
-                        choice = transferLines[1];
-                        goTime = tempStart;
-                        clSt = tempClSt;
-                        clL = tempClL;
-                        cltype = tempCltype;
-                        clN = tempClN;
-                    }
-                    // they're both on time
-                    else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
-                    {
-                        // transfer line 2 takes less time to clean
-                        if (TimeSpan.Compare(clL, tempClL) > 0)
-                        {
-                            choice = transferLines[1];
-                            goTime = tempStart;
-                            clSt = tempClSt;
-                            clL = tempClL;
-                            cltype = tempCltype;
-                            clN = tempClN;
-                        }
-                    }
-                }
+                choice = transferLines[1];
+                goTime = transferLines[1].FindTime(tgoal, juice.type, scheduleID);
+                clSt = transferLines[1].cleanTime;
+                clL = transferLines[1].cleanLength;
+                cltype = transferLines[1].cleanType;
+                clN = transferLines[1].cleanName;
             }
 
             // try transfer line 4
@@ -2373,20 +2295,6 @@ namespace WpfApp1
                         clL = tempClL;
                         cltype = tempCltype;
                         clN = tempClN;
-                    }
-                    // they're both on time
-                    else if (DateTime.Compare(tempStart, goTime) == 0 && DateTime.Compare(tempStart, juice.currentFillTime) == 0)
-                    {
-                        // transfer line 4 takes less time to clean
-                        if (TimeSpan.Compare(clL, tempClL) > 0)
-                        {
-                            choice = transferLines[3];
-                            goTime = tempStart;
-                            clSt = tempClSt;
-                            clL = tempClL;
-                            cltype = tempCltype;
-                            clN = tempClN;
-                        }
                     }
                 }
             }
@@ -2455,8 +2363,10 @@ namespace WpfApp1
             // decide if it's onTime
             if (DateTime.Compare(juice.currentFillTime, option.transferTime) < 0)
                 option.onTime = false;
+            else
+                option.onTime = true;
 
-            if (DateTime.Compare(option.transferTime.Subtract(option.tankLength).Add(juice.transferTime), option.startBlending) > 0 || option.lateMaker == null)
+            if (DateTime.Compare(option.transferTime, option.startBlending) > 0 || option.lateMaker == null)
                 option.lateMaker = option.transferLine;
             
             for (int z = 0; z < juice.recipes[recipe].Count; z++)
