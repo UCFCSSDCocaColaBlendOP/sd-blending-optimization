@@ -361,7 +361,7 @@ namespace WpfApp1
                 da.Fill(dt);
 
                 cb.ItemsSource = dt.DefaultView;
-                cb.DisplayMemberPath = "CleaningName";
+                cb.DisplayMemberPath = "process";
                 cb.SelectedValuePath = "id";
             }
 
@@ -1202,7 +1202,9 @@ namespace WpfApp1
 
         private void btn_Submit_Click(object sender, RoutedEventArgs e)
         {
+            Mouse.OverrideCursor = Cursors.Wait;
             sch.GenerateNewSchedule();
+            Mouse.OverrideCursor = null;
             MessageBox.Show(sch.message, "Status");
             Close();
         }

@@ -88,6 +88,7 @@
                     <Button x:Name="btn_Submit_Function" Content="Submit" Visibility="Hidden" IsEnabled="True" Margin="8.8,7.6,0,6.6" FontFamily="Segoe UI Semibold" FontSize="16" Background="#FFDD4A4A" Foreground="White" HorizontalAlignment="Left" Width="115" Grid.Column="1" Grid.Row="3" Click="btn_Submit_Function_Click"/>
                 </Grid>
             </TabItem>
+            
             <TabItem Header="Juices" BorderBrush="White" Foreground="White">
                 <Grid Background="#FF1F1E1E">
                     <Grid.RowDefinitions>
