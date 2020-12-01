@@ -35,12 +35,6 @@ namespace WpfApp1
         private void refresh()
         {
             // SO1
-            fill_SO_Juice(1, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_SO1_Juice);
-            cb_SO1_Juice.SelectedIndex = 0;
-            if (cb_SO1_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(1, cb_SO1_Juice.SelectedValue.ToString(), dg_SO1_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
             fill_SO_Equip(1, cb_SO1_Equip);
             cb_SO1_Equip.SelectedIndex = 0;
             if (cb_SO1_Equip.SelectedValue != null)
@@ -49,12 +43,6 @@ namespace WpfApp1
             }
 
             // SO2
-            fill_SO_Juice(2, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_SO2_Juice);
-            cb_SO2_Juice.SelectedIndex = 0;
-            if (cb_SO2_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(2, cb_SO2_Juice.SelectedValue.ToString(), dg_SO2_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
             fill_SO_Equip(2, cb_SO2_Equip);
             cb_SO2_Equip.SelectedIndex = 0;
             if (cb_SO2_Equip.SelectedValue != null)
@@ -63,12 +51,6 @@ namespace WpfApp1
             }
 
             // Shared
-            fill_SO_Juice(3, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_Shared_Juice);
-            cb_Shared_Juice.SelectedIndex = 0;
-            if (cb_Shared_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(3, cb_Shared_Juice.SelectedValue.ToString(), dg_Shared_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
             fill_SO_Equip(3, cb_Shared_Equip);
             cb_Shared_Equip.SelectedIndex = 0;            
             if (cb_Shared_Equip.SelectedValue != null)
@@ -77,12 +59,6 @@ namespace WpfApp1
             }
 
             // Transfer Line
-            fill_SO_Juice(4, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_TL_Juice);
-            cb_TL_Juice.SelectedIndex = 0;
-            if (cb_TL_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(4, cb_TL_Juice.SelectedValue.ToString(), dg_TL_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
             fill_SO_Equip(4, cb_TL_Equip);
             cb_TL_Equip.SelectedIndex = 0;
             if (cb_TL_Equip.SelectedValue != null)
@@ -91,17 +67,19 @@ namespace WpfApp1
             }
 
             // Aseptic
-            fill_SO_Juice(5, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_Aseptic_Juice);
-            cb_Aseptic_Juice.SelectedIndex = 0;
-            if (cb_Aseptic_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(5, cb_Aseptic_Juice.SelectedValue.ToString(), dg_Aseptic_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
             fill_SO_Equip(5, cb_Aseptic_Equip);
             cb_Aseptic_Equip.SelectedIndex = 0;
             if (cb_Aseptic_Equip.SelectedValue != null)
             {
                 fill_Data_Equip(5, cb_Aseptic_Equip.SelectedValue.ToString(), dg_Aseptic_Equip, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
+            }
+
+            // Juices
+            fill_SO_Juice(Convert.ToDateTime(cb_SchID.SelectedValue.ToString()), cb_Juice);
+            cb_Juice.SelectedIndex = 0;
+            if (cb_Juice.SelectedValue != null)
+            {
+                fill_Data_Juice(cb_Juice.SelectedValue.ToString(), dg_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
             }
         }
 
@@ -162,7 +140,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_SO_Juice(int so_ID, DateTime sch_ID, ComboBox cb)
+        private void fill_SO_Juice(DateTime sch_ID, ComboBox cb)
         {
             try
             {
@@ -173,7 +151,6 @@ namespace WpfApp1
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_SO_Juice]";
-                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
                 cmd.Parameters.Add("sch_ID", SqlDbType.DateTime).Value = sch_ID;
                 cmd.Connection = conn;
 
@@ -204,52 +181,16 @@ namespace WpfApp1
         {
             if (cb_Type.SelectedIndex == 0)
             {
-                dg_SO1_Juice.Visibility = Visibility.Visible;
-                dg_SO2_Juice.Visibility = Visibility.Visible;
-                dg_Shared_Juice.Visibility = Visibility.Visible;
-                dg_TL_Juice.Visibility = Visibility.Visible;
-                dg_Aseptic_Juice.Visibility = Visibility.Visible;
-                cb_SO1_Juice.Visibility = Visibility.Visible;
-                cb_SO2_Juice.Visibility = Visibility.Visible;
-                cb_Shared_Juice.Visibility = Visibility.Visible;
-                cb_TL_Juice.Visibility = Visibility.Visible;
-                cb_Aseptic_Juice.Visibility = Visibility.Visible;
-
-                dg_SO1_Equip.Visibility = Visibility.Hidden;
-                dg_SO2_Equip.Visibility = Visibility.Hidden;
-                dg_Shared_Equip.Visibility = Visibility.Hidden;
-                dg_TL_Equip.Visibility = Visibility.Hidden;
-                dg_Aseptic_Equip.Visibility = Visibility.Hidden;
-                cb_SO1_Equip.Visibility = Visibility.Hidden;
-                cb_SO2_Equip.Visibility = Visibility.Hidden;
-                cb_Shared_Equip.Visibility = Visibility.Hidden;
-                cb_TL_Equip.Visibility = Visibility.Hidden;
-                cb_Aseptic_Equip.Visibility = Visibility.Hidden;
+                dg_Juice.Visibility = Visibility.Visible;
+                cb_Juice.Visibility = Visibility.Visible;
+                tc_Home.Visibility = Visibility.Hidden;
             }
 
             else if (cb_Type.SelectedIndex == 1)
             {
-                dg_SO1_Juice.Visibility = Visibility.Hidden;
-                dg_SO2_Juice.Visibility = Visibility.Hidden;
-                dg_Shared_Juice.Visibility = Visibility.Hidden;
-                dg_TL_Juice.Visibility = Visibility.Hidden;
-                dg_Aseptic_Juice.Visibility = Visibility.Hidden;
-                cb_SO1_Juice.Visibility = Visibility.Hidden;
-                cb_SO2_Juice.Visibility = Visibility.Hidden;
-                cb_Shared_Juice.Visibility = Visibility.Hidden;
-                cb_TL_Juice.Visibility = Visibility.Hidden;
-                cb_Aseptic_Juice.Visibility = Visibility.Hidden;
-
-                dg_SO1_Equip.Visibility = Visibility.Visible;
-                dg_SO2_Equip.Visibility = Visibility.Visible;
-                dg_Shared_Equip.Visibility = Visibility.Visible;
-                dg_TL_Equip.Visibility = Visibility.Visible;
-                dg_Aseptic_Equip.Visibility = Visibility.Visible;
-                cb_SO1_Equip.Visibility = Visibility.Visible;
-                cb_SO2_Equip.Visibility = Visibility.Visible;
-                cb_Shared_Equip.Visibility = Visibility.Visible;
-                cb_TL_Equip.Visibility = Visibility.Visible;
-                cb_Aseptic_Equip.Visibility = Visibility.Visible;
+                dg_Juice.Visibility = Visibility.Hidden;
+                cb_Juice.Visibility = Visibility.Hidden;
+                tc_Home.Visibility = Visibility.Visible;
             }
         }
 
@@ -282,7 +223,7 @@ namespace WpfApp1
             }
         }
 
-        private void fill_Data_Juice(int so_ID, string juice, DataGrid dg, DateTime sch_ID)
+        private void fill_Data_Juice(string juice, DataGrid dg, DateTime sch_ID)
         {
             try
             {
@@ -293,9 +234,8 @@ namespace WpfApp1
                 SqlCommand cmd = new SqlCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = "[select_View_Sch_Juice]";
-                cmd.Parameters.Add("so_ID", SqlDbType.BigInt).Value = so_ID;
                 cmd.Parameters.Add("juice", SqlDbType.VarChar).Value = juice;
-                cmd.Parameters.Add("sch_ID", SqlDbType.VarChar).Value = sch_ID;
+                cmd.Parameters.Add("sch_ID", SqlDbType.DateTime).Value = sch_ID;
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -321,10 +261,7 @@ namespace WpfApp1
 
         private void cb_SO1_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cb_SO1_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(1, cb_SO1_Juice.SelectedValue.ToString(), dg_SO1_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
+            
         }
 
         private void cb_SO2_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -337,10 +274,7 @@ namespace WpfApp1
 
         private void cb_SO2_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cb_SO2_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(2, cb_SO2_Juice.SelectedValue.ToString(), dg_SO2_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
+            
         }
 
         private void cb_Shared_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -353,10 +287,7 @@ namespace WpfApp1
 
         private void cb_Shared_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cb_Shared_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(3, cb_Shared_Juice.SelectedValue.ToString(), dg_Shared_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
+            
         }
 
         private void cb_TL_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -369,10 +300,7 @@ namespace WpfApp1
 
         private void cb_TL_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cb_TL_Juice.SelectedValue != null)
-            {
-                fill_Data_Juice(4, cb_TL_Juice.SelectedValue.ToString(), dg_TL_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
-            }
+            
         }
 
         private void cb_Aseptic_Equip_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -385,9 +313,14 @@ namespace WpfApp1
 
         private void cb_Aseptic_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cb_Aseptic_Juice.SelectedValue != null)
+            
+        }
+
+        private void cb_Juice_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cb_Juice.SelectedValue != null)
             {
-                fill_Data_Juice(5, cb_Aseptic_Juice.SelectedValue.ToString(), dg_Aseptic_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
+                fill_Data_Juice(cb_Juice.SelectedValue.ToString(), dg_Juice, Convert.ToDateTime(cb_SchID.SelectedValue.ToString()));
             }
         }
     }
