@@ -67,6 +67,7 @@ namespace WpfApp1
             this.start = start;
             this.juice = juice;
             this.slurry = true;
+            this.end = DateTime.MaxValue;
         }
 
         /// <summary>

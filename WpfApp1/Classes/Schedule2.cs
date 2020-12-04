@@ -20,11 +20,6 @@ namespace WpfApp1
     public class Schedule2
     {
         public string message;
-
-        public bool inconceivable;
-        public Juice inconceiver;
-        public bool late;
-        public Juice lateJuice;
         public Equipment lateTool;
 
         public DateTime scheduleID;
@@ -33,7 +28,6 @@ namespace WpfApp1
         public List<Equipment> extras;          // tools with only one functionality, type == functionality, should be sorted by type
         public List<Equipment> systems;         // tools with multiple functionalities
         public Equipment thawRoom;              // the thaw room
-        public int thawID;
         public List<Equipment> tanks;           // blend tanks/ mix tanks
         public List<Equipment> transferLines;   // transfer lines
         public List<Equipment> aseptics;        // aseptic/pasteurizers
@@ -48,6 +42,7 @@ namespace WpfApp1
         public int numFunctions;
         public int numSOs;
         public TimeSpan CIPSpan;
+        public int thawID;
 
         // lists of juices
         public List<Juice> finished;
@@ -70,15 +65,15 @@ namespace WpfApp1
             waters = new List<Equipment>();
             sucroses = new List<Equipment>();
 
-            inconceivable = false;
-            late = false;
-            //ExampleOfSchedule();
-            //ExampleOfSchedule2();
             ProcessCSV(filename); 
         }
 
-        //TODO: 0=1,1=2,2=3,3=7
+        //TODO: lines are converted, so line 1 is value 0, line 2 is value 1, line 3 is value 2, and line 7 is value 3
         //TODO: if string is empty then we should pop up an ERROR box
+        /// <summary>
+        /// Initializes juice orders from a CSV file as input.
+        /// </summary>
+        /// <param name="fileName"></param>
         public void ProcessCSV(string fileName)
         {
             List<String[]> lines = new List<string[]>();
@@ -175,7 +170,6 @@ namespace WpfApp1
                 inprogress.Add(cips[c]);
             }
 
-            PrintAllJuices();
             PullEquipment();
             numFunctions = numFunctions + 1;
             numSOs = numSOs + 1; 
@@ -190,18 +184,146 @@ namespace WpfApp1
                 thawRoom.SOs.Add(true);
             thawRoom.SOs[0] = false; 
         }
-        private void PrintAllJuices()
+
+        /// <summary>
+        /// Given a string material_name, goes through the pseudonym table to find the correct juice type, returns -2 if not found
+        /// </summary>
+        /// <param name="material_name"></param>
+        /// <returns>juice type</returns>
+        private int getJuiceType(String material_name)
         {
-            Console.WriteLine("Juices in lne 1,2,3,7:");
-            for (int i = 0; i < inprogress.Count; i++)
+            try
             {
-                Console.WriteLine("Name: " + inprogress[i].name + "\ttime: " + inprogress[i].OGFillTime.ToString());
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[select_JuiceId]";
+                cmd.Parameters.Add("mat_name", SqlDbType.VarChar).Value = material_name;
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                return Convert.ToInt32(dt.Rows[0]["juice_id"]);
             }
+
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.ToString());
+            }
+
+            return -2;
         }
 
+        /// <summary>
+        /// Initializes all equipment in the system by pulling from the database
+        /// </summary>
+        private void PullEquipment()
+        {
+            getCipGroups();
+            getThawRoomID();
+            // access the database
+            // initialize SOcount and functionCount
+            //methods used to get the maximum sos and functionalities
 
-        // gets the thaw room id from the database
-        // added this function to pull equipment
+            numSOs = getNumSOs();
+            numFunctions = getNumFunctions();
+
+            // transfer lines and the sos
+            getTransferLines();
+
+            // blendtanks and their type is their sos
+            getBlendTanks();
+
+            // find the equipment list in the database
+            // iterate through each piece of equipment
+            try
+            {
+                int equip_type;
+                String equip_name;
+                int cip = 0;
+
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.CommandText = "[select_Equip_id]";
+                cmd.Connection = conn;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        equip_type = Convert.ToInt32(dr["id"]);
+                        equip_name = dr.Field<String>("Equipment");
+                        if (dr["cip_id"] != DBNull.Value)
+                        {
+                            cip = Convert.ToInt32(dr["cip_id"]);
+                        }
+
+                        Equipment temp = new Equipment(equip_name, equip_type, 0);
+
+                        //set all the number of functions in the list
+                        //set all to false
+                        //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
+                        for (int i = 0; i < numFunctions + 1; i++)
+                        {
+                            temp.functionalities.Add(false);
+                        }
+
+                        for (int j = 0; j < numSOs + 1; j++)
+                        {
+                            temp.SOs.Add(false);
+                        }
+                        if (cip > 0)
+                        {
+                            for (int k = 0; k < cipGroups.Count; k++)
+                            {
+                                if (cip == cipGroups[k].type)
+                                {
+                                    temp.cipGroup = cipGroups[k];
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            temp.cipGroup = null;
+                        }
+                        //temp.cip_id=cip; 
+                        temp.cleaningProcess = 1;
+                        temp.e_type = equip_type;
+                        systems.Add(temp);
+                    }
+                }
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            getBlendSystem_FuncSos();
+            getExtras();
+            getExtraSorted();
+            getAseptics();
+        }
+
+        /// <summary>
+        /// Initializes the CIP groups
+        /// </summary>
         public void getCipGroups()
         {
             int id;
@@ -241,6 +363,9 @@ namespace WpfApp1
             }
         }
 
+        /// <summary>
+        /// Sets thawID, the functionality index associated with the thaw room
+        /// </summary>
         public void getThawRoomID()
         {
             try
@@ -274,113 +399,14 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
-        // TODO - add pull equipment function
-        // extras are pieces of equipment with a single functionality, their type is their functionality
-        // blendtanks are blendtanks their type is their SO
-        private void PullEquipment()
+
+        /// <summary>
+        /// Finds the number of SOs in the system plus one (indexed from 1)
+        /// </summary>
+        /// <returns>numSOs</returns>
+        private int getNumSOs()
         {
-            getCipGroups();
-            getThawRoomID();
-            // access the database
-            // initialize SOcount and functionCount
-            //methods used to get the maximum sos and functionalities
-
-            numSOs = getNumSOs();
-            numFunctions = getNumFunctions();
-
-            // transfer lines and the sos
-            getTransferLines();
-
-            // blendtanks and their type is their sos
-            getBlendTanks();
-
-            // find the equipment list in the database
-            // iterate through each piece of equipment
-            try
-            {
-                int equip_type;
-                String equip_name;
-                int cip=0;
-
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_Equip_id]";
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-                if (dt.Rows.Count > 0)
-                {
-                    foreach (DataRow dr in dt.Rows)
-                    {
-                        equip_type = Convert.ToInt32(dr["id"]);
-                        equip_name = dr.Field<String>("Equipment");
-                        if(dr["cip_id"] != DBNull.Value)
-                        {
-                            cip = Convert.ToInt32(dr["cip_id"]);
-                        }
-                       
-                        Equipment temp = new Equipment(equip_name, equip_type, 0);
-
-                        //set all the number of functions in the list
-                        //set all to false
-                        //add 1 to numFunctions and num SOs because ids start with 1 instead of 0
-                        for (int i = 0; i < numFunctions + 1; i++)
-                        {
-                            temp.functionalities.Add(false);
-                        }
-
-                        for (int j = 0; j < numSOs + 1; j++)
-                        {
-                            temp.SOs.Add(false);
-                        }
-                        if (cip > 0)
-                        {
-                            for (int k = 0; k < cipGroups.Count; k++)
-                            {
-                                if (cip == cipGroups[k].type)
-                                {
-                                    temp.cipGroup = cipGroups[k];
-                                }
-
-                            }
-                        }
-                        else
-                        {
-                            temp.cipGroup = null; 
-                        }
-                        //temp.cip_id=cip; 
-                        temp.cleaningProcess = 1;
-                        temp.e_type = equip_type;
-                        systems.Add(temp);
-                    }
-                }
-                conn.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-            getBlendSystem_FuncSos();
-            getExtras();
-            getExtraSorted();
-            getAseptics();
-        }
-        public void getAseptics()
-        {
-            int id_at;
-            String name_at;
-            int id;
-            int cip;
+            int s = 0;
             try
             {
                 SqlConnection conn = new SqlConnection();
@@ -390,7 +416,7 @@ namespace WpfApp1
 
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.CommandText = "[select_Aseptics]";
+                cmd.CommandText = "[select_SOsMaxId]";
 
                 cmd.Connection = conn;
 
@@ -401,38 +427,7 @@ namespace WpfApp1
                 SqlDataReader rd = cmd.ExecuteReader();
                 if (dt.Rows.Count > 0)
                 {
-                    foreach (DataRow dr in dt.Rows)
-                    {
-
-                        id_at = Convert.ToInt32(dr["id"]);
-                        name_at = dr.Field<String>("Aseptic Tank");
-                        cip = Convert.ToInt32(dr["id_cip"]);
-                        Equipment temp = new Equipment(name_at, id_at, 0);
-                        for (int i = 0; i < numSOs + 1; i++)
-                        {
-                            if (i > 0)
-                            {
-                                temp.SOs.Add(true);
-                            }
-                            else
-                            {
-                                temp.SOs.Add(false);
-                            }
-                        }
-                        //temp.cip_id=cip; 
-                        for (int k = 0; k < cipGroups.Count; k++)
-                        {
-                            if (cip == cipGroups[k].type)
-                            {
-                                temp.cipGroup = cipGroups[k];
-                            }
-
-                        }
-                        temp.cleaningProcess = 4;
-                        temp.e_type = id_at;
-                        temp.so_type = 5;
-                        aseptics.Add(temp);
-                    }
+                    s = Convert.ToInt32(dt.Rows[0]["id"]);
                 }
                 conn.Close();
 
@@ -441,17 +436,13 @@ namespace WpfApp1
             {
                 MessageBox.Show(ex.Message);
             }
-
-            /*
-            for(int i=0; i<aseptics.Count; i++)
-            {
-                Console.WriteLine(aseptics[i].name);
-                Console.WriteLine(aseptics[i].type); 
-            }
-            */
+            return s;
         }
 
-        //gets the maximum number of functions
+        /// <summary>
+        /// Finds the number of functiionalities in the system plus one (indexed from 1)
+        /// </summary>
+        /// <returns>numFunctions</returns>
         private int getNumFunctions()
         {
             int numofFunctions = 0;
@@ -489,41 +480,9 @@ namespace WpfApp1
             return numofFunctions;
         }
 
-        // get maximum number of sos
-        private int getNumSOs()
-        {
-            int s = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.CommandText = "[select_SOsMaxId]";
-
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-
-                da.Fill(dt);
-                SqlDataReader rd = cmd.ExecuteReader();
-                if (dt.Rows.Count > 0)
-                {
-                    s = Convert.ToInt32(dt.Rows[0]["id"]);
-                }
-                conn.Close();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            return s;
-        }
+        /// <summary>
+        /// Creates the Equipment objects for each transfer line
+        /// </summary>
         public void getTransferLines()
         {
             int id_tl;
@@ -582,6 +541,10 @@ namespace WpfApp1
             }
             getTransferSOs();
         }
+
+        /// <summary>
+        /// Populates the SO list of a transfer line
+        /// </summary>
         public void getTransferSOs()
         {
             try
@@ -635,6 +598,10 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Creates the Equipment objects for each blend tank
+        /// </summary>
         public void getBlendTanks()
         {
             int id_so;
@@ -697,6 +664,9 @@ namespace WpfApp1
             */
         }
 
+        /// <summary>
+        /// Creates the Equipment objects for each system
+        /// </summary>
         private void getBlendSystem_FuncSos()
         {
             try
@@ -743,7 +713,7 @@ namespace WpfApp1
                 Equipment blendmachine;
                 for (int i = 0; i < systems.Count; i++)
                 {
-                    count = 0; 
+                    count = 0;
                     if (flag == 1 && i == 1)
                     {
                         i = 0;
@@ -813,6 +783,10 @@ namespace WpfApp1
             }
 
         }
+        
+        /// <summary>
+        /// Creates Equipment objects for each extra, water line, and liquid sucrose line
+        /// </summary>
         public void getExtras()
         {
             try
@@ -911,6 +885,10 @@ namespace WpfApp1
                 MessageBox.Show(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Sorts extras by type
+        /// </summary>
         private void getExtraSorted()
         {
             Equipment temp;
@@ -940,36 +918,90 @@ namespace WpfApp1
             */
         }
 
-        private int getJuiceType(String material_name)
+        /// <summary>
+        /// Creates Equipment objects for each aseptic
+        /// </summary>
+        public void getAseptics()
         {
+            int id_at;
+            String name_at;
+            int id;
+            int cip;
             try
             {
                 SqlConnection conn = new SqlConnection();
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
                 conn.Open();
-
                 SqlCommand cmd = new SqlCommand();
+
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_JuiceId]";
-                cmd.Parameters.Add("mat_name", SqlDbType.VarChar).Value = material_name;
+
+                cmd.CommandText = "[select_Aseptics]";
+
                 cmd.Connection = conn;
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
+
                 da.Fill(dt);
+                SqlDataReader rd = cmd.ExecuteReader();
+                if (dt.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
 
-                return Convert.ToInt32(dt.Rows[0]["juice_id"]);
+                        id_at = Convert.ToInt32(dr["id"]);
+                        name_at = dr.Field<String>("Aseptic Tank");
+                        cip = Convert.ToInt32(dr["id_cip"]);
+                        Equipment temp = new Equipment(name_at, id_at, 0);
+                        for (int i = 0; i < numSOs + 1; i++)
+                        {
+                            if (i > 0)
+                            {
+                                temp.SOs.Add(true);
+                            }
+                            else
+                            {
+                                temp.SOs.Add(false);
+                            }
+                        }
+                        //temp.cip_id=cip; 
+                        for (int k = 0; k < cipGroups.Count; k++)
+                        {
+                            if (cip == cipGroups[k].type)
+                            {
+                                temp.cipGroup = cipGroups[k];
+                            }
+
+                        }
+                        temp.cleaningProcess = 4;
+                        temp.e_type = id_at;
+                        temp.so_type = 5;
+                        aseptics.Add(temp);
+                    }
+                }
+                conn.Close();
+
             }
-
             catch (Exception ex)
             {
-                //MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
             }
 
-            return -2;
+            /*
+            for(int i=0; i<aseptics.Count; i++)
+            {
+                Console.WriteLine(aseptics[i].name);
+                Console.WriteLine(aseptics[i].type); 
+            }
+            */
         }
 
-        // TODO :: comment, add errors, add calls to functions that add to database
+        /// <summary>
+        /// Creates a schedule for each piece of equipment and juice in the system if it can be done.
+        /// Sets message to report results to user. If Late or Inconceivable, will not write a schedule
+        ///     to the database.
+        /// </summary>
         public void GenerateNewSchedule()
         {
             // sort inprogress juices so inprogress[0] is the juice with the earliest currentFillTime
@@ -996,17 +1028,13 @@ namespace WpfApp1
                     // if the transfer line is late, that's an error and we need to stop
                     if (DateTime.Compare(done.Add(inprogress[0].transferTime), inprogress[0].currentFillTime) > 0)
                     {
-                        late = true;
-                        lateJuice = inprogress[0];
-                        message = "Late because of " + lateTool.name + " for " + lateJuice.name;
+                        message = "Late because of " + lateTool.name + " for " + inprogress[0].name;
                         return;
                     }
                     // if the transfer line is down, that's an error and we need to stop
                     else if (DateTime.Compare(done, DateTime.MinValue) == 0)
                     {
-                        inconceivable = true;
-                        inconceiver = inprogress[0];
-                        message = "Inconceivable because of " + inconceiver.name;
+                        message = "Inconceivable because of " + inprogress[0].name;
                         return;
                     }
 
@@ -1041,17 +1069,13 @@ namespace WpfApp1
                         // if the transfer line is late, that's an error and we need to stop
                         if (DateTime.Compare(done, inprogress[0].currentFillTime) > 0)
                         {
-                            late = true;
-                            lateJuice = inprogress[0];
-                            message = "Late because of " + lateTool.name + " for " + lateJuice.name;
+                            message = "Late because of " + lateTool.name + " for " + inprogress[0].name;
                             return;
                         }
                         // if the transfer line is down, that's an error and we need to stop
                         else if (DateTime.Compare(done, DateTime.MinValue) == 0)
                         {
-                            inconceivable = true;
-                            inconceiver = inprogress[0];
-                            message = "Inconceivable because of " + inconceiver.name;
+                            message = "Inconceivable because of " + inprogress[0].name;
                             return;
                         }
 
@@ -1127,7 +1151,7 @@ namespace WpfApp1
                             // inline was possible and a choice was made
                             if (pick != null)
                             {
-                                pick.Actualize(thawRoom, true, inprogress[0]);
+                                pick.Actualize(thawRoom, inprogress[0]);
 
                                 // set up for the next batch
                                 inprogress[0].inline = true;
@@ -1209,25 +1233,21 @@ namespace WpfApp1
                         // error no recipe works, not even late
                         if (choice == null)
                         {
-                            inconceivable = true;
-                            inconceiver = inprogress[0];
-                            message = "Inconceivable because of " + inconceiver.name;
+                            message = "Inconceivable because of " + inprogress[0].name;
                             return;
                         }
 
                         // all our choices are late
                         if (!onTime)
                         {
-                            late = true;
-                            lateJuice = inprogress[0];
                             lateTool = choice.lateMaker;
-                            message = "Late because of " + lateTool.name + " for " + lateJuice.name;
+                            message = "Late because of " + lateTool.name + " for " + inprogress[0].name;
                             return;
                         }
 
                         // assign equipment
                         // all of the choices have been made and the times are in choice
-                        choice.Actualize(thawRoom, false, inprogress[0]);
+                        choice.Actualize(thawRoom, inprogress[0]);
 
                         // move to finished list if possible
                         inprogress[0].neededBatches--;
@@ -1256,110 +1276,8 @@ namespace WpfApp1
         }
 
         /// <summary>
-        /// Add's all the equipment schedules to the database
+        /// Sorts inprogress by currentFillTime
         /// </summary>
-        public void AddEquipmentToDatabase()
-        {
-            // thaw room
-            if (thawRoom.schedule.Count != 0)
-            {
-                for (int i = 0; i < thawRoom.schedule.Count; i++)
-                    insertingEquipSchedule(3, thawRoom.name, thawRoom.schedule[i].start, thawRoom.schedule[i].end, thawRoom.schedule[i].juice.name, thawRoom.schedule[i].slurry, thawRoom.schedule[i].batch);
-            }
-
-            // extras
-            for (int i = 0; i < extras.Count; i++)
-            {
-                if (extras[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < extras[i].schedule.Count; j++)
-                    {
-                        if (extras[i].schedule[j].cleaning)
-                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
-                        else
-                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
-                    }
-                }
-            }
-
-            // systems
-            for (int i = 0; i < systems.Count; i++)
-            {
-                if (systems[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < systems[i].schedule.Count; j++)
-                    {
-                        if (systems[i].schedule[j].cleaning)
-                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
-                        else
-                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
-                    }
-                }
-            }
-
-            // tanks
-            for (int i = 0; i < tanks.Count; i++)
-            {
-                if (tanks[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < tanks[i].schedule.Count; j++)
-                    {
-                        if (tanks[i].schedule[j].cleaning)
-                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
-                        else
-                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
-                    }
-                }
-            }
-
-            // transfer lines
-            for (int i = 0; i < transferLines.Count; i++)
-            {
-                if (transferLines[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < transferLines[i].schedule.Count; j++)
-                    {
-                        if (transferLines[i].schedule[j].cleaning)
-                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
-                        else
-                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
-                    }
-                }
-            }
-
-            // aseptics
-            for (int i = 0; i < aseptics.Count; i++)
-            {
-                if (aseptics[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < aseptics[i].schedule.Count; j++)
-                    {
-                        if (aseptics[i].schedule[j].cleaning)
-                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
-                        else
-                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// add's all the juice schedules to the database
-        /// </summary>
-        public void AddJuicesToDatabase()
-        {
-            for (int i = 0; i < finished.Count; i++)
-            {
-                if (finished[i].schedule.Count != 0)
-                {
-                    for (int j = 0; j < finished[i].schedule.Count; j++)
-                    {
-                        insertingJuiceSchedule(finished[i].name, finished[i].type, finished[i].schedule[j].slurry, finished[i].schedule[j].batch, finished[i].schedule[j].tool.name, finished[i].schedule[j].start, finished[i].schedule[j].end);
-                    }
-                }
-            }
-        }
-
         public void SortByFillTime()
         {
             // sorts inprogress by current filltime
@@ -1371,7 +1289,7 @@ namespace WpfApp1
                 {
                     for (int j = i; j > 0; j--)
                     {
-                        if (inprogress[j - 1].OGFillTime > inprogress[j].OGFillTime)
+                        if (inprogress[j - 1].currentFillTime > inprogress[j].currentFillTime)
                         {
                             tempjuice = inprogress[j];
                             inprogress[j] = inprogress[j - 1];
@@ -1385,287 +1303,6 @@ namespace WpfApp1
                 }
             }
         }
-
-        /*
-        // Enter a line in the schedule of a given equipment
-        private void EnterScheduleLine(Equipment x, DateTime startTime, Juice j, int batch, TimeSpan timeSpan)
-        {
-            List<ScheduleEntry> schedule = x.schedule;
-
-            if (schedule.Count == 0)
-            {
-                schedule.Add(new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-            }
-            else
-            {
-                int index_insert = 0;
-                for (int i = 0; i < schedule.Count; i++)
-                {
-                    if (schedule[i].start > startTime)
-                    {
-                        index_insert = i;
-                        break;
-                    }
-                }
-
-                //Deal with cleaning
-                if (x.type == 8) //might need to change this to 0
-                {
-                    schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-                }
-                else
-                {
-                    //find cleaning string
-
-                    int flag = 0;
-                    int juice1 = j.type;
-                    if (index_insert != 0)
-                    {
-                        int juice2 = schedule[index_insert - 1].juice.type;
-                        int process = 0;
-
-                        int cleaningTimes = 0;
-                        String cleaning = "";
-                        if (juice1 != juice2)
-                        {
-                            try
-                            {
-                                SqlConnection conn = new SqlConnection();
-                                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                                conn.Open();
-
-                                SqlCommand cmd = new SqlCommand();
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.CommandText = "[select_Flavor_Process]";
-                                cmd.Parameters.Add("juice1_type", SqlDbType.BigInt).Value = juice1;
-                                cmd.Parameters.Add("juice2_type", SqlDbType.BigInt).Value = juice2;
-
-                                cmd.Connection = conn;
-
-                                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                                DataTable dt = new DataTable();
-                                da.Fill(dt);
-                                if (dt.Rows.Count > 0)
-                                {
-                                    process = Convert.ToInt32(dt.Rows[0]["process_id"]);
-                                    cleaning = Convert.ToString(dt.Rows[0]["process"]);
-                                }
-                                //Console.WriteLine(process);
-                                //Console.WriteLine(cleaning);
-                                if (process != 0)
-                                {
-                                    flag = 1;
-                                }
-
-                                conn.Close();
-                            }
-
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(ex.ToString());
-                            }
-
-                            // go to the table and get cleaning time
-                            // for mix tanks that the blendtank list, is there a way to 
-                            if (flag == 1)
-                            {
-                                if (x.e_type != 0)
-                                {
-                                    if (x.cleaningProcess == 1)
-                                    {
-                                        cleaningTimes = getEquipCleaningTimes(x.e_type, process);
-                                        if (cleaningTimes != 0)
-                                        {
-                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                            //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-                                        }
-                                    }
-                                    else if (x.cleaningProcess == 2)
-                                    {
-                                        cleaningTimes = getMixTanksCleaningTimes(x.e_type, process);
-                                        if (cleaningTimes != 0)
-                                        {
-                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                        }
-                                    }
-                                    else if (x.cleaningProcess == 3)
-                                    {
-                                        cleaningTimes = getTLCleaningTimes(x.e_type, process);
-                                        if (cleaningTimes != 0)
-                                        {
-                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                        }
-
-                                    }
-                                    
-                                    // Aseptic Tanks
-                                    else if (x.cleaningProcess == 4)
-                                    {
-                                        cleaningTimes = getATCleaningTimes(x.cleaningProcess, process);
-                                        if (cleaningTimes != 0)
-                                        {
-                                            TimeSpan q = TimeSpan.FromMinutes(cleaningTimes);
-                                            schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                        }
-                                    }
-                                    
-                                    //how long the cleaning will take
-                                    //TimeSpan q = 0; 
-                                    //schedule.Insert(index_insert, new ScheduleEntry(startTime.Subtract(q), startTime, cleaning));
-                                    //schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-
-                                }
-                            }
-                        }
-                    }
-                    schedule.Insert(index_insert, new ScheduleEntry(startTime, startTime.Add(timeSpan), j));
-                }
-            }
-        }
-
-        
-        // get Asceptic Cleaning Times
-        private int getATCleaningTimes(int equipType, int process)
-        {
-            // get the cleaning time and return
-            //  set public cip
-            int time=0; 
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_ATCleaningType]";
-                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
-                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
-                cmd.Connection = conn;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                time = Convert.ToInt32(dt.Rows[0]["time"]);
-                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
-                conn.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            return time; 
-        }
-        
-        private int getMixTanksCleaningTimes(int equipType, int process)
-        {
-            int time = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_MTCleaningTime]";
-                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
-                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                if (dt.Rows.Count > 0)
-                {
-                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
-                }
-
-                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.ToString());
-            }
-
-            return time;
-        }
-        private int getTLCleaningTimes(int equipType, int process)
-        {
-            int time = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_TLCleaningTime]";
-                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
-                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                if (dt.Rows.Count > 0)
-                {
-                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
-                }
-
-                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.ToString());
-            }
-
-            return time;
-        }
-
-        private int getEquipCleaningTimes(int equipType, int process)
-        {
-            int time = 0;
-            try
-            {
-                SqlConnection conn = new SqlConnection();
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings["conn"].ConnectionString;
-                conn.Open();
-
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "[select_EquipCleaningTime]";
-                cmd.Parameters.Add("processID", SqlDbType.BigInt).Value = process;
-                cmd.Parameters.Add("equipType", SqlDbType.BigInt).Value = equipType;
-                cmd.Connection = conn;
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                if (dt.Rows.Count > 0)
-                {
-                    time = Convert.ToInt32(dt.Rows[0]["cip_time"]);
-                }
-
-                //id_cip = Convert.ToInt32(dt.Rows[0]["cip_id"]);
-                conn.Close();
-            }
-
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.ToString());
-            }
-
-            return time;
-        } */
-
 
         /// <summary>
         /// will find and schedule time for the juice in the tank to use a transfer line
@@ -2376,7 +2013,6 @@ namespace WpfApp1
             return option;
         }
 
-
         /// <summary>
         /// Will find an extra for the functionality extraType and add it's selection info to option
         /// if it can't find one, will add null to the end of option.extras
@@ -2544,65 +2180,104 @@ namespace WpfApp1
                 ScheduleEntry.SortSchedule(finished[i].schedule);
         }
 
-        public int AddingSoId(Equipment x)
+        /// <summary>
+        /// Add's all the equipment schedules to the database
+        /// </summary>
+        public void AddEquipmentToDatabase()
         {
-            Dictionary<String, int> equipment_to_so = new Dictionary<string, int>();
-
-            equipment_to_so.Add("SO1 Mix Tank 1", 1);
-            equipment_to_so.Add("SO1 Mix Tank 2", 1);
-            equipment_to_so.Add("SO1 Mix Tank 3", 1);
-            equipment_to_so.Add("SO1 Mix Tank 4", 1);
-            equipment_to_so.Add("SO2 Mix Tank 1", 2);
-            equipment_to_so.Add("SO2 Mix Tank 2", 2);
-            equipment_to_so.Add("SO2 Mix Tank 3", 2);
-            equipment_to_so.Add("SO2 Mix Tank 4", 2);
-
-            equipment_to_so.Add("SO1 Blend System", 1);
-            equipment_to_so.Add("SO2 Blend System", 2);
-            equipment_to_so.Add("SO2 Chopper", 2);
-            equipment_to_so.Add("SO3 Blend System", 3);
-            equipment_to_so.Add("Tote Unloading", 3);
-            equipment_to_so.Add("RT", 3);
-            equipment_to_so.Add("Thaw Room", 3);
-
-            equipment_to_so.Add("Liquid Sucrose(SO1)", 1);
-            equipment_to_so.Add("Liquid Sucrose(SO2)", 2);
-            equipment_to_so.Add("Water(SO1)", 1);
-            equipment_to_so.Add("Water(SO2)", 2);
-
-
-            equipment_to_so.Add("TL 1", 4);
-            equipment_to_so.Add("TL 2", 4);
-            equipment_to_so.Add("TL 3", 4);
-            equipment_to_so.Add("TL 4", 4);
-
-            equipment_to_so.Add("Line 1", 5);
-            equipment_to_so.Add("Line 2", 5);
-            equipment_to_so.Add("Line 3", 5);
-            equipment_to_so.Add("Line 7", 5);
-
-            //----------------------------------
-
-            if (x.name.Equals("Water") || x.name.Equals("Sucrose"))
+            // thaw room
+            if (thawRoom.schedule.Count != 0)
             {
-                if (x.SOs[1] == true)
-                {
-                    x.so = 1;
-                }
-                else
-                {
-                    x.so = 2;
-                }
-            }
-            else
-            {
-                x.so = equipment_to_so[x.name];
+                for (int i = 0; i < thawRoom.schedule.Count; i++)
+                    insertingEquipSchedule(3, thawRoom.name, thawRoom.schedule[i].start, thawRoom.schedule[i].end, thawRoom.schedule[i].juice.name, thawRoom.schedule[i].slurry, thawRoom.schedule[i].batch);
             }
 
-            return x.so;
+            // extras
+            for (int i = 0; i < extras.Count; i++)
+            {
+                if (extras[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < extras[i].schedule.Count; j++)
+                    {
+                        if (extras[i].schedule[j].cleaning)
+                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].cleaningname, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(extras[i].so_type, extras[i].name, extras[i].schedule[j].start, extras[i].schedule[j].end, extras[i].schedule[j].juice.name, extras[i].schedule[j].slurry, extras[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // systems
+            for (int i = 0; i < systems.Count; i++)
+            {
+                if (systems[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < systems[i].schedule.Count; j++)
+                    {
+                        if (systems[i].schedule[j].cleaning)
+                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].cleaningname, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(systems[i].so_type, systems[i].name, systems[i].schedule[j].start, systems[i].schedule[j].end, systems[i].schedule[j].juice.name, systems[i].schedule[j].slurry, systems[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // tanks
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                if (tanks[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < tanks[i].schedule.Count; j++)
+                    {
+                        if (tanks[i].schedule[j].cleaning)
+                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].cleaningname, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(tanks[i].so_type, tanks[i].name, tanks[i].schedule[j].start, tanks[i].schedule[j].end, tanks[i].schedule[j].juice.name, tanks[i].schedule[j].slurry, tanks[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // transfer lines
+            for (int i = 0; i < transferLines.Count; i++)
+            {
+                if (transferLines[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < transferLines[i].schedule.Count; j++)
+                    {
+                        if (transferLines[i].schedule[j].cleaning)
+                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].cleaningname, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(transferLines[i].so_type, transferLines[i].name, transferLines[i].schedule[j].start, transferLines[i].schedule[j].end, transferLines[i].schedule[j].juice.name, transferLines[i].schedule[j].slurry, transferLines[i].schedule[j].batch);
+                    }
+                }
+            }
+
+            // aseptics
+            for (int i = 0; i < aseptics.Count; i++)
+            {
+                if (aseptics[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < aseptics[i].schedule.Count; j++)
+                    {
+                        if (aseptics[i].schedule[j].cleaning)
+                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].cleaningname, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                        else
+                            insertingEquipSchedule(aseptics[i].so_type, aseptics[i].name, aseptics[i].schedule[j].start, aseptics[i].schedule[j].end, aseptics[i].schedule[j].juice.name, aseptics[i].schedule[j].slurry, aseptics[i].schedule[j].batch);
+                    }
+                }
+            }
         }
 
-
+        /// <summary>
+        /// Actually puts the schedule in the database
+        /// </summary>
+        /// <param name="id_so"></param>
+        /// <param name="equipname"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="juice"></param>
+        /// <param name="slurry"></param>
+        /// <param name="batch"></param>
         public void insertingEquipSchedule(int id_so, String equipname, DateTime start, DateTime end, String juice, Boolean slurry, int batch)
         {
             try
@@ -2639,8 +2314,33 @@ namespace WpfApp1
             }
         }
 
-        //  inserting Juice Schedule
-        //  needs the juice name, juice id, boolean slurry value, batch #, the equipment name, start time, and end time 
+        /// <summary>
+        /// add's all the juice schedules to the database
+        /// </summary>
+        public void AddJuicesToDatabase()
+        {
+            for (int i = 0; i < finished.Count; i++)
+            {
+                if (finished[i].schedule.Count != 0)
+                {
+                    for (int j = 0; j < finished[i].schedule.Count; j++)
+                    {
+                        insertingJuiceSchedule(finished[i].name, finished[i].type, finished[i].schedule[j].slurry, finished[i].schedule[j].batch, finished[i].schedule[j].tool.name, finished[i].schedule[j].start, finished[i].schedule[j].end);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Actually puts the schedule in the database
+        /// </summary>
+        /// <param name="juice"></param>
+        /// <param name="juice_type"></param>
+        /// <param name="slurry"></param>
+        /// <param name="batch"></param>
+        /// <param name="equipname"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
         public void insertingJuiceSchedule(String juice, int juice_type, Boolean slurry, int batch, String equipname, DateTime start, DateTime end)
         {
 
@@ -2678,6 +2378,9 @@ namespace WpfApp1
             }
         }
 
+        /// <summary>
+        /// Add's schedule ID to a schedule entry
+        /// </summary>
         public void insertingScheduleID()
         {
             try
@@ -2704,230 +2407,231 @@ namespace WpfApp1
         }
     }
 
-    /*
-    private void ExampleOfSchedule()
-    {
-        String checkname;
-        int i = 1;
-        List<Equipment> equips = new List<Equipment>();
-
-        //SO1
-        Equipment mix1_so1 = new Equipment("Mix Tank 1");
-        mix1_so1.so = 1;
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 01:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Simply Grapefruit")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:45:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Rinse")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(mix1_so1);
-
-        Equipment mix2_so1 = new Equipment("Mix Tank 2");
-        mix2_so1.so = 1;
-        mix2_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:45:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Simply Grapefruit")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 10:20:00"), new Juice("7 Step Hot Clean")));
-        mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:00:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        equips.Add(mix2_so1);
-
-        Equipment mix3_so1 = new Equipment("Mix Tank 3");
-        mix3_so1.so = 1;
-        mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:00:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        equips.Add(mix3_so1);
-
-        Equipment mix4_so1 = new Equipment("Mix Tank 4");
-        mix4_so1.so = 1;
-        mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:00:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        equips.Add(mix4_so1);
-
-        Equipment water_so1 = new Equipment("Water");
-        water_so1.so = 1;
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Lemonade Rasberry")));
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 13:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 15:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Lemonade Rasberry")));
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(water_so1);
-
-        Equipment sucrose_so1 = new Equipment("Sucrose");
-        sucrose_so1.so = 1;
-        sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Lemonade Rasberry")));
-        sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Lemonade Rasberry")));
-        sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(sucrose_so1);
-
-        //SO2
-        Equipment mix1_so2 = new Equipment("Mix Tank 1");
-        mix1_so2.so = 2;
-        mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:15:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
-        equips.Add(mix1_so2);
-
-        Equipment mix2_so2 = new Equipment("Mix Tank 2");
-        mix2_so2.so = 2;
-        mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
-        mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:15:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
-        equips.Add(mix2_so2);
-
-        Equipment mix3_so2 = new Equipment("Mix Tank 3");
-        mix3_so2.so = 2;
-        mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:15:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
-        mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:15:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
-        equips.Add(mix3_so2);
-
-        Equipment mix4_so2 = new Equipment("Mix Tank 4");
-        mix4_so2.so = 2;
-        mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Lemonade Rasberry")));
-        mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(mix4_so2);
-
-        Equipment water_so2 = new Equipment("Water");
-        water_so2.so = 2;
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 9:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Lemonade Rasberry")));
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
-        water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(water_so2);
-
-        Equipment sucrose_so2 = new Equipment("Sucrose");
-        sucrose_so2.so = 2;
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Lemonade Rasberry")));
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
-        sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(sucrose_so2);
-
-        Equipment soft_melt_chopper = new Equipment("Soft Melt Chopper");
-        soft_melt_chopper.so = 2;
-        equips.Add(soft_melt_chopper);
-
-        Equipment tote_system = new Equipment("Tote System");
-        tote_system.so = 3;
-        equips.Add(tote_system);
-
-        Equipment rt_tank = new Equipment("RT Tank");
-        rt_tank.so = 3;
-        equips.Add(rt_tank);
-
-        Equipment thaw_room = new Equipment("Thaw Room");
-        thaw_room.so = 3;
-        thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 10:04:00"), Convert.ToDateTime("02/18/2020 10:29:00"), new Juice("Peach")));
-        thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:07:00"), Convert.ToDateTime("02/18/2020 17:32:00"), new Juice("Peach")));
-        thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:32:00"), Convert.ToDateTime("02/18/2020 17:57:00"), new Juice("Peach")));
-        thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:57:00"), Convert.ToDateTime("02/18/2020 17:22:00"), new Juice("Peach")));
-        equips.Add(thaw_room);
-
-        Equipment so1_blend_system = new Equipment("SO1 Blend System");
-        so1_blend_system.so = 1;
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:15:00"), Convert.ToDateTime("02/19/2020 02:40:00"), new Juice("Simply Grapefruit")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:15:00"), Convert.ToDateTime("02/19/2020 04:40:00"), new Juice("Simply Grapefruit")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:15:00"), Convert.ToDateTime("02/19/2020 06:40:00"), new Juice("Simply Grapefruit")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:40:00"), Convert.ToDateTime("02/19/2020 10:00:00"), new Juice("7 Step Hot Clean")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Honest Black Tea Peach Apricot")));
-        equips.Add(so1_blend_system);
-
-        Equipment so2_blend_system = new Equipment("SO2 Blend System");
-        so2_blend_system.so = 2;
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:45:00"), Convert.ToDateTime("02/19/2020 02:00:00"), new Juice("Simply Orange Juice")));
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:00:00"), Convert.ToDateTime("02/19/2020 02:25:00"), new Juice("Rinse")));
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
-        so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
-        equips.Add(so2_blend_system);
-
-        Equipment so3_blend_system = new Equipment("SO3 Blend System");
-        so3_blend_system.so = 3;
-        so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 12:00:00"), new Juice("Lemonade Rasberry")));
-        so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Lemonade Rasberry")));
-        so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Lemonade Rasberry")));
-        so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Lemonade Rasberry")));
-        so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 20:00:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(so3_blend_system);
-
-        Equipment tl_1 = new Equipment("TL 1");
-        tl_1.so = 4;
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Simply Grapefruit")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:15:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Simply Grapefruit")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 11:00:00"), new Juice("7 Step Hot Clean")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        equips.Add(tl_1);
-
-        Equipment tl_2 = new Equipment("TL 2");
-        tl_2.so = 4;
-        tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
-        tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:45:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
-        tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:45:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
-        tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
-        equips.Add(tl_2);
-
-        Equipment tl_3_inline = new Equipment("TL 3 INLINE");
-        tl_3_inline.so = 4;
-        tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 04:30:00"), new Juice("Simply Orange Juice")));
-        tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Simply Orange Juice")));
-        tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
-        equips.Add(tl_3_inline);
-
-        Equipment tl_4 = new Equipment("TL 4");
-        tl_4.so = 4;
-        tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
-        tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Lemonade Rasberry")));
-        tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
-        tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Lemonade Rasberry")));
-        tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(tl_4);
-
-        Equipment aseptic_1 = new Equipment("Aseptic 1");
-        aseptic_1.so = 5;
-        aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
-        aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 21:00:00"), Convert.ToDateTime("02/20/2020 03:00:00"), new Juice("CIP")));
-        equips.Add(aseptic_1);
-
-        Equipment aseptic_2 = new Equipment("Aseptic 2");
-        aseptic_2.so = 5;
-        aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
-        equips.Add(aseptic_2);
-
-        Equipment aseptic_3 = new Equipment("Aseptic 3");
-        aseptic_3.so = 5;
-        aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
-        aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 09:25:00"), new Juice("Rinse")));
-        aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Lemonade Rasberry")));
-        equips.Add(aseptic_3);
-
-        Equipment aseptic_7 = new Equipment("Aseptic 7");
-        aseptic_7.so = 5;
-        aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Simply Orange Juice")));
-        aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
-        equips.Add(aseptic_7);
-
-        for (int e = 0; e < equips.Count; e++)
-        {
-            string equipment_name = equips[e].name;
-            List<ScheduleEntry> schedule = equips[e].schedule;
-            int x = equips[e].so;
-
-            //go through each schedule entry in the equipment's schedule
-            for (int s = 0; s < schedule.Count; s++)
-            {
-                DateTime startTime = schedule[s].start;
-                DateTime endTime = schedule[s].end;
-                string juice_name = schedule[s].juice.name;
-                //checkname = checkProductionSchedule(x, equipment_name, startTime, endTime);
-                //if (checkname != juice_name)
-                //{
-                insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
-                //.....
-                // }
-            }
-        }
-    } */
 }
+
+/*
+private void ExampleOfSchedule()
+{
+    String checkname;
+    int i = 1;
+    List<Equipment> equips = new List<Equipment>();
+
+    //SO1
+    Equipment mix1_so1 = new Equipment("Mix Tank 1");
+    mix1_so1.so = 1;
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 01:45:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Simply Grapefruit")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:45:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Rinse")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(mix1_so1);
+
+    Equipment mix2_so1 = new Equipment("Mix Tank 2");
+    mix2_so1.so = 1;
+    mix2_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:45:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Simply Grapefruit")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 10:20:00"), new Juice("7 Step Hot Clean")));
+    mix1_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:00:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    equips.Add(mix2_so1);
+
+    Equipment mix3_so1 = new Equipment("Mix Tank 3");
+    mix3_so1.so = 1;
+    mix3_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:00:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    equips.Add(mix3_so1);
+
+    Equipment mix4_so1 = new Equipment("Mix Tank 4");
+    mix4_so1.so = 1;
+    mix4_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:00:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    equips.Add(mix4_so1);
+
+    Equipment water_so1 = new Equipment("Water");
+    water_so1.so = 1;
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Lemonade Rasberry")));
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 13:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 15:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Lemonade Rasberry")));
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 17:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    water_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(water_so1);
+
+    Equipment sucrose_so1 = new Equipment("Sucrose");
+    sucrose_so1.so = 1;
+    sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 11:30:00"), new Juice("Lemonade Rasberry")));
+    sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 15:30:00"), new Juice("Lemonade Rasberry")));
+    sucrose_so1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 19:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(sucrose_so1);
+
+    //SO2
+    Equipment mix1_so2 = new Equipment("Mix Tank 1");
+    mix1_so2.so = 2;
+    mix1_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:15:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
+    equips.Add(mix1_so2);
+
+    Equipment mix2_so2 = new Equipment("Mix Tank 2");
+    mix2_so2.so = 2;
+    mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
+    mix2_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:15:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
+    equips.Add(mix2_so2);
+
+    Equipment mix3_so2 = new Equipment("Mix Tank 3");
+    mix3_so2.so = 2;
+    mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:15:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
+    mix3_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:15:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+    equips.Add(mix3_so2);
+
+    Equipment mix4_so2 = new Equipment("Mix Tank 4");
+    mix4_so2.so = 2;
+    mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Lemonade Rasberry")));
+    mix4_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(mix4_so2);
+
+    Equipment water_so2 = new Equipment("Water");
+    water_so2.so = 2;
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 9:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Lemonade Rasberry")));
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
+    water_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(water_so2);
+
+    Equipment sucrose_so2 = new Equipment("Sucrose");
+    sucrose_so2.so = 2;
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 13:30:00"), new Juice("Lemonade Rasberry")));
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
+    sucrose_so2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 17:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(sucrose_so2);
+
+    Equipment soft_melt_chopper = new Equipment("Soft Melt Chopper");
+    soft_melt_chopper.so = 2;
+    equips.Add(soft_melt_chopper);
+
+    Equipment tote_system = new Equipment("Tote System");
+    tote_system.so = 3;
+    equips.Add(tote_system);
+
+    Equipment rt_tank = new Equipment("RT Tank");
+    rt_tank.so = 3;
+    equips.Add(rt_tank);
+
+    Equipment thaw_room = new Equipment("Thaw Room");
+    thaw_room.so = 3;
+    thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 10:04:00"), Convert.ToDateTime("02/18/2020 10:29:00"), new Juice("Peach")));
+    thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:07:00"), Convert.ToDateTime("02/18/2020 17:32:00"), new Juice("Peach")));
+    thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:32:00"), Convert.ToDateTime("02/18/2020 17:57:00"), new Juice("Peach")));
+    thaw_room.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/18/2020 17:57:00"), Convert.ToDateTime("02/18/2020 17:22:00"), new Juice("Peach")));
+    equips.Add(thaw_room);
+
+    Equipment so1_blend_system = new Equipment("SO1 Blend System");
+    so1_blend_system.so = 1;
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:15:00"), Convert.ToDateTime("02/19/2020 02:40:00"), new Juice("Simply Grapefruit")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:15:00"), Convert.ToDateTime("02/19/2020 04:40:00"), new Juice("Simply Grapefruit")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:15:00"), Convert.ToDateTime("02/19/2020 06:40:00"), new Juice("Simply Grapefruit")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 06:40:00"), Convert.ToDateTime("02/19/2020 10:00:00"), new Juice("7 Step Hot Clean")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    so1_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Honest Black Tea Peach Apricot")));
+    equips.Add(so1_blend_system);
+
+    Equipment so2_blend_system = new Equipment("SO2 Blend System");
+    so2_blend_system.so = 2;
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 00:45:00"), Convert.ToDateTime("02/19/2020 02:00:00"), new Juice("Simply Orange Juice")));
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:00:00"), Convert.ToDateTime("02/19/2020 02:25:00"), new Juice("Rinse")));
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:45:00"), Convert.ToDateTime("02/19/2020 10:15:00"), new Juice("Peach")));
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:45:00"), Convert.ToDateTime("02/19/2020 12:15:00"), new Juice("Peach")));
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:45:00"), Convert.ToDateTime("02/19/2020 14:15:00"), new Juice("Peach")));
+    so2_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:45:00"), Convert.ToDateTime("02/19/2020 16:15:00"), new Juice("Peach")));
+    equips.Add(so2_blend_system);
+
+    Equipment so3_blend_system = new Equipment("SO3 Blend System");
+    so3_blend_system.so = 3;
+    so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 11:00:00"), Convert.ToDateTime("02/19/2020 12:00:00"), new Juice("Lemonade Rasberry")));
+    so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 13:00:00"), Convert.ToDateTime("02/19/2020 14:00:00"), new Juice("Lemonade Rasberry")));
+    so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 15:00:00"), Convert.ToDateTime("02/19/2020 16:00:00"), new Juice("Lemonade Rasberry")));
+    so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 17:00:00"), Convert.ToDateTime("02/19/2020 18:00:00"), new Juice("Lemonade Rasberry")));
+    so3_blend_system.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 19:00:00"), Convert.ToDateTime("02/19/2020 20:00:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(so3_blend_system);
+
+    Equipment tl_1 = new Equipment("TL 1");
+    tl_1.so = 4;
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 05:15:00"), new Juice("Simply Grapefruit")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 05:15:00"), Convert.ToDateTime("02/19/2020 07:15:00"), new Juice("Simply Grapefruit")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 07:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 11:00:00"), new Juice("7 Step Hot Clean")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    tl_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    equips.Add(tl_1);
+
+    Equipment tl_2 = new Equipment("TL 2");
+    tl_2.so = 4;
+    tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 12:45:00"), new Juice("Peach")));
+    tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:45:00"), Convert.ToDateTime("02/19/2020 14:45:00"), new Juice("Peach")));
+    tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:45:00"), Convert.ToDateTime("02/19/2020 16:45:00"), new Juice("Peach")));
+    tl_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+    equips.Add(tl_2);
+
+    Equipment tl_3_inline = new Equipment("TL 3 INLINE");
+    tl_3_inline.so = 4;
+    tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 04:30:00"), new Juice("Simply Orange Juice")));
+    tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 04:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Simply Orange Juice")));
+    tl_3_inline.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
+    equips.Add(tl_3_inline);
+
+    Equipment tl_4 = new Equipment("TL 4");
+    tl_4.so = 4;
+    tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 14:30:00"), new Juice("Lemonade Rasberry")));
+    tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 16:30:00"), new Juice("Lemonade Rasberry")));
+    tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 16:30:00"), Convert.ToDateTime("02/19/2020 18:30:00"), new Juice("Lemonade Rasberry")));
+    tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 18:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Lemonade Rasberry")));
+    tl_4.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(tl_4);
+
+    Equipment aseptic_1 = new Equipment("Aseptic 1");
+    aseptic_1.so = 5;
+    aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 14:30:00"), Convert.ToDateTime("02/19/2020 20:30:00"), new Juice("Honest Black Tea Peach Apricot")));
+    aseptic_1.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 21:00:00"), Convert.ToDateTime("02/20/2020 03:00:00"), new Juice("CIP")));
+    equips.Add(aseptic_1);
+
+    Equipment aseptic_2 = new Equipment("Aseptic 2");
+    aseptic_2.so = 5;
+    aseptic_2.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 10:45:00"), Convert.ToDateTime("02/19/2020 18:45:00"), new Juice("Peach")));
+    equips.Add(aseptic_2);
+
+    Equipment aseptic_3 = new Equipment("Aseptic 3");
+    aseptic_3.so = 5;
+    aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 03:15:00"), Convert.ToDateTime("02/19/2020 09:15:00"), new Juice("Simply Grapefruit")));
+    aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 09:15:00"), Convert.ToDateTime("02/19/2020 09:25:00"), new Juice("Rinse")));
+    aseptic_3.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 12:30:00"), Convert.ToDateTime("02/19/2020 22:30:00"), new Juice("Lemonade Rasberry")));
+    equips.Add(aseptic_3);
+
+    Equipment aseptic_7 = new Equipment("Aseptic 7");
+    aseptic_7.so = 5;
+    aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 02:30:00"), Convert.ToDateTime("02/19/2020 06:30:00"), new Juice("Simply Orange Juice")));
+    aseptic_7.schedule.Add(new ScheduleEntry(Convert.ToDateTime("02/19/2020 20:00:00"), Convert.ToDateTime("02/19/2020 22:00:00"), new Juice("Simply Orange Juice")));
+    equips.Add(aseptic_7);
+
+    for (int e = 0; e < equips.Count; e++)
+    {
+        string equipment_name = equips[e].name;
+        List<ScheduleEntry> schedule = equips[e].schedule;
+        int x = equips[e].so;
+
+        //go through each schedule entry in the equipment's schedule
+        for (int s = 0; s < schedule.Count; s++)
+        {
+            DateTime startTime = schedule[s].start;
+            DateTime endTime = schedule[s].end;
+            string juice_name = schedule[s].juice.name;
+            //checkname = checkProductionSchedule(x, equipment_name, startTime, endTime);
+            //if (checkname != juice_name)
+            //{
+            insertingEquipSchedule(x, equipment_name, startTime, endTime, juice_name);
+            //.....
+            // }
+        }
+    }
+} */

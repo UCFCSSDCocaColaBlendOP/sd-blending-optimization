@@ -84,8 +84,7 @@ namespace WpfApp1
             idealTime = new List<DateTime>();
             recipeID = new List<int>();
             recipename = new List<string>();
-
-           //this.totalBatches = batches;  //TODO: assign somewhere else, from frontend
+            schedule = new List<ScheduleEntry>();
         }
 
         /// <summary>
@@ -107,7 +106,6 @@ namespace WpfApp1
             neededBatches = totalBatches;
             inline = false;
             currentFillTime = OGFillTime;
-            schedule = new List<ScheduleEntry>();
 
             getRecipes(); 
             for(int i=0; i <recipeID.Count; i++)
@@ -204,7 +202,6 @@ namespace WpfApp1
                 }
 
                 conn.Close();
-                transferTime = new TimeSpan(2, 0, 0);
             }
             catch (Exception ex)
             {
@@ -284,7 +281,7 @@ namespace WpfApp1
             {
                 getFunctionality(recipeID[i]);
             }
-            transferTime = new TimeSpan(2, 0, 0);
+            CalculateTransferTime();
 
             // deal with the filling juice
             if (filling)
@@ -292,6 +289,7 @@ namespace WpfApp1
                 // you're finishing up with a slurry
                 if (fillingInline && fillingSlurry == 1)
                 {
+                    inline = false;
                     // mark the transferline 
                     fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, true, 1));
                     // mark the blend tank, it ends at finishedwithtransferline
@@ -311,6 +309,7 @@ namespace WpfApp1
                 // it's a batch
                 else
                 {
+                    inline = false;
                     // mark the transferline
                     fillingTransferLine.schedule.Add(new ScheduleEntry(scheduleID, finishedWithTransferLine, this, false, totalBatches - neededBatches));
                     // mark the blend tank, it ends at finishedwithtransferline
@@ -336,6 +335,7 @@ namespace WpfApp1
                 // mixing a batch
                 else
                 {
+                    inline = false;
                     // mark the blend tank
                     mixingTank.schedule.Add(new ScheduleEntry(scheduleID, mixingDoneBlending.Add(transferTime), this, false, totalBatches - neededBatches));
                     // mark the blend equipment
@@ -357,15 +357,12 @@ namespace WpfApp1
                     currentFillTime = currentFillTime.Add(transferTime);
                 InitializeIdealTime();
             }
-
-            schedule = new List<ScheduleEntry>();
         }
 
         /// <summary>
         /// Calculates the new fill and ideal times. Recalculates based on when the last batch ended,
         /// allowing for that batch to be early or late
         /// </summary>
-        /// <param name="lastbatchend"></param>
         public void RecalculateFillTime()
         {
             // find the fill time for the next batch

@@ -13,34 +13,23 @@ namespace WpfApp1
 {
     public class Equipment
     {
-        public bool down;
-        public String name;
-
-        public int so;
-
         //1 = SO 1
         //2 = SO 2
         //3 = SO 3
         //4 = TL
         //5 = Aseptic
-        public int so_type; 
-        public bool tl;
-        public bool aseptic;
+        public int so_type;
         public int cleaningProcess;
-        public int e_type; 
+        public int e_type;
+
+        public bool down;
+        public String name;
         public int type; // for extras, type = functionality, for blend tanks, type = SO
         public List<bool> functionalities;
         public List<bool> SOs;
         public List<ScheduleEntry> schedule;
         public Equipment cipGroup;
-
         public TimeSpan earlyLimit;
-
-        public bool startClean;
-        public int lastJuiceType;
-        public int lastCleaningType;
-        public bool startDirty;
-        public DateTime endMixing;
 
         // set whenever FindTime is called
         public bool needsCleaned;
@@ -50,12 +39,15 @@ namespace WpfApp1
         public string cleanName;
 
         // taken in during equipment page of generate schedule
-        public int state;
-        public int prevJuiceType;
-        public int prevCleaningType;
+        public int state; // 0 == waiting, 1 == down, 2 == clean and waiting, 3 == dirty and waiting, 4 == currently cleaning
         public string prevCleanName;
         public DateTime endTime;
+        public bool startClean;
+        public int lastJuiceType;
+        public int lastCleaningType;
+        public bool startDirty;
 
+        public DateTime endMixing;
 
         /// <summary>
         /// Creates a new piece of Equipment and initializes functionalities, Sos, and schedule
@@ -67,14 +59,16 @@ namespace WpfApp1
         {
             this.name = name;
             this.type = type;
+            this.earlyLimit = new TimeSpan(0, early, 0);
+
             functionalities = new List<bool>();
             SOs = new List<bool>();
             schedule = new List<ScheduleEntry>();
-            this.earlyLimit = new TimeSpan(0, early, 0);
+
             lastJuiceType = -1;
             state = 0;
-            prevJuiceType = 0;
-            prevCleaningType = 0;
+            lastJuiceType = 0;
+            lastCleaningType = 0;
             prevCleanName = "";
             endTime = DateTime.MinValue;
             cleanType = -1;
@@ -86,21 +80,16 @@ namespace WpfApp1
                 down = true;
             else if (state == 2)
             {
-                lastCleaningType = prevCleaningType;
-                lastJuiceType = prevJuiceType;
                 startClean = true;
             }
             else if (state == 3)
             {
                 startDirty = true;
-                lastJuiceType = prevJuiceType;
             }
             else if (state == 4)
             {
-                lastCleaningType = prevCleaningType;
-                lastJuiceType = prevJuiceType;
-                schedule.Add(new ScheduleEntry(scheduleID, endTime, prevCleaningType, prevCleanName));
-                cipGroup.schedule.Add(new ScheduleEntry(scheduleID, endTime, prevCleaningType, prevCleanName));
+                schedule.Add(new ScheduleEntry(scheduleID, endTime, lastCleaningType, prevCleanName));
+                cipGroup.schedule.Add(new ScheduleEntry(scheduleID, endTime, lastCleaningType, prevCleanName));
             }
         }
 
@@ -119,46 +108,14 @@ namespace WpfApp1
             // a tool is starting clean
             if (schedule.Count == 0 && startClean)
             {
-                cleaning = GetCleaning(lastJuiceType, juicetype);
-                bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
-
-                // the old cleaning was enough
-                if (oldcleaningenough)
-                {
-                    needsCleaned = false;
-                    return goal;
-                }
-                // you need to do more cleaning
-                else
-                {
-                    cleanTime = cipGroup.FindTimePopulated(scheduleID, cleaning);
-                    if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
-                        return goal;
-                    else
-                        return cleanTime.Add(cleaning);
-                }
+                return goal;
             }
             else if (schedule.Count == 1 && schedule[0].cleaning)
             {
-                cleaning = GetCleaning(lastJuiceType, juicetype);
-                bool oldcleaningenough = CheckCleaning(lastCleaningType, cleanType);
-
-                if (oldcleaningenough)
-                {
-                    needsCleaned = false;
-                    if (DateTime.Compare(schedule[0].end, goal) > 0)
-                        return schedule[0].end;
-                    else
-                        return goal;
-                }
+                if (DateTime.Compare(schedule[0].end, goal) > 0)
+                    return schedule[0].end;
                 else
-                {
-                    cleanTime = cipGroup.FindTimePopulated(schedule[0].end, cleaning);
-                    if (DateTime.Compare(cleanTime.Add(cleaning), goal) <= 0)
-                        return goal;
-                    else
-                        return cleanTime.Add(cleaning);
-                }
+                    return goal;
             }
             // a tool is starting dirty
             else if (schedule.Count == 0 && startDirty)
@@ -448,12 +405,6 @@ namespace WpfApp1
             }
             return time;
         }
-        public bool CheckCleaning(int last, int needed)
-        {
-            // checks whether last satisfies needed
-            
-            return true;
-        }
 
         /// <summary>
         /// Finds the entry in the schedule for the desired batch, null otherwise. If batched, slurry = 1.
@@ -496,14 +447,7 @@ namespace WpfApp1
                 return early;
 
             // preschedule
-            if (DateTime.Compare(schedule[0].start, DateTime.MinValue) == 0)
-            {
-                if (DateTime.Compare(schedule[0].end, early) < 0)
-                    return early;
-                else
-                    return schedule[0].end;
-            }
-            else if (DateTime.Compare(schedule[0].start.Subtract(length), early) >= 0)
+            if (DateTime.Compare(schedule[0].start, DateTime.MinValue) != 0 && DateTime.Compare(schedule[0].start.Subtract(length), early) >= 0)
                 return early;
 
             // find gap in schedule
@@ -517,41 +461,11 @@ namespace WpfApp1
             }
 
             // postschedule
-            return schedule[schedule.Count - 1].end;
+            if (DateTime.Compare(schedule[schedule.Count - 1].end, early) > 0)
+                return schedule[schedule.Count - 1].end;
+            else
+                return early;
         }
-
-        /// <summary>
-        /// takes a recipe and returns the number of functionalities this tool supports,
-        /// which the recipe doesn't need
-        /// </summary>
-        /// <param name="recipe"></param>
-        /// <returns></returns>
-        public int GetOtherFuncs(List<int> recipe)
-        {
-            int cnt = 0;
-
-            for (int i = 0; i < recipe.Count; i++)
-                if (functionalities[i] && recipe[i] <= 0)
-                    cnt++;
-
-            return cnt;
-        }
-
-        /// <summary>
-        /// takes a list of SOs still available returns the number of those SOs that are also
-        /// available to this tool
-        /// </summary>
-        /// <param name="sosavail"></param>
-        /// <returns></returns>
-        public int GetSOs(bool[] sosavail)
-        {
-            int cnt = 0;
-
-            for (int i = 0; i < sosavail.Length; i++)
-                if (SOs[i] && sosavail[i])
-                    cnt++;
-
-            return cnt;
-        }
+    
     }
 }

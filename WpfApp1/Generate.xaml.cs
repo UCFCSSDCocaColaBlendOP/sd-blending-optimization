@@ -502,8 +502,8 @@ namespace WpfApp1
                     {
                         equip = line.name,
                         state = line.state,
-                        juice = line.prevJuiceType,
-                        clean = line.prevCleaningType,
+                        juice = line.lastJuiceType,
+                        clean = line.lastCleaningType,
                         cleanName = line.prevCleanName,
                         time = line.endTime
                     });
@@ -518,8 +518,8 @@ namespace WpfApp1
                     {
                         equip = aseptic.name,
                         state = aseptic.state,
-                        juice = aseptic.prevJuiceType,
-                        clean = aseptic.prevCleaningType,
+                        juice = aseptic.lastJuiceType,
+                        clean = aseptic.lastCleaningType,
                         cleanName = aseptic.prevCleanName,
                         time = aseptic.endTime
                     });
@@ -534,8 +534,8 @@ namespace WpfApp1
                     {
                         equip = tank.name,
                         state = tank.state,
-                        juice = tank.prevJuiceType,
-                        clean = tank.prevCleaningType,
+                        juice = tank.lastJuiceType,
+                        clean = tank.lastCleaningType,
                         cleanName = tank.prevCleanName,
                         time = tank.endTime
                     });
@@ -550,8 +550,8 @@ namespace WpfApp1
                     {
                         equip = extra.name,
                         state = extra.state,
-                        juice = extra.prevJuiceType,
-                        clean = extra.prevCleaningType,
+                        juice = extra.lastJuiceType,
+                        clean = extra.lastCleaningType,
                         cleanName = extra.prevCleanName,
                         time = extra.endTime
                     });
@@ -566,8 +566,8 @@ namespace WpfApp1
                     {
                         equip = system.name,
                         state = system.state,
-                        juice = system.prevJuiceType,
-                        clean = system.prevCleaningType,
+                        juice = system.lastJuiceType,
+                        clean = system.lastCleaningType,
                         cleanName = system.prevCleanName,
                         time = system.endTime
                     });

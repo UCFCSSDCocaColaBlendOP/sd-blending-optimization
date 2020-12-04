@@ -93,7 +93,6 @@ namespace WpfApp1
             extraCleaningTypes = new List<int>();
             extraCleaningNames = new List<string>();
 
-            system = null;
             systemCleaningType = -1;
             tankCleaningType = -1;
             transferCleaningType = -1;
@@ -107,7 +106,7 @@ namespace WpfApp1
         /// <param name="thaw"></param>
         /// <param name="inline"></param>
         /// <param name="juice"></param>
-        public void Actualize(Equipment thaw, bool inline, Juice juice)
+        public void Actualize(Equipment thaw, Juice juice)
         {
             // create entry for thaw room if needed
             if (makeANewThawEntry)
@@ -156,7 +155,7 @@ namespace WpfApp1
             }
 
             // if it's inline in needs to be open ended
-            if (!inline)
+            if (!slurry)
                 tank.schedule.Add(new ScheduleEntry(tankTime, tankTime.Add(tankLength), juice,  slurry, batch));
             else
                 tank.schedule.Add(new ScheduleEntry(tankTime, juice));
