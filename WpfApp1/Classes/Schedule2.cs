@@ -2410,6 +2410,7 @@ namespace WpfApp1
 }
 
 /*
+ * THIS IS AN EXAMPLE OF A SCHEDULE, IT WON'T RUN BECAUSE WE GOT RID OF SOME OF THE FUNCTIONS IT CALLS, BUT YOU CAN USE IT TO UNDERSTAND THE SYSTEM
 private void ExampleOfSchedule()
 {
     String checkname;
